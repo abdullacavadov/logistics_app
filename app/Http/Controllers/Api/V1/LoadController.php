@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 /** Yük elanları — TS §5. Ictimai siyahı yalnız dərc olunmuşları göstərir; sahiblik server tərəfdə yoxlanılır. */
 class LoadController extends Controller
 {
+    public function __construct(private \App\Services\MatchRunner $matcher) {}
+
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
     private const CRITICAL = ['from_country_id','from_location_id','to_country_id','to_location_id','pickup_from','pickup_to','weight_kg','volume_m3','required_vehicle_type_id','needs_refrigeration'];
 
@@ -49,6 +51,7 @@ class LoadController extends Controller
         $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
+        if ($d['status'] === 'published') $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)], 201);
     }
 
@@ -62,6 +65,7 @@ class LoadController extends Controller
             return $this->err('critical_locked', 'Müraciət daxil olduqdan sonra marşrut, tarix və yük parametrləri dəyişdirilə bilməz', 409);
         DB::table('loads')->where('id', $id)->update($d + ['updated_at' => now()]);
         $this->audit($r, 'load.update', $id, (array) $load, $d);
+        $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)]);
     }
 
@@ -70,7 +74,8 @@ class LoadController extends Controller
         $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if ($load->status !== 'draft') return $this->err('bad_status', 'Yalnız qaralama dərc oluna bilər', 409);
         DB::table('loads')->where('id', $id)->update(['status' => 'published', 'updated_at' => now()]);
-        return response()->json(['data' => ['id' => $id, 'status' => 'published']]);
+        $n = $this->matcher->forLoad($id);
+        return response()->json(['data' => ['id' => $id, 'status' => 'published', 'matches' => $n]]);
     }
 
     public function cancel(Request $r, int $id) { return $this->moveTo($r, $id, 'cancelled', ['draft', 'published', 'has_applications', 'agreed']); }
@@ -82,7 +87,19 @@ class LoadController extends Controller
         if (!in_array($load->status, $from)) return $this->err('bad_status', 'Bu statusdan keçid mümkün deyil', 409);
         DB::table('loads')->where('id', $id)->update(['status' => $to, 'updated_at' => now()]);
         $this->audit($r, "load.$to", $id, ['status' => $load->status], ['status' => $to]);
+        $this->matcher->forLoad($id); // aktiv deyilsə uyğunluqlar silinir
         return response()->json(['data' => ['id' => $id, 'status' => $to]]);
+    }
+
+    /** Yük sahibi: elana uyğun daşıyıcı təklifləri (bal və səbəblərlə). Əlaqə məlumatı göstərilmir. */
+    public function matches(Request $r, int $id)
+    {
+        $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
+        $rows = DB::table('matches as m')->join('vehicle_offers as o', 'o.id', '=', 'm.vehicle_offer_id')->join('vehicles as v', 'v.id', '=', 'o.vehicle_id')
+            ->join('users as u', 'u.id', '=', 'o.user_id')->leftJoin('companies as c', 'c.user_id', '=', 'u.id')->where('m.load_id', $id)->orderByDesc('m.score')
+            ->select('m.score', 'm.reasons', 'o.id as offer_id', 'u.name as carrier', 'c.verification_status as company_status', 'v.vehicle_type_id', 'o.from_country_id', 'o.to_country_id', 'o.available_from', 'o.available_to', 'o.price', 'o.currency')->get()
+            ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
+        return response()->json(['data' => $rows]);
     }
 
     /** Başqasının elanı → 404 (varlığı açıqlanmır). */

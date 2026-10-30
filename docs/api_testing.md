@@ -22,3 +22,13 @@ Invoke-RestMethod "$b/loads" -Method Post -Headers $hs -ContentType "application
 
 # Ictimai siyahı (token olmadan) və filtr
 (Invoke-RestMethod "$b/loads?from_country_id=1&min_weight=5000" -Headers @{Accept="application/json"}).data
+
+# --- Nəqliyyat + təklif + uyğunluq (daşıyıcı tokeni $h ilə) ---
+$v = '{"name":"Volvo FH","vehicle_type_id":1,"capacity_kg":20000,"capacity_m3":82}'
+$veh = Invoke-RestMethod "$b/vehicles" -Method Post -Headers $h -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($v))
+$o = "{`"vehicle_id`":$($veh.data.id),`"from_country_id`":1,`"to_country_id`":3,`"available_from`":`"2026-11-18`",`"available_to`":`"2026-11-25`",`"price`":1400,`"currency`":`"EUR`",`"activate`":true}"
+$off = Invoke-RestMethod "$b/offers" -Method Post -Headers $h -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($o))
+# Daşıyıcıya uyğun yüklər (bal + səbəblər):
+(Invoke-RestMethod "$b/offers/$($off.data.id)/matches" -Headers $h).data | Format-List
+# Yük sahibi uyğun daşıyıcılara baxır ($hs ilə):
+(Invoke-RestMethod "$b/loads/1/matches" -Headers $hs).data | Format-List
