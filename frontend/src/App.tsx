@@ -74,7 +74,7 @@ export default function App() {
   const isMap=page==='Yük xəritəsi'
   return <div className="app-shell" data-theme={theme}>
     <aside className="sidebar">
-      <button className="brand-lockup" onClick={()=>changePage('Bütün elanlar')}><span className="brand-mark"><i/><b/><em/></span><span>LOGI<span>STICS</span><small>FREIGHT NETWORK</small></span></button>
+      <button className="brand-lockup" onClick={()=>changePage('Bütün elanlar')} aria-label="Yoldaş — Bütün elanlar"><span className="brand-mark" aria-hidden="true"><i/><b/><em/></span><span className="brand-wordmark"><span className="brand-yol">Yol</span><span className="brand-dash">daş</span><small>FREIGHT NETWORK</small></span></button>
       <div className="sidebar-scroll">
         <div className="nav-group">{primaryNav.map(({label,icon:Icon})=><button key={label} className={'side-link '+(page===label?'selected':'')} onClick={()=>changePage(label)}><Icon size={19}/><span>{label}</span>{label==='Bütün elanlar'&&<i className="nav-indicator"/>}</button>)}</div>
         <div className="nav-divider"/>
