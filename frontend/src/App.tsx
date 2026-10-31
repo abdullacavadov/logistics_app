@@ -1,90 +1,126 @@
 import { useMemo, useState } from 'react'
 import {
-  Bell, Search, SlidersHorizontal, MapPin, CalendarDays, Package,
-  Truck, MessageCircle, UserRound, Home, Map, Plus, ChevronRight,
-  ArrowUpDown, Clock3, Weight, X, Check, Navigation, Filter,
-  Bookmark, MoreHorizontal, Send, Phone, ShieldCheck, Menu,
+  Bell, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare,
+  UserRound, House, Map, Plus, ChevronDown, ChevronRight,
+  Clock3, Weight, X, Check, Bookmark, FileText, BookOpen, ChartNoAxesCombined,
+  Route, Network, Info, Shield, CircleHelp, Sun, Moon, LogOut, Menu, Flag,
+  LayoutGrid, ListFilter, ArrowRight, MoreHorizontal
 } from 'lucide-react'
 
-type Load = {
+type Listing = {
   id: string; from: string; to: string; fromFlag: string; toFlag: string;
-  cargo: string; weight: string; truck: string; price: string; date: string;
-  distance: string; owner: string; verified: boolean; urgent?: boolean;
+  cargo: string; weight: string; vehicle: string; price: string; date: string;
+  source: string; urgent?: boolean; kind: 'load' | 'vehicle'
 }
-const loads: Load[] = [
-  { id:'LS-2048', from:'Bakı', to:'Tbilisi', fromFlag:'🇦🇿', toFlag:'🇬🇪', cargo:'Meyvə və tərəvəz', weight:'12 ton', truck:'Tentli', price:'₼ 1 850', date:'Bu gün, 14:00', distance:'568 km', owner:'Caspian Trade', verified:true, urgent:true },
-  { id:'LS-2047', from:'İstanbul', to:'Bakı', fromFlag:'🇹🇷', toFlag:'🇦🇿', cargo:'Məişət texnikası', weight:'8 ton', truck:'Qapalı furqon', price:'₼ 2 400', date:'Sabah, 09:00', distance:'1 245 km', owner:'Anadolu Logistics', verified:true },
-  { id:'LS-2046', from:'Gəncə', to:'Almatı', fromFlag:'🇦🇿', toFlag:'🇰🇿', cargo:'Tikinti materialları', weight:'20 ton', truck:'Tentli', price:'₼ 3 100', date:'31 Okt, 08:00', distance:'2 890 km', owner:'West Cargo', verified:false },
-  { id:'LS-2045', from:'Bursa', to:'Tbilisi', fromFlag:'🇹🇷', toFlag:'🇬🇪', cargo:'Tekstil məhsulları', weight:'6 ton', truck:'Soyuduculu', price:'₼ 1 250', date:'01 Noy, 12:00', distance:'1 380 km', owner:'Global Supply', verified:true },
-  { id:'LS-2044', from:'Sumqayıt', to:'Moskva', fromFlag:'🇦🇿', toFlag:'🇷🇺', cargo:'Plastik xammal', weight:'18 ton', truck:'Mega', price:'₼ 4 600', date:'02 Noy, 07:00', distance:'2 240 km', owner:'AzPolymer', verified:true },
+const listings: Listing[] = [
+  {id:'LA-72418',from:'Bakı',to:'İstanbul',fromFlag:'🇦🇿',toFlag:'🇹🇷',cargo:'Məişət texnikası',weight:'20 ton',vehicle:'Tent / Ref',price:'3 450 AZN',date:'Bu gün, 14:30',source:'Caspian Trade',urgent:true,kind:'load'},
+  {id:'LA-72417',from:'Tbilisi',to:'Almatı',fromFlag:'🇬🇪',toFlag:'🇰🇿',cargo:'Tikinti materialları',weight:'22 ton',vehicle:'Tent',price:'Razılaşma ilə',date:'Bu gün, 13:10',source:'Geo Cargo',kind:'load'},
+  {id:'LA-72416',from:'Moskva',to:'Bakı',fromFlag:'🇷🇺',toFlag:'🇦🇿',cargo:'Sənaye avadanlığı',weight:'12 ton',vehicle:'Qapalı furqon',price:'4 100 AZN',date:'Bu gün, 11:45',source:'North Logistics',kind:'load'},
+  {id:'LA-72415',from:'İstanbul',to:'Bakı',fromFlag:'🇹🇷',toFlag:'🇦🇿',cargo:'Tekstil məhsulları',weight:'8 ton',vehicle:'Mega',price:'2 200 AZN',date:'Dünən, 18:20',source:'Anadolu Group',kind:'load'},
+  {id:'LA-72414',from:'Gəncə',to:'Tbilisi',fromFlag:'🇦🇿',toFlag:'🇬🇪',cargo:'Kənd təsərrüfatı',weight:'15 ton',vehicle:'Soyuduculu',price:'1 600 AZN',date:'Dünən, 16:05',source:'West Supply',kind:'load'},
+  {id:'TR-3092',from:'Bakı',to:'Bütün istiqamətlər',fromFlag:'🇦🇿',toFlag:'🌍',cargo:'Tentli yük maşını',weight:'20 ton',vehicle:'Tent',price:'Boş maşın',date:'Bu gün, 10:20',source:'Araz Transport',kind:'vehicle'},
 ]
-type Tab = 'home'|'market'|'map'|'applications'|'messages'|'profile'
-const tabs: {id:Tab; label:string; icon:typeof Home}[] = [
-  {id:'home',label:'Ana səhifə',icon:Home},{id:'market',label:'Yüklər',icon:Package},
-  {id:'map',label:'Xəritə',icon:Map},{id:'applications',label:'Müraciətlər',icon:Truck},
-  {id:'messages',label:'Mesajlar',icon:MessageCircle},{id:'profile',label:'Profil',icon:UserRound},
+const primaryNav = [
+  {label:'Bütün elanlar',icon:House},{label:'Mənim elanlarım',icon:LayoutGrid},
+  {label:'Yük xəritəsi',icon:Map},{label:'Marşrutlarım',icon:Route},
+  {label:'Xidmətlərimiz',icon:Network},{label:'Tariflər və Analitika',icon:ChartNoAxesCombined},
+  {label:'Sənədlər',icon:FileText},{label:'Bilik bazası',icon:BookOpen},{label:'Profil',icon:UserRound},
 ]
-function LoadCard({load,onOpen,saved,onSave}:{load:Load;onOpen:()=>void;saved:boolean;onSave:()=>void}) {
-  return <article className="load-card">
-    <div className="load-card-top"><span className="load-id">{load.id}</span><div className="load-tags">{load.urgent&&<span className="tag urgent">Təcili</span>}<span className="tag open">Aktiv</span></div><button className={'save-btn '+(saved?'saved':'')} onClick={onSave} aria-label="Yadda saxla"><Bookmark size={17} fill={saved?'currentColor':'none'}/></button></div>
-    <button className="route-block" onClick={onOpen}>
-      <div className="route-city"><span className="flag">{load.fromFlag}</span><div><strong>{load.from}</strong><small>Yükləmə nöqtəsi</small></div></div>
-      <div className="route-line"><span/><i/><span/></div>
-      <div className="route-city"><span className="flag">{load.toFlag}</span><div><strong>{load.to}</strong><small>Çatdırılma nöqtəsi</small></div></div>
+const secondaryNav = [
+  {label:'Platforma haqqında',icon:Info},{label:'İstifadə şərtləri',icon:FileText},
+  {label:'Məxfilik Siyasəti',icon:Shield},{label:'Kömək',icon:CircleHelp},
+]
+function ListingCard({item,onSelect,saved,onSave}:{item:Listing;onSelect:()=>void;saved:boolean;onSave:()=>void}) {
+  return <article className="listing-card">
+    <div className="listing-top"><span className="listing-id">{item.id}</span><span className="source"><span className="source-dot"/> {item.source}</span><button className={'icon-button save '+(saved?'is-saved':'')} onClick={onSave} aria-label="Yadda saxla"><Bookmark size={17} fill={saved?'currentColor':'none'}/></button></div>
+    <button className="route-row" onClick={onSelect}>
+      <div className="route-end"><span className="country-flag">{item.fromFlag}</span><span><strong>{item.from}</strong><small>Yükləmə nöqtəsi</small></span></div>
+      <div className="route-track"><i/><span/><i/></div>
+      <div className="route-end destination"><span className="country-flag">{item.toFlag}</span><span><strong>{item.to}</strong><small>Təyinat nöqtəsi</small></span></div>
     </button>
-    <div className="load-meta"><span><Package size={14}/>{load.cargo}</span><span><Weight size={14}/>{load.weight}</span><span><Truck size={14}/>{load.truck}</span></div>
-    <div className="load-card-bottom"><div><strong className="load-price">{load.price}</strong><small>{load.distance} · {load.date}</small></div><button className="details-btn" onClick={onOpen}>Ətraflı <ChevronRight size={15}/></button></div>
-    <div className="owner-line"><span className="owner-avatar">{load.owner.slice(0,1)}</span><span>{load.owner}{load.verified&&<ShieldCheck size={13} className="verified"/>}</span><small>Yük sahibi</small></div>
+    <div className="listing-specs"><span><Package size={15}/>{item.cargo}</span><span><Weight size={15}/>{item.weight}</span><span><Truck size={15}/>{item.vehicle}</span></div>
+    <div className="listing-footer"><div><small>Təklif olunan qiymət</small><strong className="price">{item.price}</strong></div><button className="outline-action" onClick={onSelect}>Ətraflı <ArrowRight size={15}/></button></div>
+    <div className="listing-meta"><span><Clock3 size={14}/>{item.date}</span>{item.urgent&&<span className="urgent-tag">Təcili yük</span>}</div>
   </article>
 }
-function DetailModal({load,onClose}:{load:Load|null;onClose:()=>void}) {
-  if(!load)return null
-  return <div className="modal-backdrop" onClick={onClose}><section className="detail-modal" onClick={e=>e.stopPropagation()}>
-    <div className="modal-head"><div><span className="eyebrow">{load.id} · YÜK ELANI</span><h2>Yük məlumatları</h2></div><button className="icon-btn" onClick={onClose}><X size={20}/></button></div>
-    <div className="modal-route"><div><span>{load.fromFlag}</span><strong>{load.from}</strong><small>Yükləmə şəhəri</small></div><ArrowUpDown size={20}/><div><span>{load.toFlag}</span><strong>{load.to}</strong><small>Təyinat şəhəri</small></div></div>
-    <div className="detail-price"><small>Təklif olunan qiymət</small><strong>{load.price}</strong></div>
-    <div className="detail-grid"><div><small>Yük növü</small><strong>{load.cargo}</strong></div><div><small>Çəki</small><strong>{load.weight}</strong></div><div><small>Nəqliyyat</small><strong>{load.truck}</strong></div><div><small>Tarix</small><strong>{load.date}</strong></div><div><small>Məsafə</small><strong>{load.distance}</strong></div><div><small>Yük sahibi</small><strong>{load.owner}</strong></div></div>
-    <button className="primary-action" onClick={()=>alert('Müraciət üçün daşıyıcı hesabı və aktiv abunəlik tələb olunur.')}>Bu yükə müraciət et <ChevronRight size={17}/></button>
-    <p className="modal-note">Müraciət göndərmək üçün daşıyıcı hesabı ilə daxil olun və aktiv abunəliyiniz olduğuna əmin olun.</p>
+function DetailDialog({item,onClose}:{item:Listing|null;onClose:()=>void}) {
+  if(!item)return null
+  return <div className="dialog-backdrop" onClick={onClose}><section className="detail-dialog" onClick={e=>e.stopPropagation()}>
+    <div className="dialog-heading"><div><span className="overline">{item.id} · ELAN DETALI</span><h2>Daşıma məlumatları</h2></div><button className="icon-button" onClick={onClose}><X/></button></div>
+    <div className="dialog-route"><div><span>{item.fromFlag}</span><strong>{item.from}</strong><small>Yükləmə şəhəri</small></div><ArrowRight/><div><span>{item.toFlag}</span><strong>{item.to}</strong><small>Təyinat şəhəri</small></div></div>
+    <div className="dialog-price"><small>Qiymət</small><strong>{item.price}</strong></div>
+    <div className="dialog-grid"><div><small>Yük növü</small><strong>{item.cargo}</strong></div><div><small>Çəki</small><strong>{item.weight}</strong></div><div><small>Nəqliyyat növü</small><strong>{item.vehicle}</strong></div><div><small>Elan sahibi</small><strong>{item.source}</strong></div></div>
+    <button className="primary-button full-width">Bu elana müraciət et <ArrowRight size={16}/></button>
+    <p className="dialog-note">Müraciət funksiyası hesab və abunəlik statusuna uyğun aktivləşdiriləcək.</p>
   </section></div>
 }
 export default function App() {
-  const [tab,setTab]=useState<Tab>('home')
+  const [page,setPage]=useState('Bütün elanlar')
+  const [theme,setTheme]=useState<'light'|'dark'>('light')
+  const [kind,setKind]=useState<'load'|'vehicle'>('load')
   const [query,setQuery]=useState('')
-  const [filter,setFilter]=useState('Hamısı')
-  const [selected,setSelected]=useState<Load|null>(null)
+  const [origin,setOrigin]=useState('')
+  const [destination,setDestination]=useState('')
+  const [filterOpen,setFilterOpen]=useState(false)
+  const [sort,setSort]=useState('Əvvəlcə yenilər')
+  const [country,setCountry]=useState('🇦🇿 Azərbaycan')
+  const [selected,setSelected]=useState<Listing|null>(null)
   const [saved,setSaved]=useState<string[]>([])
-  const [showFilters,setShowFilters]=useState(false)
-  const [notice,setNotice]=useState(false)
-  const [menu,setMenu]=useState(false)
-  const filtered=useMemo(()=>loads.filter(l=>(filter==='Hamısı'||(filter==='Təcili'&&l.urgent))&&[l.from,l.to,l.cargo,l.owner].join(' ').toLowerCase().includes(query.toLowerCase())),[filter,query])
-  const toggleSave=(id:string)=>setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id])
-  const title=tab==='home'?'Daşıma bazarı':tabs.find(t=>t.id===tab)?.label||'Daşıma bazarı'
-  return <div className="mobile-app">
-    <header className="app-header">
-      <div className="brand-row"><button className="menu-button" onClick={()=>setMenu(!menu)}><Menu size={21}/></button><div className="brand-symbol"><Truck size={21}/></div><div className="brand-name">load<span>ship</span><small>YÜK DAŞIMA BAZARI</small></div><button className="notification-btn" onClick={()=>setNotice(!notice)}><Bell size={20}/><i/></button></div>
-      {notice&&<div className="notification-pop"><strong>Bildirişlər</strong><p>Yeni yüklər və müraciət statusları burada görünəcək.</p></div>}
-      {menu&&<div className="menu-pop"><button onClick={()=>{setTab('profile');setMenu(false)}}>Profil və hesab</button><button onClick={()=>{setTab('applications');setMenu(false)}}>Müraciətlərim</button><button onClick={()=>{setTab('messages');setMenu(false)}}>Mesajlar</button></div>}
-      <div className="header-greeting"><div><small>30 OKTYABR, CÜMƏ</small><h1>{tab==='home'?'Salam! 👋':title}</h1><p>{tab==='home'?'Bu gün sizin üçün yeni yük imkanları var.':'Logistika əməliyyatlarınızı idarə edin.'}</p></div><div className="user-bubble">AC</div></div>
-      <div className="search-row"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Şəhər, marşrut və ya yük axtar..."/><button onClick={()=>setShowFilters(!showFilters)} className={showFilters?'filter-active':''}><SlidersHorizontal size={18}/></button></div>
-      {showFilters&&<div className="filter-panel"><strong>Yükləri filtrlə</strong><div className="filter-options">{['Hamısı','Təcili'].map(x=><button key={x} className={filter===x?'selected':''} onClick={()=>setFilter(x)}>{x}</button>)}</div><div className="filter-hint"><Filter size={14}/> Digər filtrlər növbəti mərhələdə genişləndiriləcək.</div></div>}
-    </header>
-    <main className="main-content">
-      {tab==='home'&&<><div className="section-heading"><div><h2>Yaxınlıqdakı yüklər</h2><p>Platformadakı ən son yük elanları</p></div><button className="view-all" onClick={()=>setTab('market')}>Hamısına bax <ChevronRight size={15}/></button></div>
-        <div className="quick-stats"><div><span className="stat-icon blue"><Package size={17}/></span><div><strong>128</strong><small>Aktiv yük</small></div></div><div><span className="stat-icon green"><Truck size={17}/></span><div><strong>64</strong><small>Yeni daşıyıcı</small></div></div><div><span className="stat-icon orange"><Navigation size={17}/></span><div><strong>12</strong><small>Marşrut</small></div></div></div>
-        <div className="section-heading map-heading"><div><h2>Marşrut xəritəsi</h2><p>Aktiv daşımaların coğrafiyası</p></div><button className="view-all" onClick={()=>setTab('map')}>Xəritə <ChevronRight size={15}/></button></div>
-        <button className="map-preview" onClick={()=>setTab('map')}><div className="map-grid"><div className="map-water"/><svg viewBox="0 0 360 170" preserveAspectRatio="none"><path d="M30 115 C90 35 135 135 205 65 S300 45 330 85" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeDasharray="5 5"/><path d="M80 35 Q140 80 185 90 T300 145" fill="none" stroke="#0d9488" strokeWidth="2" strokeDasharray="4 5"/></svg><span className="map-pin pin-a">🇦🇿</span><span className="map-pin pin-b">🇬🇪</span><span className="map-pin pin-c">🇹🇷</span><span className="map-label">Bakı</span><span className="map-label label-b">Tbilisi</span><span className="map-zoom">Xəritəni aç <ChevronRight size={14}/></span></div></button>
-        <div className="section-heading"><div><h2>Yeni elanlar</h2><p>Ən son əlavə olunan yüklər</p></div><span className="live-label"><i/> CANLI</span></div>
-        {loads.slice(0,3).map(l=><LoadCard key={l.id} load={l} onOpen={()=>setSelected(l)} saved={saved.includes(l.id)} onSave={()=>toggleSave(l.id)}/>)}
-      </>}
-      {tab==='market'&&<><div className="market-heading"><div><h2>Bütün yüklər</h2><p>{filtered.length} elan tapıldı</p></div><button className="filter-pill" onClick={()=>setShowFilters(!showFilters)}><SlidersHorizontal size={16}/> Filtr</button></div><div className="chip-row">{['Hamısı','Təcili'].map(x=><button key={x} className={'chip '+(filter===x?'chip-active':'')} onClick={()=>setFilter(x)}>{x}</button>)}</div>{filtered.map(l=><LoadCard key={l.id} load={l} onOpen={()=>setSelected(l)} saved={saved.includes(l.id)} onSave={()=>toggleSave(l.id)}/>)}</>}
-      {tab==='map'&&<><div className="section-heading"><div><h2>Yüklər xəritədə</h2><p>Marşrutları və aktiv yükləri kəşf edin</p></div></div><div className="large-map"><div className="map-grid"><div className="map-water"/><svg viewBox="0 0 360 390" preserveAspectRatio="none"><path d="M25 290 C75 190 130 250 170 155 S280 90 330 135" fill="none" stroke="#2563eb" strokeWidth="3" strokeDasharray="6 6"/><path d="M40 90 Q125 150 180 210 T320 300" fill="none" stroke="#0d9488" strokeWidth="2.5" strokeDasharray="5 5"/></svg>{[['🇦🇿','pin-a'],['🇬🇪','pin-b'],['🇹🇷','pin-c'],['🇰🇿','pin-d']].map(([f,c])=><span className={'map-pin '+c} key={c}>{f}</span>)}<span className="map-city city-a">Bakı</span><span className="map-city city-b">Tbilisi</span><span className="map-city city-c">İstanbul</span></div></div><div className="map-legend"><span><i className="legend-blue"/> Aktiv marşrut</span><span><i className="legend-green"/> Alternativ marşrut</span></div><h3 className="subheading">Xəritədəki yüklər</h3>{loads.slice(0,3).map(l=><LoadCard key={l.id} load={l} onOpen={()=>setSelected(l)} saved={saved.includes(l.id)} onSave={()=>toggleSave(l.id)}/>)}</>}
-      {tab==='applications'&&<div className="empty-state"><span><Truck size={28}/></span><h2>Müraciətləriniz</h2><p>Göndərdiyiniz yük müraciətləri və onların statusları burada görünəcək.</p><button className="primary-action" onClick={()=>setTab('market')}>Yüklərə bax <ChevronRight size={16}/></button></div>}
-      {tab==='messages'&&<div className="empty-state"><span><MessageCircle size={28}/></span><h2>Mesajlar</h2><p>Yük sahibləri və daşıyıcılarla yazışmalarınız burada olacaq.</p></div>}
-      {tab==='profile'&&<div className="profile-screen"><div className="profile-hero"><div className="profile-large">AC</div><h2>İstifadəçi hesabı</h2><p>Hesab məlumatları və platforma parametrləri</p><span><ShieldCheck size={14}/> Təsdiqlənmiş hesab</span></div><div className="profile-menu">{[['Şəxsi məlumatlar','Hesab məlumatlarını yenilə'],['Abunəlik və ödəniş','Daşıyıcı planını idarə et'],['Yadda saxlanılan yüklər',saved.length+' elan'],['Bildiriş parametrləri','Bildiriş seçimləri'],['Dəstək mərkəzi','Bizimlə əlaqə']].map(([a,b])=><button key={a}><span><strong>{a}</strong><small>{b}</small></span><ChevronRight size={18}/></button>)}</div></div>}
-    </main>
-    <button className="floating-create" onClick={()=>alert('Yük yaratmaq forması növbəti mərhələdə API ilə birləşdiriləcək.')}><Plus size={20}/><span>Yük yerləşdir</span></button>
-    <nav className="bottom-nav">{tabs.map(t=>{const Icon=t.icon;return <button key={t.id} className={tab===t.id?'active':''} onClick={()=>setTab(t.id)}><span className="nav-icon"><Icon size={20}/>{t.id==='messages'&&<i/>}</span><small>{t.label}</small></button>})}</nav>
-    <DetailModal load={selected} onClose={()=>setSelected(null)}/>
+  const [showNotices,setShowNotices]=useState(false)
+  const [showMobileMenu,setShowMobileMenu]=useState(false)
+  const filtered=useMemo(()=>listings.filter(x=>x.kind===kind && [x.from,x.to,x.cargo,x.source,x.vehicle].join(' ').toLocaleLowerCase('az').includes(query.toLocaleLowerCase('az')) && (!origin||x.from.toLocaleLowerCase('az').includes(origin.toLocaleLowerCase('az'))) && (!destination||x.to.toLocaleLowerCase('az').includes(destination.toLocaleLowerCase('az')))),[kind,query,origin,destination])
+  const changePage=(label:string)=>{setPage(label);setShowMobileMenu(false)}
+  const toggleSaved=(id:string)=>setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id])
+  const isMap=page==='Yük xəritəsi'
+  return <div className="app-shell" data-theme={theme}>
+    <aside className="sidebar">
+      <button className="brand-lockup" onClick={()=>changePage('Bütün elanlar')}><span className="brand-mark"><i/><b/><em/></span><span>LOGI<span>STICS</span><small>FREIGHT NETWORK</small></span></button>
+      <div className="sidebar-scroll">
+        <div className="nav-group">{primaryNav.map(({label,icon:Icon})=><button key={label} className={'side-link '+(page===label?'selected':'')} onClick={()=>changePage(label)}><Icon size={19}/><span>{label}</span>{label==='Bütün elanlar'&&<i className="nav-indicator"/>}</button>)}</div>
+        <div className="nav-divider"/>
+        <div className="nav-group muted-group">{secondaryNav.map(({label,icon:Icon})=><button key={label} className={'side-link '+(page===label?'selected':'')} onClick={()=>changePage(label)}><Icon size={18}/><span>{label}</span></button>)}</div>
+      </div>
+      <div className="sidebar-version"><span className="status-light"/> LogisticsApp <span>v1.0</span></div>
+    </aside>
+    <div className="workspace">
+      <header className="topbar">
+        <button className="mobile-menu-trigger icon-button" onClick={()=>setShowMobileMenu(!showMobileMenu)}><Menu/></button>
+        <div className="page-title"><span className="overline">LOGISTICS NETWORK</span><h1>{page}</h1></div>
+        <div className="top-actions">
+          <label className="country-select"><span>{country}</span><select aria-label="Ölkə seçimi" value={country} onChange={e=>setCountry(e.target.value)}><option>🇦🇿 Azərbaycan</option><option>🇬🇪 Gürcüstan</option><option>🇹🇷 Türkiyə</option><option>🇰🇿 Qazaxıstan</option></select><ChevronDown size={15}/></label>
+          <button className="icon-button desktop-only" aria-label="Yadda saxlanılanlar" onClick={()=>changePage('Yadda saxlanılanlar')}><Bookmark/></button>
+          <div className="notice-wrap"><button className="icon-button" aria-label="Bildirişlər" onClick={()=>setShowNotices(!showNotices)}><Bell/><i className="notification-dot"/></button>{showNotices&&<div className="notice-popover"><strong>Bildirişlər</strong><p>Yeni elanlar və müraciət yenilikləri burada görünəcək.</p></div>}</div>
+          <button className="theme-toggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Mövzunu dəyiş">{theme==='light'?<Moon size={17}/>:<Sun size={17}/>}</button>
+          <button className="login-button"><LogOut size={16}/> Daxil ol</button>
+        </div>
+      </header>
+      {showMobileMenu&&<div className="mobile-menu-panel">{primaryNav.map(({label,icon:Icon})=><button key={label} onClick={()=>changePage(label)}><Icon size={18}/>{label}</button>)}<div className="nav-divider"/>{secondaryNav.map(({label,icon:Icon})=><button key={label} onClick={()=>changePage(label)}><Icon size={18}/>{label}</button>)}</div>}
+      <main className="content-area">
+        {page==='Bütün elanlar' ? <>
+          <div className="market-tabs"><button className={kind==='load'?'active':''} onClick={()=>setKind('load')}><Package size={18}/> Yüklər <b>7 156</b></button><button className={kind==='vehicle'?'active':''} onClick={()=>setKind('vehicle')}><Truck size={18}/> Maşınlar <b>606</b></button></div>
+          <section className="search-tools">
+            <label className="search-field"><Truck size={18}/><input placeholder="Nəqliyyat növünü seçin" value={query} onChange={e=>setQuery(e.target.value)}/></label>
+            <label className="search-field"><MapPin size={18}/><input placeholder="Haradan" value={origin} onChange={e=>setOrigin(e.target.value)}/></label>
+            <label className="search-field"><Flag size={18}/><input placeholder="Haraya" value={destination} onChange={e=>setDestination(e.target.value)}/></label>
+            <button className={'filter-button '+(filterOpen?'filter-on':'')} onClick={()=>setFilterOpen(!filterOpen)}><SlidersHorizontal size={17}/> Daha çox <ChevronDown size={15}/></button>
+            <button className="filter-button channel-filter"><MessageSquare size={16}/> <Check size={15}/><span>WhatsApp</span></button>
+            <label className="sort-select"><ListFilter size={16}/><select value={sort} onChange={e=>setSort(e.target.value)}><option>Əvvəlcə yenilər</option><option>Əvvəlcə köhnələr</option></select><ChevronDown size={14}/></label>
+          </section>
+          {filterOpen&&<section className="expanded-filters"><div><strong>Elan filtrləri</strong><small>Nəticələri dəqiqləşdirin</small></div><label><span>Minimum çəki</span><input placeholder="ton"/></label><label><span>Maksimum çəki</span><input placeholder="ton"/></label><label><span>Yük növü</span><select><option>Bütün növlər</option><option>Qida</option><option>Tikinti materialları</option></select></label><button className="text-action" onClick={()=>{setOrigin('');setDestination('');setQuery('')}}>Filtrləri sıfırla</button></section>}
+          <section className="welcome-banner"><div className="banner-copy"><span className="banner-kicker">LOGISTICS MARKETPLACE</span><h2>Doğru yük. Doğru marşrut. <em>Vaxtında çatdırılma.</em></h2><p>Platformada {kind==='load'?'yük':'nəqliyyat'} imkanlarını araşdırın və növbəti daşınmanızı planlaşdırın.</p><div className="banner-stats"><span><strong>{kind==='load'?'7 156':'606'}</strong> aktiv elan</span><i/><span><strong>+238</strong> son 1 saatda</span></div></div><div className="banner-art"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="art-pin"><MapPin size={27}/></div><span className="art-node node-one">🇦🇿</span><span className="art-node node-two">🇹🇷</span><span className="art-node node-three">🇬🇪</span></div></section>
+          <div className="results-heading"><div><span className="overline">MARKETPLACE / {kind==='load'?'LOADS':'VEHICLES'}</span><h2>{kind==='load'?'Bütün yük elanları':'Boş nəqliyyat vasitələri'} <span>{filtered.length}</span></h2></div><div className="view-switch"><button className="selected"><LayoutGrid size={17}/></button><button><ListFilter size={17}/></button></div></div>
+          <div className="listing-grid">{filtered.length?filtered.map(item=><ListingCard key={item.id} item={item} onSelect={()=>setSelected(item)} saved={saved.includes(item.id)} onSave={()=>toggleSaved(item.id)}/>):<div className="no-results"><Search size={25}/><strong>Elan tapılmadı</strong><span>Axtarış şərtlərini dəyişərək yenidən yoxlayın.</span></div>}</div>
+        </> : page==='Yük xəritəsi' ? <section className="map-page"><div className="map-toolbar"><div><span className="overline">LIVE FREIGHT MAP</span><h2>Yüklər xəritədə</h2><p>Marşrutları və yük sıxlığını interaktiv xəritədə izləyin.</p></div><button className="primary-button"><MapPin size={16}/> Yaxınlıqdakı yüklər</button></div><div className="map-placeholder"><div className="map-land map-land-a"/><div className="map-land map-land-b"/><div className="map-route route-a"/><div className="map-route route-b"/>{[['Bakı','🇦🇿','47%','56%','133'],['İstanbul','🇹🇷','24%','66%','186'],['Moskva','🇷🇺','54%','22%','82'],['Tbilisi','🇬🇪','39%','47%','31'],['Almatı','🇰🇿','78%','52%','47']].map(([name,flag,x,y,count])=><button className="map-cluster" style={{left:x,top:y}} key={name}><b>{count}</b><span>{flag} {name}</span></button>)}<div className="map-search-pill"><Search size={17}/><span>Haradan · Haraya · Nəqliyyat növü</span></div><div className="map-legend-pill"><i/> Aktiv yüklər <i/> Marşrutlar</div></div></section> : <section className="placeholder-page"><div className="placeholder-icon"><Package size={28}/></div><span className="overline">LOGISTICS WORKSPACE</span><h2>{page}</h2><p>Bu bölmənin interfeysi yeni dizayn sisteminə uyğun hazırlanacaq.</p><button className="primary-button" onClick={()=>changePage('Bütün elanlar')}>Bütün elanlara qayıt <ArrowRight size={16}/></button></section>}
+      </main>
+    </div>
+    <nav className="mobile-bottom-nav">
+      <button className={page==='Bütün elanlar'?'active':''} onClick={()=>changePage('Bütün elanlar')}><House/><small>Əsas</small></button>
+      <button className={page==='Xidmətlərimiz'?'active':''} onClick={()=>changePage('Xidmətlərimiz')}><Network/><small>Xidmətlər</small></button>
+      <button className={'mobile-map-tab '+(isMap?'active':'')} onClick={()=>changePage('Yük xəritəsi')}><span><Map size={23}/></span><small>Xəritə</small></button>
+      <button onClick={()=>changePage('Mesajlar')} className={page==='Mesajlar'?'active':''}><MessageSquare/><small>Mesajlar</small></button>
+      <button onClick={()=>setShowMobileMenu(!showMobileMenu)}><MoreHorizontal/><small>Daha çox</small></button>
+    </nav>
+    <button className="mobile-create" aria-label="Elan yerləşdir"><Plus size={21}/></button>
+    <DetailDialog item={selected} onClose={()=>setSelected(null)}/>
   </div>
 }
