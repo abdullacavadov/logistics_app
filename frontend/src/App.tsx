@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import logoLight from './assets/img/logo-light.png'
+import logoDark from './assets/img/logo-dark.png'
 import {
   Bell, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare,
   UserRound, House, Map, Plus, ChevronDown, ChevronRight,
@@ -74,7 +76,7 @@ export default function App() {
   const isMap=page==='Yük xəritəsi'
   return <div className="app-shell" data-theme={theme}>
     <aside className="sidebar">
-      <button className="brand-lockup" onClick={()=>changePage('Bütün elanlar')} aria-label="Yoldaş — Bütün elanlar"><span className="brand-mark" aria-hidden="true"><i/><b/><em/></span><span className="brand-wordmark"><span className="brand-yol">Yol</span><span className="brand-dash">daş</span><small>FREIGHT NETWORK</small></span></button>
+      <button className="brand-lockup" onClick={()=>changePage('Bütün elanlar')} aria-label="Yoldaş — Bütün elanlar"><img className="brand-logo" src={theme==='dark'?logoDark:logoLight} alt="Yoldaş" /></button>
       <div className="sidebar-scroll">
         <div className="nav-group">{primaryNav.map(({label,icon:Icon})=><button key={label} className={'side-link '+(page===label?'selected':'')} onClick={()=>changePage(label)}><Icon size={19}/><span>{label}</span>{label==='Bütün elanlar'&&<i className="nav-indicator"/>}</button>)}</div>
         <div className="nav-divider"/>
