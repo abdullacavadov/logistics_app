@@ -86,7 +86,9 @@ export default function MarketplacePage() {
                     onCountryChange={setCountry}
                     onNavigate={changePage}
                     onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+                    showNotices={showNotices}
                     onToggleNotices={() => setShowNotices(!showNotices)}
+                    onLogin={() => navigate('/login')}
                     onToggleMobileMenu={() => setShowMobileMenu(!showMobileMenu)}
                 />
                 {showMobileMenu && (
