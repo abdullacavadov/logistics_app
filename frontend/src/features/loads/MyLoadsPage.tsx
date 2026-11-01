@@ -72,7 +72,7 @@ export default function MyLoadsPage() {
               <h2>Mənim elanlarım</h2>
               <p>Yerləşdirdiyiniz yükləri, statusları və müraciətləri bir məkandan idarə edin.</p>
             </div>
-            <button className="primary-button" onClick={() => navigate('/loads/create')}><FilePlus2 size={17} /> Yeni elan yarat</button>
+            <button className="primary-button" disabled title="Elan yaratma formu növbəti mərhələdə qoşulacaq"><FilePlus2 size={17} /> Yeni elan yarat</button>
           </section>
 
           <section className="my-loads-stats" aria-label="Elan statistikası">
@@ -92,7 +92,7 @@ export default function MyLoadsPage() {
             ) : loads.isError ? (
               <div className="my-loads-state"><CircleAlert size={30} /><strong>Elanları yükləmək mümkün olmadı</strong><p>Server bağlantısını yoxlayın və yenidən cəhd edin.</p><button className="outline-action" onClick={() => loads.refetch()}>Yenidən yoxla</button></div>
             ) : rows.length === 0 ? (
-              <div className="my-loads-state"><span className="my-loads-empty-icon"><Package size={30} /></span><strong>Hələ elanınız yoxdur</strong><p>İlk yük elanınızı yaradın və uyğun daşıyıcılarla əlaqə qurun.</p><button className="primary-button" onClick={() => navigate('/loads/create')}><FilePlus2 size={16} /> İlk elanı yarat</button></div>
+              <div className="my-loads-state"><span className="my-loads-empty-icon"><Package size={30} /></span><strong>Hələ elanınız yoxdur</strong><p>İlk yük elanınızı yaradın və uyğun daşıyıcılarla əlaqə qurun.</p><button className="primary-button" disabled title="Elan yaratma formu növbəti mərhələdə qoşulacaq"><FilePlus2 size={16} /> İlk elanı yarat</button></div>
             ) : (
               <div className="my-loads-list">
                 {rows.map(load => (
