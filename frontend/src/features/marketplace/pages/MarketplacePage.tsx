@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, House, Map, Plus, ChevronDown, X, Check, Network, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, Plus, ChevronDown, Check, Flag, LayoutGrid, ListFilter, ArrowRight } from "lucide-react";
 import { pagePaths } from "../config/navigation";
 import { listings, type Listing } from "../data/listings";
 import { CountryFlag } from "../components/CountryFlag";
@@ -8,6 +8,7 @@ import { ListingCard } from "../components/ListingCard";
 import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
+import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 export default function MarketplacePage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -377,42 +378,7 @@ export default function MarketplacePage() {
                     )}
                 </main>
             </div>
-            <nav className="mobile-bottom-nav">
-                <button
-                    className={page === "Bütün elanlar" ? "active" : ""}
-                    onClick={() => changePage("Bütün elanlar")}
-                >
-                    <House />
-                    <small>Əsas</small>
-                </button>
-                <button
-                    className={page === "Xidmətlərimiz" ? "active" : ""}
-                    onClick={() => changePage("Xidmətlərimiz")}
-                >
-                    <Network />
-                    <small>Xidmətlər</small>
-                </button>
-                <button
-                    className={"mobile-map-tab " + (isMap ? "active" : "")}
-                    onClick={() => changePage("Yük xəritəsi")}
-                >
-                    <span>
-                        <Map size={23} />
-                    </span>
-                    <small>Xəritə</small>
-                </button>
-                <button
-                    onClick={() => changePage("Mesajlar")}
-                    className={page === "Mesajlar" ? "active" : ""}
-                >
-                    <MessageSquare />
-                    <small>Mesajlar</small>
-                </button>
-                <button onClick={() => setShowMobileMenu(!showMobileMenu)}>
-                    <MoreHorizontal />
-                    <small>Daha çox</small>
-                </button>
-            </nav>
+            <MarketplaceMobileNav page={page} onNavigate={changePage} onToggleMore={() => setShowMobileMenu(!showMobileMenu)} />
             <button className="mobile-create" aria-label="Elan yerləşdir">
                 <Plus size={21} />
             </button>
