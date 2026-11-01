@@ -42,9 +42,9 @@ export default function MyLoadsPage() {
                 <span className="source">{statusLabels[load.status]}</span>
               </div>
               <div className="route-row" style={{ cursor: 'default' }}>
-                <div className="route-end"><span><strong>{load.from_name}</strong><small>Yükləmə</small></span></div>
+                <div className="route-end"><span><strong>{load.from_name ?? load.from_country_name ?? '—'}</strong><small>Yükləmə</small></span></div>
                 <div className="route-track">→</div>
-                <div className="route-end destination"><span><strong>{load.to_name}</strong><small>Təyinat</small></span></div>
+                <div className="route-end destination"><span><strong>{load.to_name ?? load.to_country_name ?? '—'}</strong><small>Təyinat</small></span></div>
               </div>
               <div className="listing-specs">
                 <span>{load.title}</span>
