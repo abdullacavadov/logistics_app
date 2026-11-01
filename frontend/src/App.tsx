@@ -462,7 +462,6 @@ export default function App() {
                         <Menu />
                     </button>
                     <div className="page-title">
-                        <span className="overline">LOGISTICS NETWORK</span>
                         <h1>{page}</h1>
                     </div>
                     <div className="top-actions">
