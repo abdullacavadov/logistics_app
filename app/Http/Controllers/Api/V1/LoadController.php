@@ -17,15 +17,17 @@ class LoadController extends Controller
     public function index(Request $r)
     {
         $r->validate(['per_page' => 'nullable|integer|min:1|max:50', 'min_weight' => 'nullable|numeric|min:0', 'max_weight' => 'nullable|numeric|min:0']);
-        $q = DB::table('loads')->whereIn('status', self::PUBLIC_STATUSES)->where(fn ($w) => $w->whereNull('pickup_to')->where('pickup_from', '>=', now()->toDateString())->orWhere('pickup_to', '>=', now()->toDateString()));
+        $q = $this->publicQuery()
+            ->whereIn('l.status', self::PUBLIC_STATUSES)
+            ->where(fn ($w) => $w->whereNull('l.pickup_to')->where('l.pickup_from', '>=', now()->toDateString())->orWhere('l.pickup_to', '>=', now()->toDateString()));
         foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'required_vehicle_type_id', 'currency'] as $f)
-            if ($r->filled($f)) $q->where($f, $r->input($f));
-        if ($r->filled('min_weight')) $q->where('weight_kg', '>=', $r->min_weight);
-        if ($r->filled('max_weight')) $q->where('weight_kg', '<=', $r->max_weight);
-        if ($r->filled('pickup_date')) $q->where('pickup_from', '<=', $r->pickup_date)->whereRaw('COALESCE(pickup_to, pickup_from) >= ?', [$r->pickup_date]);
-        if ($r->filled('min_price')) $q->where('price', '>=', $r->min_price);
-        if ($r->filled('max_price')) $q->where('price', '<=', $r->max_price);
-        return response()->json($q->orderByDesc('id')->select($this->publicColumns())->paginate($r->integer('per_page', 15)));
+            if ($r->filled($f)) $q->where("l.$f", $r->input($f));
+        if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
+        if ($r->filled('max_weight')) $q->where('l.weight_kg', '<=', $r->max_weight);
+        if ($r->filled('pickup_date')) $q->where('l.pickup_from', '<=', $r->pickup_date)->whereRaw('COALESCE(l.pickup_to, l.pickup_from) >= ?', [$r->pickup_date]);
+        if ($r->filled('min_price')) $q->where('l.price', '>=', $r->min_price);
+        if ($r->filled('max_price')) $q->where('l.price', '<=', $r->max_price);
+        return response()->json($q->orderByDesc('l.id')->paginate($r->integer('per_page', 15)));
     }
 
     public function show(Request $r, int $id)
@@ -33,7 +35,10 @@ class LoadController extends Controller
         $load = DB::table('loads')->where('id', $id)->first();
         $uid = auth('sanctum')->id();
         if (!$load || (!in_array($load->status, self::PUBLIC_STATUSES) && $load->user_id !== $uid)) return $this->err('not_found', 'Elan tapılmadı', 404);
-        return response()->json(['data' => $load->user_id === $uid ? $load : (object) collect($load)->only($this->publicColumns())->all()]);
+        if ($load->user_id === $uid) return response()->json(['data' => $load]);
+
+        $publicLoad = $this->publicQuery()->where('l.id', $id)->first();
+        return response()->json(['data' => $publicLoad]);
     }
 
     public function mine(Request $r)
@@ -126,6 +131,29 @@ class LoadController extends Controller
             'temp_min' => 'nullable|numeric', 'temp_max' => 'nullable|numeric|gte:temp_min', 'is_hazardous' => 'boolean', 'notes' => 'nullable|string|max:3000',
             'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'price_negotiable' => 'boolean',
         ];
+    }
+
+    /** Public listing payload enriched with display labels; never exposes owner/contact fields. */
+    private function publicQuery()
+    {
+        return DB::table('loads as l')
+            ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
+            ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
+            ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
+            ->select(array_map(fn ($column) => "l.$column", $this->publicColumns()))
+            ->addSelect(
+                'fc.name as from_country_name',
+                'fc.iso2 as from_country_iso2',
+                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
+                'tc.name as to_country_name',
+                'tc.iso2 as to_country_iso2',
+                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'),
+                'ct.name as cargo_type_name',
+                'vt.name as vehicle_type_name'
+            );
     }
 
     private function publicColumns(): array
