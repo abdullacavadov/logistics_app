@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import logoLight from "../../../assets/img/logo-light.png";
-import logoDark from "../../../assets/img/logo-dark.png";
 import { Bell, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, House, Map, Plus, ChevronDown, X, Check, Bookmark, Network, Sun, Moon, LogOut, Menu, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
-import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
+import { pagePaths } from "../config/navigation";
 import { listings, type Listing } from "../data/listings";
 import { CountryFlag } from "../components/CountryFlag";
 import { ListingCard } from "../components/ListingCard";
 import { DetailDialog } from "../components/DetailDialog";
+import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 export default function MarketplacePage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -56,59 +55,7 @@ export default function MarketplacePage() {
     const isMap = page === "Yük xəritəsi";
     return (
         <div className="app-shell" data-theme={theme}>
-            <aside className="sidebar">
-                <button
-                    className="brand-lockup"
-                    onClick={() => changePage("Bütün elanlar")}
-                    aria-label="Yoldaş — Bütün elanlar"
-                >
-                    <img
-                        className="brand-logo"
-                        src={theme === "dark" ? logoDark : logoLight}
-                        alt="Yoldaş"
-                    />
-                </button>
-                <div className="sidebar-scroll">
-                    <div className="nav-group">
-                        {primaryNav.map(({ label, icon: Icon }) => (
-                            <button
-                                key={label}
-                                className={
-                                    "side-link " +
-                                    (page === label ? "selected" : "")
-                                }
-                                onClick={() => changePage(label)}
-                            >
-                                <Icon size={19} />
-                                <span>{label}</span>
-                                {label === "Bütün elanlar" && (
-                                    <i className="nav-indicator" />
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="nav-divider" />
-                    <div className="nav-group muted-group">
-                        {secondaryNav.map(({ label, icon: Icon }) => (
-                            <button
-                                key={label}
-                                className={
-                                    "side-link " +
-                                    (page === label ? "selected" : "")
-                                }
-                                onClick={() => changePage(label)}
-                            >
-                                <Icon size={18} />
-                                <span>{label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="sidebar-version">
-                    <span className="status-light" /> LogisticsApp{" "}
-                    <span>v1.0</span>
-                </div>
-            </aside>
+            <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
             <div className="workspace">
                 <header className="topbar">
                     <button
