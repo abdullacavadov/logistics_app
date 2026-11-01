@@ -17,6 +17,7 @@ export default function MyLoadsPage() {
   const publish = usePublishLoad()
   const cancel = useCancelLoad()
   const archive = useArchiveLoad()
+  const rows = loads.data?.data ?? []
 
   return (
     <main className="content-area">
@@ -30,11 +31,11 @@ export default function MyLoadsPage() {
         <div className="no-results"><strong>Elanlar yüklənir…</strong></div>
       ) : loads.isError ? (
         <div className="no-results"><strong>Elanları yükləmək mümkün olmadı</strong><span>Server cavabını yoxlayın.</span></div>
-      ) : loads.data.data.length === 0 ? (
+      ) : rows.length === 0 ? (
         <div className="no-results"><strong>Hələ elanınız yoxdur</strong><span>Yaratdığınız yük elanları burada görünəcək.</span></div>
       ) : (
         <div className="listing-grid">
-          {loads.data.data.map((load) => (
+          {rows.map((load) => (
             <article className="listing-card" key={load.id}>
               <div className="listing-top">
                 <span className="listing-id">LA-{load.id}</span>
