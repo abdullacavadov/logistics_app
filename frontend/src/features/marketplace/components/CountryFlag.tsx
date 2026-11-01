@@ -1,5 +1,3 @@
-import type { ImgHTMLAttributes } from 'react'
-
 const flagCodes: Record<string, string> = {
     "AZ": "az",
     "TR": "tr",
