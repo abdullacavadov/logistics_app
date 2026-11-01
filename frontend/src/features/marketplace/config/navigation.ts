@@ -17,3 +17,21 @@ export const secondaryNav = [
     { label: "Məxfilik Siyasəti", icon: Shield },
     { label: "Kömək", icon: CircleHelp },
 ];
+
+export const pagePaths: Record<string, string> = {
+    "Bütün elanlar": "/",
+    "Mənim elanlarım": "/my/loads",
+    "Yük xəritəsi": "/map",
+    "Marşrutlarım": "/routes",
+    "Xidmətlərimiz": "/services",
+    "Tariflər və Analitika": "/pricing-analytics",
+    "Sənədlər": "/documents",
+    "Bilik bazası": "/knowledge-base",
+    "Profil": "/profile",
+    "Platforma haqqında": "/about",
+    "İstifadə şərtləri": "/terms",
+    "Məxfilik Siyasəti": "/privacy",
+    "Kömək": "/help",
+    "Yadda saxlanılanlar": "/saved",
+    "Mesajlar": "/messages",
+}
