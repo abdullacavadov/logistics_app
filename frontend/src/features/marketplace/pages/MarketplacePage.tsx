@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, Plus, ChevronDown, Check, Flag, LayoutGrid, ListFilter, ArrowRight } from "lucide-react";
-import { pagePaths } from "../config/navigation";
+import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
 import { listings, type Listing } from "../data/listings";
 import { CountryFlag } from "../components/CountryFlag";
 import { ListingCard } from "../components/ListingCard";
