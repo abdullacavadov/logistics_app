@@ -1,0 +1,104 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
+import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight } from 'lucide-react'
+import type { Listing } from '../types'
+import { CountryFlag } from './CountryFlag'
+
+export function ListingCard({
+    item,
+    onSelect,
+    saved,
+    onSave,
+}: {
+    item: Listing;
+    onSelect: () => void;
+    saved: boolean;
+    onSave: () => void;
+}) {
+    return (
+        <article className="listing-card">
+            <div className="listing-top">
+                <span className="listing-id">{item.id}</span>
+                <span className="source">
+                    <span className="source-dot" /> {item.source}
+                </span>
+                <button
+                    className={"icon-button save " + (saved ? "is-saved" : "")}
+                    onClick={onSave}
+                    aria-label="Yadda saxla"
+                >
+                    <Bookmark
+                        size={17}
+                        fill={saved ? "currentColor" : "none"}
+                    />
+                </button>
+            </div>
+            <button className="route-row" onClick={onSelect}>
+                <div className="route-end">
+                    <CountryFlag
+                        flag={item.fromFlag}
+                        className="country-flag"
+                    />
+                    <span>
+                        <strong>{item.from}</strong>
+                        <small>Yükləmə nöqtəsi</small>
+                    </span>
+                </div>
+                <div className="route-track">
+                    <MoveRight size={15} />
+                </div>
+                <div className="route-end destination">
+                    <CountryFlag flag={item.toFlag} className="country-flag" />
+                    <span>
+                        <strong>{item.to}</strong>
+                        <small>Təyinat nöqtəsi</small>
+                    </span>
+                </div>
+            </button>
+            <div className="listing-specs">
+                <span>
+                    <Package size={15} />
+                    {item.cargo}
+                </span>
+                <span>
+                    <Weight size={15} />
+                    {item.weight}
+                </span>
+                <span>
+                    <Truck size={15} />
+                    {item.vehicle}
+                </span>
+                <span>
+                  {item.urgent && <span className="urgent-tag">Təcili yük</span>}
+                </span>
+            </div>
+            <div className="listing-footer">
+                <div>
+                    <small>Təklif olunan qiymət</small>
+                    <strong className="price">{item.price}</strong>
+                </div>
+                <button className="outline-action" onClick={onSelect}>
+                    Ətraflı <ArrowRight size={15} />
+                </button>
+            </div>
+            <div className="listing-meta">
+                <span>
+                    <Clock3 size={14} />
+                    {item.date}
+                </span>
+                {item.application === "WhatsApp-dan" ? (
+                    <span style={{ color: "#1db053" }}>
+                        <FontAwesomeIcon icon={faWhatsapp} />
+                        {item.application}
+                    </span>
+                ) : (
+                    <span style={{ color: "var(--brand-orange)" }}>
+                        <Monitor size={14} />
+                        {item.application}
+                    </span>
+                )}
+
+            </div>
+        </article>
+    );
+}
