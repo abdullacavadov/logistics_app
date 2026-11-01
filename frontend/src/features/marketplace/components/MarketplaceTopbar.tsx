@@ -11,6 +11,8 @@ interface MarketplaceTopbarProps {
   showNotices: boolean
   onToggleNotices: () => void
   onLogin: () => void
+  userName: string | null
+  onLogout: () => void
   onToggleMobileMenu: () => void
 }
 
@@ -24,6 +26,8 @@ export function MarketplaceTopbar({
   showNotices,
   onToggleNotices,
   onLogin,
+  userName,
+  onLogout,
   onToggleMobileMenu,
 }: MarketplaceTopbarProps) {
   return (
@@ -104,8 +108,8 @@ export function MarketplaceTopbar({
                                     <Sun size={17} />
                                 )}
                             </button>
-                            <button className="login-button" onClick={onLogin}>
-                                <LogOut size={16} /> Daxil ol
+                            <button className="login-button" onClick={userName ? onLogout : onLogin}>
+                                <LogOut size={16} /> {userName ?? "Daxil ol"}
                             </button>
                         </div>
                     </header>
