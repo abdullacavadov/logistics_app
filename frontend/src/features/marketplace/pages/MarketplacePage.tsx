@@ -21,10 +21,10 @@ export default function MarketplacePage() {
     const logout = useLogout();
     const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map((load) => ({
         id: `LA-${load.id}`,
-        from: load.from_name,
-        to: load.to_name,
-        fromFlag: load.from_country_iso2,
-        toFlag: load.to_country_iso2,
+        from: load.from_name ?? load.from_country_name ?? '—',
+        to: load.to_name ?? load.to_country_name ?? '—',
+        fromFlag: load.from_country_iso2 ?? 'XX',
+        toFlag: load.to_country_iso2 ?? 'XX',
         cargo: load.cargo_type_name ?? "Digər yük",
         weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
         vehicle: load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
