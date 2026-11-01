@@ -501,16 +501,16 @@ export default function App() {
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
                             >
-                                <option value="Azərbaycanca">
+                                <option value="AZ Azərbaycanca">
                                     Azərbaycan
                                 </option>
-                                <option value="Русский">
+                                <option value="RU Русский">
                                     Русский
                                 </option>
-                                <option value="Türkçe">
+                                <option value="TR Türkçe">
                                     Türkiyə
                                 </option>
-                                <option value="English">
+                                <option value="GB English">
                                     English
                                 </option>
                             </select>
