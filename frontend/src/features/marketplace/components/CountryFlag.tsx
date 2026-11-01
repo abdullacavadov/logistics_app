@@ -15,7 +15,7 @@ export function CountryFlag({
     flag: string;
     className?: string;
 }) {
-    const code = flagCodes[flag];
+    const code = flagCodes[flag] ?? (/^[A-Za-z]{2}$/.test(flag) ? flag.toLowerCase() : undefined);
     return code ? (
         <img
             className={className}
