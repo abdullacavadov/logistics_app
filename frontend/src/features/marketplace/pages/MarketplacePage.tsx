@@ -9,7 +9,31 @@ import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
+import { useLoads } from "../../loads/hooks/useLoads";
+import { useAuth, useLogout } from "../../auth/hooks/useAuth";
+function formatLoadDate(value: string): string {
+    return new Intl.DateTimeFormat("az-AZ", { day: "2-digit", month: "short" }).format(new Date(value));
+}
+
 export default function MarketplacePage() {
+    const loadsQuery = useLoads({ per_page: 50 });
+    const auth = useAuth();
+    const logout = useLogout();
+    const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map((load) => ({
+        id: `LA-${load.id}`,
+        from: load.from_name ?? load.from_country_name ?? '—',
+        to: load.to_name ?? load.to_country_name ?? '—',
+        fromFlag: load.from_country_iso2 ?? '',
+        toFlag: load.to_country_iso2 ?? '',
+        cargo: load.cargo_type_name ?? "Digər yük",
+        weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
+        vehicle: load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
+        price: load.price === null ? "Razılaşma ilə" : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
+        application: "Saytdan",
+        date: formatLoadDate(load.created_at),
+        source: "LogisticsApp",
+        kind: "load",
+    }));
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname.replace(/\/+$/, "") || "/";
@@ -28,7 +52,7 @@ export default function MarketplacePage() {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const filtered = useMemo(
         () =>
-            listings.filter(
+            (kind === "load" ? apiListings : listings).filter(
                 (x) =>
                     x.kind === kind &&
                     [x.from, x.to, x.cargo, x.source, x.vehicle]
@@ -44,7 +68,7 @@ export default function MarketplacePage() {
                             .toLocaleLowerCase("az")
                             .includes(destination.toLocaleLowerCase("az"))),
             ),
-        [kind, query, origin, destination],
+        [kind, query, origin, destination, apiListings],
     );
     const changePage = (label: string) => {
         navigate(pagePaths[label] ?? "/");
@@ -65,7 +89,11 @@ export default function MarketplacePage() {
                     onCountryChange={setCountry}
                     onNavigate={changePage}
                     onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+                    showNotices={showNotices}
                     onToggleNotices={() => setShowNotices(!showNotices)}
+                    onLogin={() => navigate('/login')}
+                    userName={auth.data?.data.user.name ?? null}
+                    onLogout={() => logout.mutate()}
                     onToggleMobileMenu={() => setShowMobileMenu(!showMobileMenu)}
                 />
                 {showMobileMenu && (
@@ -281,7 +309,14 @@ export default function MarketplacePage() {
                                 </div>
                             </div>
                             <div className="listing-grid">
-                                {filtered.length ? (
+                                {kind === "load" && loadsQuery.isLoading ? (
+                                    <div className="no-results"><strong>Yüklər yüklənir…</strong></div>
+                                ) : kind === "load" && loadsQuery.isError ? (
+                                    <div className="no-results">
+                                        <strong>Yükləri əldə etmək mümkün olmadı</strong>
+                                        <span>API bağlantısını və server cavabını yoxlayın.</span>
+                                    </div>
+                                ) : filtered.length ? (
                                     filtered.map((item) => (
                                         <ListingCard
                                             key={item.id}
