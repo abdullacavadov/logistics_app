@@ -43,9 +43,18 @@ class LoadController extends Controller
 
     public function mine(Request $r)
     {
-        $q = DB::table('loads')->where('user_id', $r->user()->id);
-        if ($r->filled('status')) $q->where('status', $r->status);
-        return response()->json($q->orderByDesc('id')->paginate($r->integer('per_page', 15)));
+        $q = DB::table('loads as l')
+            ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
+            ->where('l.user_id', $r->user()->id);
+        if ($r->filled('status')) $q->where('l.status', $r->status);
+        return response()->json($q->orderByDesc('l.id')
+            ->select('l.*',
+                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
+                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'))
+            ->paginate($r->integer('per_page', 15)));
     }
 
     public function store(Request $r)
