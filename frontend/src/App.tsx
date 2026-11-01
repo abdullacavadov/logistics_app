@@ -164,6 +164,7 @@ const flagCodes: Record<string, string> = {
     "🇬🇪": "ge",
     "🇰🇿": "kz",
     "🇷🇺": "ru",
+    "🇬🇧": "gb",
 };
 function CountryFlag({
     flag,
@@ -477,13 +478,17 @@ export default function App() {
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
                             >
-                                <option value="🇦🇿 Azərbaycan">
+                                <option value="🇦🇿 Azərbaycanca">
                                     Azərbaycan
                                 </option>
-                                <option value="🇬🇪 Gürcüstan">Gürcüstan</option>
-                                <option value="🇹🇷 Türkiyə">Türkiyə</option>
-                                <option value="🇰🇿 Qazaxıstan">
-                                    Qazaxıstan
+                                <option value="🇷🇺 Русский">
+                                    Русский
+                                </option>
+                                <option value="🇹🇷 Türkçe">
+                                    Türkiyə
+                                </option>
+                                <option value="🇬🇧 English">
+                                    English
                                 </option>
                             </select>
                             <ChevronDown size={15} />
