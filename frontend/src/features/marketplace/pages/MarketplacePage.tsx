@@ -54,7 +54,6 @@ export default function MarketplacePage() {
         setSaved((s) =>
             s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
         );
-    const isMap = page === "Yük xəritəsi";
     return (
         <div className="app-shell" data-theme={theme}>
             <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
