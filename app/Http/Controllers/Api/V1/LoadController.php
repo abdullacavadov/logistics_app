@@ -52,8 +52,8 @@ class LoadController extends Controller
         if ($r->filled('status')) $q->where('l.status', $r->status);
         return response()->json($q->orderByDesc('l.id')
             ->select('l.*',
-                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
-                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'))
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'))
             ->paginate($r->integer('per_page', 15)));
     }
 
