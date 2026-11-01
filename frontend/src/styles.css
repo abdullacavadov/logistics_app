@@ -69,6 +69,17 @@ select:focus-visible {
     --danger: #ff8e86;
     --shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
 }
+
+.span-round {
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    background: var(--brand-road);
+    color: var(--text);
+}
 .sidebar {
     width: 272px;
     flex: none;
@@ -608,6 +619,14 @@ select:focus-visible {
     right: 20px;
     bottom: 5px;
 }
+.node-four {
+    left: 40px;
+    bottom: 15px;
+}
+.node-five {
+    left: 40px;
+    top: 5px;
+}
 .banner-close {
     position: absolute;
     right: 14px;
@@ -838,8 +857,8 @@ select:focus-visible {
 }
 .urgent-tag {
     font-size: 9px;
-    color: var(--danger);
-    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    color: var(--surface);
+    background: color-mix(in srgb, var(--danger) 30%, transparent);
     padding: 4px 7px;
     border-radius: 6px;
 }

@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
 import logoLight from "./assets/img/logo-light.png";
 import logoDark from "./assets/img/logo-dark.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
+
 import {
     Bell,
+    Monitor,
     Search,
     SlidersHorizontal,
     MapPin,
@@ -14,7 +18,6 @@ import {
     Map,
     Plus,
     ChevronDown,
-    ChevronRight,
     MoveRight,
     Clock3,
     Weight,
@@ -50,6 +53,7 @@ type Listing = {
     weight: string;
     vehicle: string;
     price: string;
+    application: string;
     date: string;
     source: string;
     urgent?: boolean;
@@ -60,12 +64,13 @@ const listings: Listing[] = [
         id: "LA-72418",
         from: "Bakı",
         to: "İstanbul",
-        fromFlag: "🇦🇿",
-        toFlag: "🇹🇷",
+        fromFlag: "AZ",
+        toFlag: "TR",
         cargo: "Məişət texnikası",
         weight: "20 ton",
         vehicle: "Tent / Ref",
         price: "3 450 AZN",
+        application: "WhatsApp-dan",
         date: "Bu gün, 14:30",
         source: "Caspian Trade",
         urgent: true,
@@ -75,12 +80,13 @@ const listings: Listing[] = [
         id: "LA-72417",
         from: "Tbilisi",
         to: "Almatı",
-        fromFlag: "🇬🇪",
-        toFlag: "🇰🇿",
+        fromFlag: "GE",
+        toFlag: "KZ",
         cargo: "Tikinti materialları",
         weight: "22 ton",
         vehicle: "Tent",
         price: "Razılaşma ilə",
+        application: "Saytdan",
         date: "Bu gün, 13:10",
         source: "Geo Cargo",
         kind: "load",
@@ -89,12 +95,13 @@ const listings: Listing[] = [
         id: "LA-72416",
         from: "Moskva",
         to: "Bakı",
-        fromFlag: "🇷🇺",
-        toFlag: "🇦🇿",
+        fromFlag: "RU",
+        toFlag: "AZ",
         cargo: "Sənaye avadanlığı",
         weight: "12 ton",
         vehicle: "Qapalı furqon",
         price: "4 100 AZN",
+        application: "WhatsApp-dan",
         date: "Bu gün, 11:45",
         source: "North Logistics",
         kind: "load",
@@ -103,12 +110,13 @@ const listings: Listing[] = [
         id: "LA-72415",
         from: "İstanbul",
         to: "Bakı",
-        fromFlag: "🇹🇷",
-        toFlag: "🇦🇿",
+        fromFlag: "TR",
+        toFlag: "AZ",
         cargo: "Tekstil məhsulları",
         weight: "8 ton",
         vehicle: "Mega",
         price: "2 200 AZN",
+        application: "Saytdan",
         date: "Dünən, 18:20",
         source: "Anadolu Group",
         kind: "load",
@@ -117,12 +125,13 @@ const listings: Listing[] = [
         id: "LA-72414",
         from: "Gəncə",
         to: "Tbilisi",
-        fromFlag: "🇦🇿",
-        toFlag: "🇬🇪",
+        fromFlag: "AZ",
+        toFlag: "GE",
         cargo: "Kənd təsərrüfatı",
         weight: "15 ton",
         vehicle: "Soyuduculu",
         price: "1 600 AZN",
+        application: "Saytdan",
         date: "Dünən, 16:05",
         source: "West Supply",
         kind: "load",
@@ -131,12 +140,13 @@ const listings: Listing[] = [
         id: "TR-3092",
         from: "Bakı",
         to: "Bütün istiqamətlər",
-        fromFlag: "🇦🇿",
-        toFlag: "🌍",
+        fromFlag: "AZ",
+        toFlag: "CH",
         cargo: "Tentli yük maşını",
         weight: "20 ton",
         vehicle: "Tent",
         price: "Boş maşın",
+        application: "WhatsApp-dan",
         date: "Bu gün, 10:20",
         source: "Araz Transport",
         kind: "vehicle",
@@ -160,12 +170,13 @@ const secondaryNav = [
     { label: "Kömək", icon: CircleHelp },
 ];
 const flagCodes: Record<string, string> = {
-    "🇦🇿": "az",
-    "🇹🇷": "tr",
-    "🇬🇪": "ge",
-    "🇰🇿": "kz",
-    "🇷🇺": "ru",
-    "🇬🇧": "gb",
+    "AZ": "az",
+    "TR": "tr",
+    "GE": "ge",
+    "KZ": "kz",
+    "RU": "ru",
+    "GB": "gb",
+    "CN": "cn",
 };
 function CountryFlag({
     flag,
@@ -257,6 +268,9 @@ function ListingCard({
                     <Truck size={15} />
                     {item.vehicle}
                 </span>
+                <span>
+                  {item.urgent && <span className="urgent-tag">Təcili yük</span>}
+                </span>
             </div>
             <div className="listing-footer">
                 <div>
@@ -272,7 +286,18 @@ function ListingCard({
                     <Clock3 size={14} />
                     {item.date}
                 </span>
-                {item.urgent && <span className="urgent-tag">Təcili yük</span>}
+                {item.application === "WhatsApp-dan" ? (
+                    <span style={{ color: "#1db053" }}>
+                        <FontAwesomeIcon icon={faWhatsapp} />
+                        {item.application}
+                    </span>
+                ) : (
+                    <span style={{ color: "var(--brand-orange)" }}>
+                        <Monitor size={14} />
+                        {item.application}
+                    </span>
+                )}
+
             </div>
         </article>
     );
@@ -476,16 +501,16 @@ export default function App() {
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
                             >
-                                <option value="🇦🇿 Azərbaycanca">
+                                <option value="Azərbaycanca">
                                     Azərbaycan
                                 </option>
-                                <option value="🇷🇺 Русский">
+                                <option value="Русский">
                                     Русский
                                 </option>
-                                <option value="🇹🇷 Türkçe">
+                                <option value="Türkçe">
                                     Türkiyə
                                 </option>
-                                <option value="🇬🇧 English">
+                                <option value="English">
                                     English
                                 </option>
                             </select>
@@ -621,7 +646,7 @@ export default function App() {
                                 <button className="filter-button channel-filter">
                                     <MessageSquare size={16} />{" "}
                                     <Check size={15} />
-                                    <span>WhatsApp</span>
+                                    <span>WhatsApp-dan</span>
                                 </button>
                                 <label className="sort-select">
                                     <ListFilter size={16} />
@@ -675,9 +700,6 @@ export default function App() {
                             )}
                             <section className="welcome-banner">
                                 <div className="banner-copy">
-                                    <span className="banner-kicker">
-                                        LOGISTICS MARKETPLACE
-                                    </span>
                                     <h2>
                                         Doğru yük. Doğru marşrut.{" "}
                                         <em>Vaxtında çatdırılma.</em>
@@ -710,30 +732,35 @@ export default function App() {
                                         <MapPin size={27} />
                                     </div>
                                     <CountryFlag
-                                        flag="🇦🇿"
+                                        flag="AZ"
                                         className="art-node node-one"
                                     />
                                     <CountryFlag
-                                        flag="🇹🇷"
+                                        flag="TR"
                                         className="art-node node-two"
                                     />
                                     <CountryFlag
-                                        flag="🇬🇪"
+                                        flag="GE"
                                         className="art-node node-three"
+                                    />
+                                    <CountryFlag
+                                        flag="CN"
+                                        className="art-node node-four"
+                                    />
+                                    <CountryFlag
+                                        flag="RU"
+                                        className="art-node node-five"
                                     />
                                 </div>
                             </section>
                             <div className="results-heading">
                                 <div>
-                                    <span className="overline">
-                                        MARKETPLACE /{" "}
-                                        {kind === "load" ? "LOADS" : "VEHICLES"}
-                                    </span>
+                                    
                                     <h2>
                                         {kind === "load"
                                             ? "Bütün yük elanları"
                                             : "Boş nəqliyyat vasitələri"}{" "}
-                                        <span>{filtered.length}</span>
+                                        <span className="span-round">{filtered.length}</span>
                                     </h2>
                                 </div>
                                 <div className="view-switch">
