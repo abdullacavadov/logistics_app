@@ -98,11 +98,11 @@ export default function RegisterPage() {
             <div className="auth-form-row">
               <label className="auth-field">
                 <span>Şifrə</span>
-                <div className="auth-input-wrap"><LockKeyhole size={18} /><input required minLength={8} autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimum 8 simvol" /></div>
+                <div className="auth-input-wrap"><LockKeyhole size={18} /><input required minLength={8} autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimum 8 simvol" /><button className="auth-password-toggle" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Şifrəni gizlət" : "Şifrəni göstər"}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
               </label>
               <label className="auth-field">
                 <span>Şifrənin təkrarı</span>
-                <div className="auth-input-wrap"><LockKeyhole size={18} /><input required minLength={8} autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={passwordConfirmation} onChange={e => setPasswordConfirmation(e.target.value)} placeholder="Şifrəni təkrarlayın" /></div>
+                <div className="auth-input-wrap"><LockKeyhole size={18} /><input required minLength={8} autoComplete="new-password" type={showPassword ? 'text' : 'password'} value={passwordConfirmation} onChange={e => setPasswordConfirmation(e.target.value)} placeholder="Şifrəni təkrarlayın" /><button className="auth-password-toggle" type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Şifrəni gizlət" : "Şifrəni göstər"}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
               </label>
             </div>
             <label className="auth-terms">
