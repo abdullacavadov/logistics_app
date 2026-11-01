@@ -11,7 +11,7 @@ import { DetailDialog } from "../components/DetailDialog";
 export default function MarketplacePage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const currentPath = location.pathname.replace(/\\/+$/, "") || "/";
+    const currentPath = location.pathname.replace(/\/+$/, "") || "/";
     const page = Object.entries(pagePaths).find(([, path]) => path === currentPath)?.[0] ?? "Bütün elanlar";
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [kind, setKind] = useState<"load" | "vehicle">("load");
