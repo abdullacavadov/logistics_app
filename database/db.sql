@@ -262,7 +262,7 @@ CREATE TABLE `loads` (
   `notes` text DEFAULT NULL,
   `price` decimal(12,2) DEFAULT NULL,
   `currency` char(3) DEFAULT NULL,
-  `application` enum('web','whatsapp') NOT NULL,
+  `applications` enum('web','whatsapp') NOT NULL,
   `price_negotiable` tinyint(1) NOT NULL DEFAULT 1,
   `status` enum('draft','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft',
   `created_at` timestamp NULL DEFAULT NULL,
