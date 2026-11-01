@@ -1,5 +1,5 @@
-import MarketplacePage from './features/marketplace/pages/MarketplacePage'
+import { AppRouter } from './app/router'
 
 export default function App() {
-  return <MarketplacePage />
+  return <AppRouter />
 }
