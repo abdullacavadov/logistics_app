@@ -1,14 +1,18 @@
 import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import logoLight from "../../../assets/img/logo-light.png";
 import logoDark from "../../../assets/img/logo-dark.png";
-import { Bell, Monitor, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, UserRound, House, Map, Plus, ChevronDown, MoveRight, Clock3, Weight, X, Check, Bookmark, FileText, BookOpen, ChartNoAxesCombined, Route, Network, Info, Shield, CircleHelp, Sun, Moon, LogOut, Menu, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
-import { primaryNav, secondaryNav } from "../config/navigation";
+import { Bell, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, House, Map, Plus, ChevronDown, X, Check, Bookmark, Network, Sun, Moon, LogOut, Menu, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
+import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
 import { listings, type Listing } from "../data/listings";
 import { CountryFlag } from "../components/CountryFlag";
 import { ListingCard } from "../components/ListingCard";
 import { DetailDialog } from "../components/DetailDialog";
 export default function MarketplacePage() {
-    const [page, setPage] = useState("Bütün elanlar");
+    const location = useLocation();
+    const navigate = useNavigate();
+    const currentPath = location.pathname.replace(/\\/+$/, "") || "/";
+    const page = Object.entries(pagePaths).find(([, path]) => path === currentPath)?.[0] ?? "Bütün elanlar";
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [kind, setKind] = useState<"load" | "vehicle">("load");
     const [query, setQuery] = useState("");
@@ -42,7 +46,7 @@ export default function MarketplacePage() {
         [kind, query, origin, destination],
     );
     const changePage = (label: string) => {
-        setPage(label);
+        navigate(pagePaths[label] ?? "/");
         setShowMobileMenu(false);
     };
     const toggleSaved = (id: string) =>
