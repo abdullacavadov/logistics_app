@@ -8,7 +8,9 @@ interface MarketplaceTopbarProps {
   onCountryChange: (country: string) => void
   onNavigate: (label: string) => void
   onToggleTheme: () => void
+  showNotices: boolean
   onToggleNotices: () => void
+  onLogin: () => void
   onToggleMobileMenu: () => void
 }
 
@@ -19,7 +21,9 @@ export function MarketplaceTopbar({
   onCountryChange,
   onNavigate,
   onToggleTheme,
+  showNotices,
   onToggleNotices,
+  onLogin,
   onToggleMobileMenu,
 }: MarketplaceTopbarProps) {
   return (
@@ -100,7 +104,7 @@ export function MarketplaceTopbar({
                                     <Sun size={17} />
                                 )}
                             </button>
-                            <button className="login-button">
+                            <button className="login-button" onClick={onLogin}>
                                 <LogOut size={16} /> Daxil ol
                             </button>
                         </div>
