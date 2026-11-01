@@ -88,6 +88,12 @@ export default function RegisterPage() {
               </label>
             </div>
             <label className="auth-field">
+              <span>Qeydiyyat ölkəsi</span>
+              <select className="auth-select" value="1" disabled aria-label="Qeydiyyat ölkəsi">
+                <option value="1">Azərbaycan</option>
+              </select>
+            </label>
+            <label className="auth-field">
               <span>Hesab növü</span>
               <select className="auth-select" value={role} onChange={e => setRole(e.target.value as RegisterPayload['role'])}>
                 <option value="shipper">Yük sahibi</option>
