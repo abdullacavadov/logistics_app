@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, House, Map, Plus, ChevronDown, X, Check, Bookmark, Network, Sun, Moon, LogOut, Menu, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, House, Map, Plus, ChevronDown, X, Check, Network, Flag, LayoutGrid, ListFilter, ArrowRight, MoreHorizontal } from "lucide-react";
 import { pagePaths } from "../config/navigation";
 import { listings, type Listing } from "../data/listings";
 import { CountryFlag } from "../components/CountryFlag";
 import { ListingCard } from "../components/ListingCard";
 import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
+import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 export default function MarketplacePage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -57,88 +58,16 @@ export default function MarketplacePage() {
         <div className="app-shell" data-theme={theme}>
             <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
             <div className="workspace">
-                <header className="topbar">
-                    <button
-                        className="mobile-menu-trigger icon-button"
-                        onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    >
-                        <Menu />
-                    </button>
-                    <div className="page-title">
-                        <h1>{page}</h1>
-                    </div>
-                    <div className="top-actions">
-                        <label className="country-select">
-                            <span className="country-select-value">
-                                <CountryFlag flag={country.split(" ")[0]} />
-                                {country
-                                    .replace(country.split(" ")[0], "")
-                                    .trim()}
-                            </span>
-                            <select
-                                aria-label="Ölkə seçimi"
-                                value={country}
-                                onChange={(e) => setCountry(e.target.value)}
-                            >
-                                <option value="AZ Azərbaycanca">
-                                    Azərbaycan
-                                </option>
-                                <option value="RU Русский">
-                                    Русский
-                                </option>
-                                <option value="TR Türkçe">
-                                    Türkiyə
-                                </option>
-                                <option value="GB English">
-                                    English
-                                </option>
-                            </select>
-                            <ChevronDown size={15} />
-                        </label>
-                        <button
-                            className="icon-button desktop-only"
-                            aria-label="Yadda saxlanılanlar"
-                            onClick={() => changePage("Yadda saxlanılanlar")}
-                        >
-                            <Bookmark />
-                        </button>
-                        <div className="notice-wrap">
-                            <button
-                                className="icon-button"
-                                aria-label="Bildirişlər"
-                                onClick={() => setShowNotices(!showNotices)}
-                            >
-                                <Bell />
-                                <i className="notification-dot" />
-                            </button>
-                            {showNotices && (
-                                <div className="notice-popover">
-                                    <strong>Bildirişlər</strong>
-                                    <p>
-                                        Yeni elanlar və müraciət yenilikləri
-                                        burada görünəcək.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                        <button
-                            className="theme-toggle"
-                            onClick={() =>
-                                setTheme(theme === "light" ? "dark" : "light")
-                            }
-                            aria-label="Mövzunu dəyiş"
-                        >
-                            {theme === "light" ? (
-                                <Moon size={17} />
-                            ) : (
-                                <Sun size={17} />
-                            )}
-                        </button>
-                        <button className="login-button">
-                            <LogOut size={16} /> Daxil ol
-                        </button>
-                    </div>
-                </header>
+                <MarketplaceTopbar
+                    page={page}
+                    theme={theme}
+                    country={country}
+                    onCountryChange={setCountry}
+                    onNavigate={changePage}
+                    onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+                    onToggleNotices={() => setShowNotices(!showNotices)}
+                    onToggleMobileMenu={() => setShowMobileMenu(!showMobileMenu)}
+                />
                 {showMobileMenu && (
                     <div className="mobile-menu-panel">
                         {primaryNav.map(({ label, icon: Icon }) => (
