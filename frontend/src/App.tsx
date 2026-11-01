@@ -15,6 +15,7 @@ import {
     Plus,
     ChevronDown,
     ChevronRight,
+    MoveRight,
     Clock3,
     Weight,
     X,
@@ -233,9 +234,7 @@ function ListingCard({
                     </span>
                 </div>
                 <div className="route-track">
-                    <i />
-                    <span />
-                    <i />
+                    <MoveRight size={15} />
                 </div>
                 <div className="route-end destination">
                     <CountryFlag flag={item.toFlag} className="country-flag" />
