@@ -39,8 +39,8 @@ export interface Load {
   to_country_name?: string
   to_country_iso2?: string
   to_name?: string
-  cargo_type_name: string | null
-  vehicle_type_name: string | null
+  cargo_type_name?: string | null
+  vehicle_type_name?: string | null
 }
 
 export interface PaginatedResponse<T> {
