@@ -1716,3 +1716,5 @@ select:focus-visible {
     .my-load-route strong { font-size: 11px; }
     .my-load-meta { gap: 8px 12px; }
 }
+
+.primary-button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
