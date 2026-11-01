@@ -11,17 +11,16 @@ export default function LoginPage() {
   const loginMutation = useLogin()
   const navigate = useNavigate()
   const location = useLocation()
+  const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
 
   useEffect(() => {
-    if (auth.data?.data.user) navigate('/', { replace: true })
-  }, [auth.data, navigate])
+    if (auth.data?.data.user) navigate(destination || '/', { replace: true })
+  }, [auth.data, destination, navigate])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
       await loginMutation.mutateAsync({ login: login.trim(), password })
-      const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
-      navigate(destination || '/', { replace: true })
     } catch {
       // Mutation error is rendered below.
     }
