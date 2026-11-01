@@ -10,12 +10,15 @@ import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 import { useLoads } from "../../loads/hooks/useLoads";
+import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
     return new Intl.DateTimeFormat("az-AZ", { day: "2-digit", month: "short" }).format(new Date(value));
 }
 
 export default function MarketplacePage() {
     const loadsQuery = useLoads({ per_page: 50 });
+    const auth = useAuth();
+    const logout = useLogout();
     const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map((load) => ({
         id: `LA-${load.id}`,
         from: load.from_name,
@@ -89,6 +92,8 @@ export default function MarketplacePage() {
                     showNotices={showNotices}
                     onToggleNotices={() => setShowNotices(!showNotices)}
                     onLogin={() => navigate('/login')}
+                    userName={auth.data?.data.user.name ?? null}
+                    onLogout={() => logout.mutate()}
                     onToggleMobileMenu={() => setShowMobileMenu(!showMobileMenu)}
                 />
                 {showMobileMenu && (
