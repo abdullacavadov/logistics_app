@@ -1,6 +1,6 @@
 # LogisticsApp Frontend
 
-React + TypeScript frontend for the existing Laravel 11 REST API.
+React + TypeScript frontend for the Laravel 12 API.
 
 ## Local development
 
@@ -11,28 +11,42 @@ React + TypeScript frontend for the existing Laravel 11 REST API.
    npm install
    ```
 
-3. Copy `.env.example` to `.env` and set `VITE_API_BASE_URL`.
-4. Start the Laravel API on `http://localhost:8000`.
+3. Configure the Laravel `.env` file with `SANCTUM_STATEFUL_DOMAINS=localhost:5173,127.0.0.1:5173,localhost,127.0.0.1`.
+4. Start Laravel on `http://127.0.0.1:8000`.
 5. Run the frontend:
 
    ```bash
    npm run dev
    ```
 
-The Vite development server runs on port 5173.
+The Vite server runs on port 5173 and proxies `/api` and `/sanctum` to Laravel. In production, serve the built frontend and Laravel API from the same origin.
 
-## Build
+## Build and checks
 
 ```bash
 npm run typecheck
 npm run build
 ```
 
+## Frontend structure
+
+- `app/`: application-level providers and composition.
+- `features/`: domain modules; the existing marketplace UI currently lives in `features/marketplace`.
+- `lib/`: shared infrastructure such as the Axios API client.
+- `assets/` and `styles.css`: shared visual resources.
+
+## Authentication contract
+
+- Authentication uses Laravel Sanctum SPA session cookies, not personal access tokens.
+- Call `initializeCsrf()` before login, registration, or other state-changing requests.
+- Use `authApi.login`, `authApi.register`, `authApi.me`, and `authApi.logout` from `features/auth/api/authApi.ts`.
+- The browser sends the session cookie automatically; do not store or attach Bearer tokens.
+- Laravel must run `$middleware->statefulApi()` and include the frontend origin in `SANCTUM_STATEFUL_DOMAINS`.
+- Production should use HTTPS and a same-origin deployment.
+
 ## Integration notes
 
-- API base path is `/api/v1`.
-- Authentication uses Laravel Sanctum Bearer tokens. The API client currently keeps the token in memory; wire login/logout flows through `setAccessToken`.
-- API error envelopes follow the existing backend's `error.code` and `error.message` convention.
-- The overview currently contains clearly identified demo metrics and rows. Replace them with API queries before production use.
-- Routes are scaffolded for loads, carriers, vehicles, applications, business places, map, subscription, and settings. Screens are intentionally placeholders until the corresponding backend contracts are complete.
+- API base path: `/api/v1`.
+- API error envelopes currently use `error.code` and `error.message`.
+- The marketplace page still contains demo listings and UI-local navigation. Replace these incrementally with feature pages and API queries; this refactor intentionally preserves the current UI.
 - Do not assume subscription checkout, application review, dictionary, business-place, or admin endpoints exist; verify/add those backend contracts first.
