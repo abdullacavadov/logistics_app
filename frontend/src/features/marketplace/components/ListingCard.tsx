@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
-import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight } from 'lucide-react'
+import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight, Monitor } from 'lucide-react'
 import type { Listing } from '../types'
 import { CountryFlag } from './CountryFlag'
 
