@@ -1,6 +1,20 @@
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, SlidersHorizontal, MapPin, Package, Truck, MessageSquare, Plus, ChevronDown, Check, Flag, LayoutGrid, ListFilter, ArrowRight } from "lucide-react";
+import {
+    Search,
+    SlidersHorizontal,
+    MapPin,
+    Package,
+    Truck,
+    MessageSquare,
+    Plus,
+    ChevronDown,
+    Check,
+    Flag,
+    LayoutGrid,
+    ListFilter,
+    ArrowRight,
+} from "lucide-react";
 import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
 import { listings } from "../data/listings";
 import type { Listing } from "../types";
@@ -13,32 +27,44 @@ import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 import { useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
-    return new Intl.DateTimeFormat("az-AZ", { day: "2-digit", month: "short" }).format(new Date(value));
+    return new Intl.DateTimeFormat("az-AZ", {
+        day: "2-digit",
+        month: "short",
+    }).format(new Date(value));
 }
 
 export default function MarketplacePage() {
     const loadsQuery = useLoads({ per_page: 50 });
     const auth = useAuth();
     const logout = useLogout();
-    const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map((load) => ({
-        id: `LA-${load.id}`,
-        from: load.from_name ?? load.from_country_name ?? '—',
-        to: load.to_name ?? load.to_country_name ?? '—',
-        fromFlag: load.from_country_iso2 ?? '',
-        toFlag: load.to_country_iso2 ?? '',
-        cargo: load.cargo_type_name ?? "Digər yük",
-        weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
-        vehicle: load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
-        price: load.price === null ? "Razılaşma ilə" : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
-        application: "Saytdan",
-        date: formatLoadDate(load.created_at),
-        source: "LogisticsApp",
-        kind: "load",
-    }));
+    const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map(
+        (load) => ({
+            id: `LA-${load.id}`,
+            from: load.from_name ?? load.from_country_name ?? "—",
+            to: load.to_name ?? load.to_country_name ?? "—",
+            fromFlag: load.from_country_iso2 ?? "",
+            toFlag: load.to_country_iso2 ?? "",
+            cargo: load.cargo_type_name ?? "Digər yük",
+            weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
+            vehicle: load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
+            price:
+                load.price === null
+                    ? "Razılaşma ilə"
+                    : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
+            application:
+                load.application === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
+            date: formatLoadDate(load.created_at),
+            source: "LogisticsApp",
+            kind: "load",
+        }),
+    );
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname.replace(/\/+$/, "") || "/";
-    const page = Object.entries(pagePaths).find(([, path]) => path === currentPath)?.[0] ?? "Bütün elanlar";
+    const page =
+        Object.entries(pagePaths).find(
+            ([, path]) => path === currentPath,
+        )?.[0] ?? "Bütün elanlar";
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [kind, setKind] = useState<"load" | "vehicle">("load");
     const [query, setQuery] = useState("");
@@ -81,7 +107,11 @@ export default function MarketplacePage() {
         );
     return (
         <div className="app-shell" data-theme={theme}>
-            <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
+            <MarketplaceSidebar
+                theme={theme}
+                page={page}
+                onNavigate={changePage}
+            />
             <div className="workspace">
                 <MarketplaceTopbar
                     page={page}
@@ -89,13 +119,17 @@ export default function MarketplacePage() {
                     country={country}
                     onCountryChange={setCountry}
                     onNavigate={changePage}
-                    onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+                    onToggleTheme={() =>
+                        setTheme(theme === "light" ? "dark" : "light")
+                    }
                     showNotices={showNotices}
                     onToggleNotices={() => setShowNotices(!showNotices)}
-                    onLogin={() => navigate('/login')}
+                    onLogin={() => navigate("/login")}
                     userName={auth.data?.data.user.name ?? null}
                     onLogout={() => logout.mutate()}
-                    onToggleMobileMenu={() => setShowMobileMenu(!showMobileMenu)}
+                    onToggleMobileMenu={() =>
+                        setShowMobileMenu(!showMobileMenu)
+                    }
                 />
                 {showMobileMenu && (
                     <div className="mobile-menu-panel">
@@ -292,12 +326,13 @@ export default function MarketplacePage() {
                             </section>
                             <div className="results-heading">
                                 <div>
-                                    
                                     <h2>
                                         {kind === "load"
                                             ? "Bütün yük elanları"
                                             : "Boş nəqliyyat vasitələri"}{" "}
-                                        <span className="span-round">{filtered.length}</span>
+                                        <span className="span-round">
+                                            {filtered.length}
+                                        </span>
                                     </h2>
                                 </div>
                                 <div className="view-switch">
@@ -311,11 +346,18 @@ export default function MarketplacePage() {
                             </div>
                             <div className="listing-grid">
                                 {kind === "load" && loadsQuery.isLoading ? (
-                                    <div className="no-results"><strong>Yüklər yüklənir…</strong></div>
+                                    <div className="no-results">
+                                        <strong>Yüklər yüklənir…</strong>
+                                    </div>
                                 ) : kind === "load" && loadsQuery.isError ? (
                                     <div className="no-results">
-                                        <strong>Yükləri əldə etmək mümkün olmadı</strong>
-                                        <span>API bağlantısını və server cavabını yoxlayın.</span>
+                                        <strong>
+                                            Yükləri əldə etmək mümkün olmadı
+                                        </strong>
+                                        <span>
+                                            API bağlantısını və server cavabını
+                                            yoxlayın.
+                                        </span>
                                     </div>
                                 ) : filtered.length ? (
                                     filtered.map((item) => (
@@ -413,7 +455,11 @@ export default function MarketplacePage() {
                     )}
                 </main>
             </div>
-            <MarketplaceMobileNav page={page} onNavigate={changePage} onToggleMore={() => setShowMobileMenu(!showMobileMenu)} />
+            <MarketplaceMobileNav
+                page={page}
+                onNavigate={changePage}
+                onToggleMore={() => setShowMobileMenu(!showMobileMenu)}
+            />
             <button className="mobile-create" aria-label="Elan yerləşdir">
                 <Plus size={21} />
             </button>

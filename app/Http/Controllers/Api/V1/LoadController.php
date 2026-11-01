@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
@@ -11,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id','from_location_id','to_country_id','to_location_id','pickup_from','pickup_to','weight_kg','volume_m3','required_vehicle_type_id','needs_refrigeration'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'required_vehicle_type_id', 'needs_refrigeration'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -19,7 +20,7 @@ class LoadController extends Controller
         $r->validate(['per_page' => 'nullable|integer|min:1|max:50', 'min_weight' => 'nullable|numeric|min:0', 'max_weight' => 'nullable|numeric|min:0']);
         $q = $this->publicQuery()
             ->whereIn('l.status', self::PUBLIC_STATUSES)
-            ->where(fn ($w) => $w->whereNull('l.pickup_to')->where('l.pickup_from', '>=', now()->toDateString())->orWhere('l.pickup_to', '>=', now()->toDateString()));
+            ->where(fn($w) => $w->whereNull('l.pickup_to')->where('l.pickup_from', '>=', now()->toDateString())->orWhere('l.pickup_to', '>=', now()->toDateString()));
         foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'required_vehicle_type_id', 'currency'] as $f)
             if ($r->filled($f)) $q->where("l.$f", $r->input($f));
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
@@ -51,9 +52,11 @@ class LoadController extends Controller
             ->where('l.user_id', $r->user()->id);
         if ($r->filled('status')) $q->where('l.status', $r->status);
         return response()->json($q->orderByDesc('l.id')
-            ->select('l.*',
+            ->select(
+                'l.*',
                 DB::raw('COALESCE(fl.name, fc.name) as from_name'),
-                DB::raw('COALESCE(tl.name, tc.name) as to_name'))
+                DB::raw('COALESCE(tl.name, tc.name) as to_name')
+            )
             ->paginate($r->integer('per_page', 15)));
     }
 
@@ -71,7 +74,8 @@ class LoadController extends Controller
 
     public function update(Request $r, int $id)
     {
-        $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
+        $load = $this->owned($r, $id);
+        if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if (in_array($load->status, ['in_transit', 'completed', 'cancelled', 'archived'])) return $this->err('locked', 'Bu statusda elan dəyişdirilə bilməz', 409);
         $d = $r->validate($this->rules(true));
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
@@ -85,19 +89,27 @@ class LoadController extends Controller
 
     public function publish(Request $r, int $id)
     {
-        $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
+        $load = $this->owned($r, $id);
+        if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if ($load->status !== 'draft') return $this->err('bad_status', 'Yalnız qaralama dərc oluna bilər', 409);
         DB::table('loads')->where('id', $id)->update(['status' => 'published', 'updated_at' => now()]);
         $n = $this->matcher->forLoad($id);
         return response()->json(['data' => ['id' => $id, 'status' => 'published', 'matches' => $n]]);
     }
 
-    public function cancel(Request $r, int $id) { return $this->moveTo($r, $id, 'cancelled', ['draft', 'published', 'has_applications', 'agreed']); }
-    public function archive(Request $r, int $id) { return $this->moveTo($r, $id, 'archived', ['draft', 'published', 'has_applications', 'completed', 'cancelled']); }
+    public function cancel(Request $r, int $id)
+    {
+        return $this->moveTo($r, $id, 'cancelled', ['draft', 'published', 'has_applications', 'agreed']);
+    }
+    public function archive(Request $r, int $id)
+    {
+        return $this->moveTo($r, $id, 'archived', ['draft', 'published', 'has_applications', 'completed', 'cancelled']);
+    }
 
     private function moveTo(Request $r, int $id, string $to, array $from)
     {
-        $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
+        $load = $this->owned($r, $id);
+        if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if (!in_array($load->status, $from)) return $this->err('bad_status', 'Bu statusdan keçid mümkün deyil', 409);
         DB::table('loads')->where('id', $id)->update(['status' => $to, 'updated_at' => now()]);
         $this->audit($r, "load.$to", $id, ['status' => $load->status], ['status' => $to]);
@@ -108,11 +120,12 @@ class LoadController extends Controller
     /** Yük sahibi: elana uyğun daşıyıcı təklifləri (bal və səbəblərlə). Əlaqə məlumatı göstərilmir. */
     public function matches(Request $r, int $id)
     {
-        $load = $this->owned($r, $id); if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
+        $load = $this->owned($r, $id);
+        if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         $rows = DB::table('matches as m')->join('vehicle_offers as o', 'o.id', '=', 'm.vehicle_offer_id')->join('vehicles as v', 'v.id', '=', 'o.vehicle_id')
             ->join('users as u', 'u.id', '=', 'o.user_id')->leftJoin('companies as c', 'c.user_id', '=', 'u.id')->where('m.load_id', $id)->orderByDesc('m.score')
             ->select('m.score', 'm.reasons', 'o.id as offer_id', 'u.name as carrier', 'c.verification_status as company_status', 'v.vehicle_type_id', 'o.from_country_id', 'o.to_country_id', 'o.available_from', 'o.available_to', 'o.price', 'o.currency')->get()
-            ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
+            ->map(fn($x) => tap($x, fn($y) => $y->reasons = json_decode($y->reasons)));
         return response()->json(['data' => $rows]);
     }
 
@@ -127,18 +140,34 @@ class LoadController extends Controller
     {
         $s = $partial ? 'sometimes|' : '';
         return [
-            'title' => $s . 'required|string|max:200', 'description' => 'nullable|string|max:5000',
+            'title' => $s . 'required|string|max:200',
+            'description' => 'nullable|string|max:5000',
             'cargo_type_id' => 'nullable|exists:cargo_types,id',
-            'from_country_id' => $s . 'required|exists:countries,id', 'from_location_id' => 'nullable|exists:locations,id',
-            'from_address' => 'nullable|string|max:255', 'from_lat' => 'nullable|numeric|between:-90,90', 'from_lng' => 'nullable|numeric|between:-180,180',
-            'to_country_id' => $s . 'required|exists:countries,id', 'to_location_id' => 'nullable|exists:locations,id',
-            'to_address' => 'nullable|string|max:255', 'to_lat' => 'nullable|numeric|between:-90,90', 'to_lng' => 'nullable|numeric|between:-180,180',
-            'pickup_from' => $s . 'required|date|after_or_equal:today', 'pickup_to' => 'nullable|date|after_or_equal:pickup_from',
+            'from_country_id' => $s . 'required|exists:countries,id',
+            'from_location_id' => 'nullable|exists:locations,id',
+            'from_address' => 'nullable|string|max:255',
+            'from_lat' => 'nullable|numeric|between:-90,90',
+            'from_lng' => 'nullable|numeric|between:-180,180',
+            'to_country_id' => $s . 'required|exists:countries,id',
+            'to_location_id' => 'nullable|exists:locations,id',
+            'to_address' => 'nullable|string|max:255',
+            'to_lat' => 'nullable|numeric|between:-90,90',
+            'to_lng' => 'nullable|numeric|between:-180,180',
+            'pickup_from' => $s . 'required|date|after_or_equal:today',
+            'pickup_to' => 'nullable|date|after_or_equal:pickup_from',
             'delivery_by' => 'nullable|date|after_or_equal:pickup_from',
-            'weight_kg' => $s . 'required|numeric|gt:0|max:1000000', 'volume_m3' => 'nullable|numeric|gt:0', 'pallets' => 'nullable|integer|min:1',
-            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id', 'needs_refrigeration' => 'boolean',
-            'temp_min' => 'nullable|numeric', 'temp_max' => 'nullable|numeric|gte:temp_min', 'is_hazardous' => 'boolean', 'notes' => 'nullable|string|max:3000',
-            'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'price_negotiable' => 'boolean',
+            'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
+            'volume_m3' => 'nullable|numeric|gt:0',
+            'pallets' => 'nullable|integer|min:1',
+            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'needs_refrigeration' => 'boolean',
+            'temp_min' => 'nullable|numeric',
+            'temp_max' => 'nullable|numeric|gte:temp_min',
+            'is_hazardous' => 'boolean',
+            'notes' => 'nullable|string|max:3000',
+            'price' => 'nullable|numeric|min:0',
+            'currency' => 'required_with:price|nullable|string|size:3',
+            'price_negotiable' => 'boolean',
         ];
     }
 
@@ -152,7 +181,7 @@ class LoadController extends Controller
             ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
             ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
             ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
-            ->select(array_map(fn ($column) => "l.$column", $this->publicColumns()))
+            ->select(array_map(fn($column) => "l.$column", $this->publicColumns()))
             ->addSelect(
                 'fc.name as from_country_name',
                 'fc.iso2 as from_country_iso2',
@@ -167,15 +196,51 @@ class LoadController extends Controller
 
     private function publicColumns(): array
     {
-        return ['id','title','description','cargo_type_id','from_country_id','from_location_id','to_country_id','to_location_id','pickup_from','pickup_to','delivery_by',
-            'weight_kg','volume_m3','pallets','required_vehicle_type_id','needs_refrigeration','temp_min','temp_max','is_hazardous','price','currency','price_negotiable','status','created_at'];
+        return [
+            'id',
+            'title',
+            'description',
+            'cargo_type_id',
+            'from_country_id',
+            'from_location_id',
+            'to_country_id',
+            'to_location_id',
+            'pickup_from',
+            'pickup_to',
+            'delivery_by',
+            'weight_kg',
+            'volume_m3',
+            'pallets',
+            'required_vehicle_type_id',
+            'needs_refrigeration',
+            'temp_min',
+            'temp_max',
+            'is_hazardous',
+            'price',
+            'applications',
+            'currency',
+            'price_negotiable',
+            'status',
+            'created_at'
+        ];
     }
 
     private function audit(Request $r, string $action, int $id, $old, $new): void
     {
-        DB::table('audit_logs')->insert(['actor_id' => $r->user()->id, 'action' => $action, 'entity' => 'load', 'entity_id' => $id,
-            'old_values' => $old ? json_encode($old) : null, 'new_values' => json_encode($new), 'ip' => $r->ip(), 'created_at' => now()]);
+        DB::table('audit_logs')->insert([
+            'actor_id' => $r->user()->id,
+            'action' => $action,
+            'entity' => 'load',
+            'entity_id' => $id,
+            'old_values' => $old ? json_encode($old) : null,
+            'new_values' => json_encode($new),
+            'ip' => $r->ip(),
+            'created_at' => now()
+        ]);
     }
 
-    private function err(string $c, string $m, int $h) { return response()->json(['error' => ['code' => $c, 'message' => $m]], $h); }
+    private function err(string $c, string $m, int $h)
+    {
+        return response()->json(['error' => ['code' => $c, 'message' => $m]], $h);
+    }
 }
