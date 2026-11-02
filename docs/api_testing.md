@@ -183,3 +183,15 @@ Invoke-Api $carrierSession $carrierXsrf "/subscription/quote"
 Admin testi üçün əvvəlcə admin rolu olan ayrıca test hesabı yaratmaq lazımdır. Tarif yazma endpoint-i yeni versiya yaradır və əvvəlki aktiv versiyanı deaktiv edir; bu əməliyyatı yalnız test bazasında edin. Daşıyıcı qiymət hesablaması aktiv vasitələrin sayını və istifadəçinin/şirkətin qeydiyyat ölkəsini əsas götürür.
 
 Birbank ödənişinin başlanması və avtomatik yenilənməsi hələ aktiv deyil. Promo kod endirimi də endirim qaydaları təsdiqlənənədək hesablanmır.
+
+## 9. Telefon nömrəsinin ölkəyə uyğun formatlanması
+
+1. Qeydiyyatda qeydiyyat ölkəsini seçin; telefon ölkə kodu həmin ölkəyə avtomatik keçir.
+2. Telefon ölkə seçicisindən başqa ölkə seçin və nömrəni milli formatda daxil edin.
+3. Yazarkən nömrənin ölkəyə uyğun qruplaşdırıldığını yoxlayın.
+4. Qeydiyyat sorğusunda telefonun E.164 formatında (məsələn, +994501234567) göndərildiyini yoxlayın.
+5. Login-də telefon və e-poçt rejimlərini ayrıca yoxlayın; telefon rejimində ölkə kodu ilə daxil olun.
+6. Yanlış və natamam telefon nömrəsinin frontend tərəfindən bloklandığını yoxlayın.
+7. Eyni telefonun fərqli yazılışlarla təkrar qeydiyyata alınmadığını yoxlayın.
+
+Bayraq şəkilləri flagcdn.com üzərindən, ölkə siyahısı isə aktiv DB ölkə kataloqundan gəlir. Telefon kodları və formatlama libphonenumber-js metadata-sı ilə müəyyən edilir.
