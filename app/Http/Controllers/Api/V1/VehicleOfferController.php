@@ -48,6 +48,7 @@ class VehicleOfferController extends Controller
 
     public function update(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id);
         if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if (!in_array($o->status, ['draft', 'active'])) {
@@ -60,7 +61,7 @@ class VehicleOfferController extends Controller
             'from_location_id' => 'nullable|exists:locations,id',
             'to_country_id' => 'sometimes|required|exists:countries,id',
             'to_location_id' => 'nullable|exists:locations,id',
-            'available_from' => 'sometimes|required|date|after_or_equal:today',
+            'available_from' => 'sometimes|required|date',
             'available_to' => 'sometimes|required|date',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
@@ -94,6 +95,7 @@ class VehicleOfferController extends Controller
 
     public function activate(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if ($o->status !== 'draft') return $this->err('bad_status', 'Yalnız qaralama aktivləşdirilə bilər', 409);
         if ($o->available_to < date('Y-m-d')) return $this->err('expired', 'Təklifin müddəti bitib', 422);
@@ -105,6 +107,7 @@ class VehicleOfferController extends Controller
 
     public function cancel(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if (!in_array($o->status, ['draft', 'active', 'applied'])) return $this->err('bad_status', 'Bu statusdan ləğv mümkün deyil', 409);
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'cancelled', 'updated_at' => now()]);
@@ -115,11 +118,22 @@ class VehicleOfferController extends Controller
     /** Daşıyıcı: təklifə uyğun yüklər (bal və səbəblərlə). */
     public function matches(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         $rows = DB::table('matches as m')->join('loads as l', 'l.id', '=', 'm.load_id')->where('m.vehicle_offer_id', $id)->orderByDesc('m.score')
             ->select('m.score', 'm.reasons', 'l.id as load_id', 'l.title', 'l.from_country_id', 'l.to_country_id', 'l.pickup_from', 'l.pickup_to', 'l.weight_kg', 'l.price', 'l.currency')->get()
             ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
         return response()->json(['data' => $rows]);
+    }
+
+    private function carrierOnly(Request $r)
+    {
+        return DB::table('user_roles')->where([
+            'user_id' => $r->user()->id,
+            'role' => 'carrier',
+        ])->exists()
+            ? null
+            : $this->err('not_carrier', 'Daşıyıcı hüququ lazımdır', 403);
     }
 
     private function conflicts(int $vehicleId, string $from, string $to, ?int $exceptId): bool
