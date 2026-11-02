@@ -273,7 +273,7 @@ CREATE TABLE `loads` (
 -- Дамп данных таблицы `loads`
 --
 
-INSERT INTO `loads` (`id`, `user_id`, `title`, `description`, `cargo_type_id`, `from_country_id`, `from_location_id`, `from_address`, `from_lat`, `from_lng`, `to_country_id`, `to_location_id`, `to_address`, `to_lat`, `to_lng`, `pickup_from`, `pickup_to`, `delivery_by`, `weight_kg`, `volume_m3`, `pallets`, `required_vehicle_type_id`, `needs_refrigeration`, `temp_min`, `temp_max`, `is_hazardous`, `notes`, `price`, `currency`, `application`, `price_negotiable`, `status`, `created_at`, `updated_at`) VALUES
+INSERT INTO `loads` (`id`, `user_id`, `title`, `description`, `cargo_type_id`, `from_country_id`, `from_location_id`, `from_address`, `from_lat`, `from_lng`, `to_country_id`, `to_location_id`, `to_address`, `to_lat`, `to_lng`, `pickup_from`, `pickup_to`, `delivery_by`, `weight_kg`, `volume_m3`, `pallets`, `required_vehicle_type_id`, `needs_refrigeration`, `temp_min`, `temp_max`, `is_hazardous`, `notes`, `price`, `currency`, `applications`, `price_negotiable`, `status`, `created_at`, `updated_at`) VALUES
 (1, 2, 'Baki-Tbilisi 10 ton', NULL, NULL, 1, NULL, NULL, NULL, NULL, 3, NULL, NULL, NULL, NULL, '2026-11-20', NULL, NULL, 10000.00, NULL, NULL, NULL, 0, NULL, NULL, 0, NULL, 1500.00, 'EUR', 'web', 1, 'published', '2026-10-30 04:43:19', '2026-11-01 05:53:26');
 
 -- --------------------------------------------------------
