@@ -98,6 +98,11 @@ class VehicleOfferController extends Controller
         if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if ($o->status !== 'draft') return $this->err('bad_status', 'Yalnız qaralama aktivləşdirilə bilər', 409);
+        if (!DB::table('vehicles')->where([
+            'id' => $o->vehicle_id,
+            'user_id' => $r->user()->id,
+            'is_active' => 1,
+        ])->exists()) return $this->err('inactive_vehicle', 'Aktiv nəqliyyat vasitəsi seçilməlidir', 422);
         if ($o->available_to < date('Y-m-d')) return $this->err('expired', 'Təklifin müddəti bitib', 422);
         if ($this->conflicts($o->vehicle_id, $o->available_from, $o->available_to, $id)) return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'active', 'updated_at' => now()]);
