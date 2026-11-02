@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Services\MatchRunner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /** Nəqliyyat vasitələri — TS §6.1. Yalnız carrier rolu; yalnız öz vasitələri. */
 class VehicleController extends Controller
 {
+    public function __construct(private MatchRunner $matcher) {}
     public function index(Request $r)
     {
         return response()->json(['data' => DB::table('vehicles')
@@ -59,6 +61,8 @@ class VehicleController extends Controller
         }
 
         DB::table('vehicles')->where('id', $id)->update($data + ['updated_at' => now()]);
+        DB::table('vehicle_offers')->where('vehicle_id', $id)->where('status', 'active')
+            ->pluck('id')->each(fn ($offerId) => $this->matcher->forOffer((int) $offerId));
         return response()->json(['data' => DB::table('vehicles')->find($id)]);
     }
 
