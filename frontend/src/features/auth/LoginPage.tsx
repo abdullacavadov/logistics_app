@@ -24,6 +24,12 @@ export default function LoginPage() {
   const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
 
   useEffect(() => {
+    if (countries.data?.length && !countries.data.some(country => country.iso2 === phoneCountryIso2)) {
+      setPhoneCountryIso2(countries.data[0].iso2)
+    }
+  }, [countries.data, phoneCountryIso2])
+
+  useEffect(() => {
     if (auth.data?.data.user) navigate(destination || '/', { replace: true })
   }, [auth.data, destination, navigate])
 
