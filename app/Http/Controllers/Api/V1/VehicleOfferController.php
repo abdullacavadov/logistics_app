@@ -49,7 +49,7 @@ class VehicleOfferController extends Controller
     public function update(Request $r, int $id)
     {
         $o = $this->owned($r, $id);
-        if ($o instanceof \\Illuminate\\Http\\JsonResponse) return $o;
+        if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if (!in_array($o->status, ['draft', 'active'])) {
             return $this->err('locked', 'Bu statusda təklif dəyişdirilə bilməz', 409);
         }
@@ -61,7 +61,7 @@ class VehicleOfferController extends Controller
             'to_country_id' => 'sometimes|required|exists:countries,id',
             'to_location_id' => 'nullable|exists:locations,id',
             'available_from' => 'sometimes|required|date|after_or_equal:today',
-            'available_to' => 'sometimes|required|date|after_or_equal:available_from',
+            'available_to' => 'sometimes|required|date',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
             'terms' => 'nullable|string|max:3000',
