@@ -1902,12 +1902,13 @@ select:focus-visible {
 
 /* Country-aware international phone input */
 .auth-phone-input-wrap { padding-left: 9px; padding-right: 13px; }
+.auth-phone-input-wrap > .phone-number-control { flex: 1 1 0; min-width: 0; width: 100%; }
 .phone-number-control { display: flex; align-items: center; gap: 11px; width: 100%; min-width: 0; height: 100%; }
 .phone-country-picker { position: relative; height: 34px; min-width: 88px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 8px; border-right: 1px solid var(--auth-line); color: #34445a; font-size: 12px; font-weight: 700; cursor: pointer; }
 .phone-country-picker img { width: 23px; height: 16px; border-radius: 2px; object-fit: cover; box-shadow: 0 0 0 1px rgba(20,35,55,.08); }
 .phone-country-picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .phone-country-chevron { color: #8996a8; font-size: 10px; }
-.phone-number-control > input { flex: 1; min-width: 0; width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #172337; font-size: 12px; }
+.phone-number-control > input { display: block; flex: 1 1 0; min-width: 0; width: 1%; height: 100%; border: 0; outline: 0; background: transparent; color: #172337; font-size: 12px; }
 .phone-number-control > input::placeholder { color: #a4afbd; }
 .auth-login-method { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px solid var(--auth-line); border-radius: 11px; background: #f5f7fa; }
 .auth-login-method button { min-height: 35px; border: 0; border-radius: 8px; background: transparent; color: #78869a; font-size: 12px; font-weight: 650; }
