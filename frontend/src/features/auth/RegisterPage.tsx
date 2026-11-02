@@ -2,11 +2,12 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { catalogApi } from '../catalog/catalogApi'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, UserRound } from 'lucide-react'
 import type { AxiosError } from 'axios'
 import { useAuth, useRegister } from './hooks/useAuth'
 import type { RegisterPayload } from './api/authApi'
 import logoLight from '../../assets/img/logo-light.png'
+import PhoneNumberField, { normalizePhoneNumber } from './PhoneNumberField'
 
 type RegisterErrors = { message?: string; errors?: Record<string, string[]>; error?: { message?: string } }
 
@@ -16,6 +17,8 @@ export default function RegisterPage() {
   const registerMutation = useRegister()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneCountryIso2, setPhoneCountryIso2] = useState('AZ')
+  const [phoneError, setPhoneError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -31,9 +34,15 @@ export default function RegisterPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const normalizedPhone = phone.trim() ? normalizePhoneNumber(phone, phoneCountryIso2) : undefined
+    if (phone.trim() && !normalizedPhone) {
+      setPhoneError('Seçilmiş ölkəyə uyğun düzgün telefon nömrəsi daxil edin.')
+      return
+    }
+    setPhoneError('')
     const payload: RegisterPayload = {
       name: name.trim(),
-      phone: phone.trim() || undefined,
+      phone: normalizedPhone || undefined,
       email: email.trim() || undefined,
       password,
       password_confirmation: passwordConfirmation,
@@ -84,7 +93,8 @@ export default function RegisterPage() {
             <div className="auth-form-row">
               <label className="auth-field">
                 <span>Telefon <small>(ən azı biri tələb olunur)</small></span>
-                <div className="auth-input-wrap"><Phone size={18} /><input type="tel" autoComplete="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+994 50 000 00 00" /></div>
+                <div className="auth-input-wrap auth-phone-input-wrap"><PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={phone} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setPhone(''); setPhoneError('') }} onChange={value => { setPhone(value); setPhoneError('') }} placeholder="50 000 00 00" /></div>
+                {phoneError && <small className="auth-error">{phoneError}</small>}
               </label>
               <label className="auth-field">
                 <span>E-poçt</span>
@@ -93,7 +103,7 @@ export default function RegisterPage() {
             </div>
             <label className="auth-field">
               <span>Qeydiyyat ölkəsi</span>
-              <select className="auth-select" value={countryId} onChange={e => setCountryId(e.target.value)} required disabled={countries.isLoading || countries.isError}>
+              <select className="auth-select" value={countryId} onChange={e => { setCountryId(e.target.value); const selected = countries.data?.find(country => country.id === Number(e.target.value)); if (selected) { setPhoneCountryIso2(selected.iso2); setPhone(''); setPhoneError('') } }} required disabled={countries.isLoading || countries.isError}>
                 <option value="">{countries.isLoading ? 'Ölkələr yüklənir…' : 'Ölkə seçin'}</option>
                 {(countries.data ?? []).map(country => <option key={country.id} value={country.id}>{country.name}</option>)}
               </select>
