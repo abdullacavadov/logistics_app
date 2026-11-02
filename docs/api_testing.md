@@ -11,6 +11,7 @@ $origin = "http://127.0.0.1:8000"
 $api = "$origin/api/v1"
 $shipperSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $carrierSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$adminSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
 function Initialize-Session($session) {
     Invoke-WebRequest "$origin/sanctum/csrf-cookie" -WebSession $session | Out-Null
