@@ -1,4 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { catalogApi } from '../catalog/catalogApi'
+import PhoneNumberField, { normalizePhoneNumber } from './PhoneNumberField'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { AxiosError } from 'axios'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Package, Truck } from 'lucide-react'
@@ -8,6 +11,10 @@ import logoLight from '../../assets/img/logo-light.png'
 
 export default function LoginPage() {
   const [login, setLogin] = useState('')
+  const [loginMode, setLoginMode] = useState<'phone' | 'email'>('phone')
+  const [phoneCountryIso2, setPhoneCountryIso2] = useState('AZ')
+  const [phoneError, setPhoneError] = useState('')
+  const countries = useQuery({ queryKey: ['catalog', 'countries'], queryFn: catalogApi.countries })
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const auth = useAuth()
@@ -22,8 +29,14 @@ export default function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const normalizedLogin = loginMode === 'phone' ? normalizePhoneNumber(login, phoneCountryIso2) : login.trim()
+    if (loginMode === 'phone' && !normalizedLogin) {
+      setPhoneError('Düzgün telefon nömrəsi daxil edin.')
+      return
+    }
+    setPhoneError('')
     try {
-      await loginMutation.mutateAsync({ login: login.trim(), password })
+      await loginMutation.mutateAsync({ login: normalizedLogin ?? login.trim(), password })
     } catch {
       // Mutation error is rendered below.
     }
@@ -60,13 +73,24 @@ export default function LoginPage() {
           <h2>Hesaba daxil olun</h2>
           <p className="auth-subtitle">Davam etmək üçün hesab məlumatlarınızı daxil edin.</p>
           <form className="auth-form" onSubmit={handleSubmit}>
-            <label className="auth-field">
-              <span>Telefon və ya e-poçt</span>
-              <div className="auth-input-wrap">
-                <Mail size={18} />
-                <input autoComplete="username" required value={login} onChange={(event) => setLogin(event.target.value)} placeholder="+994 50 000 00 00 və ya e-poçt" />
-              </div>
-            </label>
+            <div className="auth-login-method" role="group" aria-label="Giriş üsulu">
+              <button type="button" className={loginMode === 'phone' ? 'active' : ''} onClick={() => { setLoginMode('phone'); setLogin(''); setPhoneError('') }}>Telefon</button>
+              <button type="button" className={loginMode === 'email' ? 'active' : ''} onClick={() => { setLoginMode('email'); setLogin(''); setPhoneError('') }}>E-poçt</button>
+            </div>
+            {loginMode === 'phone' ? (
+              <label className="auth-field">
+                <span>Telefon nömrəsi</span>
+                <div className="auth-input-wrap auth-phone-input-wrap">
+                  <PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" placeholder="50 000 00 00" />
+                </div>
+                {(phoneError || countries.isError) && <small className="auth-error">{phoneError || 'Ölkə siyahısını yükləmək mümkün olmadı.'}</small>}
+              </label>
+            ) : (
+              <label className="auth-field">
+                <span>E-poçt</span>
+                <div className="auth-input-wrap"><Mail size={18} /><input type="email" autoComplete="username" required value={login} onChange={event => setLogin(event.target.value)} placeholder="name@example.com" /></div>
+              </label>
+            )}
             <label className="auth-field">
               <span>Şifrə</span>
               <div className="auth-input-wrap">
