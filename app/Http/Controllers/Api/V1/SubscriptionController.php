@@ -74,7 +74,7 @@ class SubscriptionController extends Controller
                 ->where('country_id', $data['country_id'])
                 ->where('is_active', 1)
                 ->lockForUpdate()
-                ->update(['is_active' => 0, 'updated_at' => now()]);
+                ->update(['is_active' => 0, 'effective_from' => DB::raw('effective_from'), 'updated_at' => now()]);
 
             $id = DB::table('subscription_plans')->insertGetId([
                 'kind' => $data['kind'],
