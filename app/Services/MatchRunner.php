@@ -23,7 +23,7 @@ class MatchRunner
 
     public function forOffer(int $offerId): int
     {
-        $o = DB::table('vehicle_offers as o')->join('vehicles as v', 'v.id', '=', 'o.vehicle_id')->where('o.id', $offerId)
+        $o = DB::table('vehicle_offers as o')->join('vehicles as v', 'v.id', '=', 'o.vehicle_id')->where('v.is_active', 1)->where('o.id', $offerId)
             ->select('o.*', 'v.capacity_kg', 'v.capacity_m3', 'v.vehicle_type_id', 'v.is_refrigerated')->first();
         if (!$o || $o->status !== 'active') { $this->clear('vehicle_offer_id', $offerId); return 0; }
         $loads = DB::table('loads')->whereIn('status', ['published', 'has_applications'])
