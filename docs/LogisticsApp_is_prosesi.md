@@ -263,13 +263,13 @@
 
 ### 8.1. Tariflər
 
-- [x] Daşıyıcı tarifinin ölkəyə görə müəyyənləşdirilməsi biznes qaydası təsdiqlənib.
-- [x] Azərbaycan üzrə nümunə tarif: 3.99 USD / maşın / ay.
-- [x] Türkiyə üzrə nümunə tarif: 4.99 USD / maşın / ay.
-- [x] Fərdi sürücünün tarifi onun qeydiyyatda göstərdiyi ölkəyə əsaslanır.
-- [x] Şirkət qeydiyyatı zamanı maşın sayı daxil edilir.
-- [x] Şirkət üçün aylıq baza məbləği: ölkə üzrə bir maşının tarifi × qeydiyyata alınmış maşın sayı.
-- [x] Promokod faiz endirimi ölkəyə uyğun baza tarifinə tətbiq edilir və şirkətin bütün maşınlarına şamil olunur.
+- [ ] Daşıyıcı tarifinin ölkəyə görə müəyyənləşdirilməsi biznes qaydası təsdiqlənib.
+- [ ] Azərbaycan üzrə nümunə tarif: 3.99 USD / maşın / ay.
+- [ ] Türkiyə üzrə nümunə tarif: 4.99 USD / maşın / ay.
+- [ ] Fərdi sürücünün tarifi onun qeydiyyatda göstərdiyi ölkəyə əsaslanır.
+- [ ] Şirkət qeydiyyatı zamanı maşın sayı daxil edilir.
+- [ ] Şirkət üçün aylıq baza məbləği: ölkə üzrə bir maşının tarifi × qeydiyyata alınmış maşın sayı.
+- [ ] Promokod faiz endirimi ölkəyə uyğun baza tarifinə tətbiq edilir və şirkətin bütün maşınlarına şamil olunur.
 - [ ] Promokodun etibarlılıq müddəti, istifadə limiti, bir şirkətə neçə dəfə tətbiqi və digər kampaniya kodları ilə birləşdirilməsi qaydaları admin tərəfindən idarə olunur.
 - [ ] Tarif və promokod hesablaması backend-də aparılır; frontend məbləği yalnız göstərir.
 - [ ] Abunəlik sifarişində tətbiq edilmiş tarif, maşın sayı, promokod, endirim faizi və yekun məbləğ snapshot kimi saxlanılır.
@@ -287,8 +287,8 @@
 
 ### 8.2. Daşıyıcı abunəliyi UI və API
 
-- [x] Bütün daşıyıcı növləri üçün növbəti ödəniş DB-də saxlanılan tarixə əsasən yoxlanmalıdır.
-- [x] Ödəniş vaxtı çatdıqda sistem qeydiyyatlı ödəniş vasitəsindən avtomatik tutulma başladır.
+- [ ] Bütün daşıyıcı növləri üçün növbəti ödəniş DB-də saxlanılan tarixə əsasən yoxlanmalıdır.
+- [ ] Ödəniş vaxtı çatdıqda sistem qeydiyyatlı ödəniş vasitəsindən avtomatik tutulma başladır.
 - [ ] Fərdi sürücü və şirkət üçün abunəlik hesablanması eyni ölkə-tarif qaydasından istifadə edir.
 - [ ] Şirkət abunəliyində maşın sayı və hər maşına düşən tarif ayrıca görünür.
 - [ ] Tətbiq edilmiş promokod və endirim hesablaması istifadəçiyə göstərilir.
