@@ -126,9 +126,12 @@ class SubscriptionController extends Controller
 
         $vehicles = DB::table('vehicles')->where('is_active', 1);
         if ($company) {
-            $vehicleCount = $vehicles->where('company_id', $company->id)->count();
+            $vehicleCount = $vehicles->where(function ($query) use ($company, $user) {
+                $query->where('company_id', $company->id)
+                    ->orWhere('user_id', $user->id);
+            })->count();
         } else {
-            $vehicleCount = $vehicles->where('user_id', $user->id)->whereNull('company_id')->count();
+            $vehicleCount = $vehicles->where('user_id', $user->id)->count();
         }
 
         if ($vehicleCount < 1) {
