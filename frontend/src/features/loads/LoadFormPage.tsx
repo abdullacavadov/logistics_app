@@ -57,13 +57,13 @@ export default function LoadFormPage() {
     if (!load) return
     setForm({
       title: load.title ?? '', description: load.description ?? '', cargo_type_id: String(load.cargo_type_id ?? ''),
-      from_country_id: String(load.from_country_id), from_location_id: String(load.from_location_id ?? ''), from_address: '',
-      to_country_id: String(load.to_country_id), to_location_id: String(load.to_location_id ?? ''), to_address: '',
+      from_country_id: String(load.from_country_id), from_location_id: String(load.from_location_id ?? ''), from_address: load.from_address ?? '',
+      to_country_id: String(load.to_country_id), to_location_id: String(load.to_location_id ?? ''), to_address: load.to_address ?? '',
       pickup_from: load.pickup_from ?? '', pickup_to: load.pickup_to ?? '', delivery_by: load.delivery_by ?? '',
       weight_kg: String(load.weight_kg ?? ''), volume_m3: String(load.volume_m3 ?? ''), pallets: String(load.pallets ?? ''),
       required_vehicle_type_id: String(load.required_vehicle_type_id ?? ''), needs_refrigeration: Boolean(load.needs_refrigeration),
       temp_min: String(load.temp_min ?? ''), temp_max: String(load.temp_max ?? ''), is_hazardous: Boolean(load.is_hazardous),
-      notes: '', price: String(load.price ?? ''), currency: load.currency ?? 'AZN',
+      notes: load.notes ?? '', price: String(load.price ?? ''), currency: load.currency ?? 'AZN',
       price_negotiable: Boolean(load.price_negotiable), publish: false,
     })
   }, [loadQuery.data])
