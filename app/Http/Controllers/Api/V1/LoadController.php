@@ -81,8 +81,20 @@ class LoadController extends Controller
         if (in_array($load->status, ['in_transit', 'completed', 'cancelled', 'archived'])) return $this->err('locked', 'Bu statusda elan dəyişdirilə bilməz', 409);
         $d = $r->validate($this->rules(true));
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
-        if (in_array($load->status, ['has_applications', 'agreed']) && array_intersect(array_keys($d), self::CRITICAL))
+        $changedCritical = [];
+        foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
+            $oldValue = $load->{$field} ?? null;
+            $newValue = $d[$field];
+            $same = ($oldValue === null || $newValue === null)
+                ? $oldValue === $newValue
+                : (is_numeric($oldValue) && is_numeric($newValue)
+                    ? (float) $oldValue === (float) $newValue
+                    : (string) $oldValue === (string) $newValue);
+            if (!$same) $changedCritical[] = $field;
+        }
+        if (in_array($load->status, ['has_applications', 'agreed']) && $changedCritical) {
             return $this->err('critical_locked', 'Müraciət daxil olduqdan sonra marşrut, tarix və yük parametrləri dəyişdirilə bilməz', 409);
+        }
         DB::table('loads')->where('id', $id)->update($d + ['updated_at' => now()]);
         $this->audit($r, 'load.update', $id, (array) $load, $d);
         $this->matcher->forLoad($id);
