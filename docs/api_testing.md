@@ -151,3 +151,30 @@ Müraciət yaratma endpoint-i aktiv daşıyıcı abunəliyi tələb edir. Test b
 4. /my/offers səhifəsində təklif yaradın, aktivləşdirin, redaktə edin və ləğv edin.
 5. İki ayrı istifadəçi sessiyası ilə sahiblik və rol məhdudiyyətlərini yoxlayın.
 6. Dark/light görünüş, mobil ölçülər və API xəta vəziyyətlərini yoxlayın.
+
+## 8. Abunəlik tarifi və administrator yoxlaması
+
+Administrator sessiyası ilə:
+
+~~~powershell
+$adminXsrf = Initialize-Session $adminSession
+Invoke-Api $adminSession $adminXsrf "/admin/subscription-plans"
+Invoke-Api $adminSession $adminXsrf "/admin/subscription-plans" "POST" @{
+    kind = "carrier"
+    country_id = 1
+    price = 12.50
+    currency = "AZN"
+    duration_months = 1
+}
+~~~
+
+Daşıyıcı sessiyası ilə:
+
+~~~powershell
+Invoke-Api $carrierSession $carrierXsrf "/my/subscription"
+Invoke-Api $carrierSession $carrierXsrf "/subscription/quote"
+~~~
+
+Admin testi üçün əvvəlcə admin rolu olan ayrıca test hesabı yaratmaq lazımdır. Tarif yazma endpoint-i yeni versiya yaradır və əvvəlki aktiv versiyanı deaktiv edir; bu əməliyyatı yalnız test bazasında edin. Daşıyıcı qiymət hesablaması aktiv vasitələrin sayını və istifadəçinin/şirkətin qeydiyyat ölkəsini əsas götürür.
+
+Birbank ödənişinin başlanması və avtomatik yenilənməsi hələ aktiv deyil. Promo kod endirimi də endirim qaydaları təsdiqlənənədək hesablanmır.
