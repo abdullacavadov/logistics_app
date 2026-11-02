@@ -155,10 +155,14 @@ Müraciət yaratma endpoint-i aktiv daşıyıcı abunəliyi tələb edir. Test b
 
 ## 8. Abunəlik tarifi və administrator yoxlaması
 
-Administrator sessiyası ilə:
+Administrator sessiyası ilə. Burada öz test administratorunuzun giriş məlumatlarını istifadə edin:
 
 ~~~powershell
 $adminXsrf = Initialize-Session $adminSession
+$adminLogin = Invoke-Api $adminSession $adminXsrf "/auth/login" "POST" @{
+    login = "ADMIN_PHONE_OR_EMAIL"
+    password = "ADMIN_TEST_PASSWORD"
+}
 Invoke-Api $adminSession $adminXsrf "/admin/subscription-plans"
 Invoke-Api $adminSession $adminXsrf "/admin/subscription-plans" "POST" @{
     kind = "carrier"
