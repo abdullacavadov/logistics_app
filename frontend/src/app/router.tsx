@@ -6,6 +6,8 @@ import RegisterPage from '../features/auth/RegisterPage'
 import RequireAuth from '../features/auth/RequireAuth'
 import MyLoadsPage from '../features/loads/MyLoadsPage'
 import LoadFormPage from '../features/loads/LoadFormPage'
+import VehiclesPage from '../features/vehicles/VehiclesPage'
+import OffersPage from '../features/offers/OffersPage'
 
 export function AppRouter() {
   return (
@@ -15,6 +17,8 @@ export function AppRouter() {
       <Route path="/my/loads" element={<RequireAuth><MyLoadsPage /></RequireAuth>} />
       <Route path="/loads/new" element={<RequireAuth><LoadFormPage /></RequireAuth>} />
       <Route path="/loads/:id/edit" element={<RequireAuth><LoadFormPage /></RequireAuth>} />
+      <Route path="/my/vehicles" element={<RequireAuth><VehiclesPage /></RequireAuth>} />
+      <Route path="/my/offers" element={<RequireAuth><OffersPage /></RequireAuth>} />
       {Object.values(pagePaths).filter((path) => path !== '/my/loads').map((path) => (
         <Route key={path} path={path} element={<MarketplacePage />} />
       ))}
