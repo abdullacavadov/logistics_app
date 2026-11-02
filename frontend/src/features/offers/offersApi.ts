@@ -32,8 +32,8 @@ export interface OfferPayload {
 
 export const offersApi = {
   async mine(): Promise<VehicleOffer[]> {
-    const { data } = await api.get<{ data: { data: VehicleOffer[] } }>('/my/offers')
-    return data.data.data
+    const { data } = await api.get<{ data: VehicleOffer[] }>('/my/offers')
+    return data.data
   },
   async create(payload: OfferPayload): Promise<VehicleOffer> {
     const { data } = await api.post<{ data: VehicleOffer }>('/offers', payload)
