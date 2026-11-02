@@ -29,7 +29,7 @@ export interface Load {
   temp_max: number | string | null
   is_hazardous: boolean
   price: number | string | null
-  application: 'web' | 'whatsapp';
+  applications: 'web' | 'whatsapp';
   currency: string | null
   price_negotiable: boolean
   status: LoadStatus
