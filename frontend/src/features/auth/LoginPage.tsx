@@ -24,12 +24,6 @@ export default function LoginPage() {
   const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
 
   useEffect(() => {
-    if (countries.data?.length && !countries.data.some(country => country.iso2 === phoneCountryIso2)) {
-      setPhoneCountryIso2(countries.data[0].iso2)
-    }
-  }, [countries.data, phoneCountryIso2])
-
-  useEffect(() => {
     if (auth.data?.data.user) navigate(destination || '/', { replace: true })
   }, [auth.data, destination, navigate])
 
@@ -87,7 +81,7 @@ export default function LoginPage() {
               <label className="auth-field">
                 <span>Telefon nömrəsi</span>
                 <div className="auth-input-wrap auth-phone-input-wrap">
-                  <PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" placeholder="50 000 00 00" />
+                  <PhoneNumberField countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" placeholder="50 000 00 00" />
                 </div>
                 {(phoneError || countries.isError) && <small className="auth-error">{phoneError || 'Ölkə siyahısını yükləmək mümkün olmadı.'}</small>}
               </label>
