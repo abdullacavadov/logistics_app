@@ -37,6 +37,7 @@ class VehicleOfferController extends Controller
             'available_from' => 'required|date|after_or_equal:today', 'available_to' => 'required|date|after_or_equal:available_from',
             'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'terms' => 'nullable|string|max:3000', 'activate' => 'boolean',
         ]);
+        if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         if (!DB::table('vehicles')->where(['id' => $d['vehicle_id'], 'user_id' => $r->user()->id, 'is_active' => 1])->exists()) return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil', 403);
         $status = !empty($d['activate']) ? 'active' : 'draft'; unset($d['activate']);
         if ($status === 'active' && $this->conflicts($d['vehicle_id'], $d['available_from'], $d['available_to'], null))
@@ -68,6 +69,7 @@ class VehicleOfferController extends Controller
             'terms' => 'nullable|string|max:3000',
         ]);
 
+        if (!$this->validLocationSelection($data, $o)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         $vehicleId = (int) ($data['vehicle_id'] ?? $o->vehicle_id);
         if (!DB::table('vehicles')->where([
             'id' => $vehicleId,
@@ -129,6 +131,25 @@ class VehicleOfferController extends Controller
             ->select('m.score', 'm.reasons', 'l.id as load_id', 'l.title', 'l.from_country_id', 'l.to_country_id', 'l.pickup_from', 'l.pickup_to', 'l.weight_kg', 'l.price', 'l.currency')->get()
             ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
         return response()->json(['data' => $rows]);
+    }
+
+    private function validLocationSelection(array $data, ?object $existing = null): bool
+    {
+        foreach ([
+            ['country' => 'from_country_id', 'location' => 'from_location_id'],
+            ['country' => 'to_country_id', 'location' => 'to_location_id'],
+        ] as $pair) {
+            $locationId = $data[$pair['location']] ?? ($existing->{$pair['location']} ?? null);
+            $countryId = $data[$pair['country']] ?? ($existing->{$pair['country']} ?? null);
+            if ($locationId && (!$countryId || !DB::table('locations')->where([
+                'id' => $locationId,
+                'country_id' => $countryId,
+            ])->exists())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function carrierOnly(Request $r)
