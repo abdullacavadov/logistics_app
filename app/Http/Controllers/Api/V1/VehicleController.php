@@ -24,7 +24,7 @@ class VehicleController extends Controller
     public function update(Request $r, int $id)
     {
         if (!DB::table('vehicles')->where(['id' => $id, 'user_id' => $r->user()->id])->exists()) return $this->err('not_found', 'Tapılmadı', 404);
-        DB::table('vehicles')->where('id', $id)->update($r->validate($this->rules(true)) + ['updated_at' => now()]);
+        $data = $r->validate($this->rules(true));\n        if (!empty($data['company_id']) && !DB::table('companies')->where(['id' => $data['company_id'], 'user_id' => $r->user()->id])->exists()) return $this->err('forbidden_company', 'Şirkət sizə məxsus deyil', 403);\n        DB::table('vehicles')->where('id', $id)->update($data + ['updated_at' => now()]);
         return response()->json(['data' => DB::table('vehicles')->find($id)]);
     }
 
