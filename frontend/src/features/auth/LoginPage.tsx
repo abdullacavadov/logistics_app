@@ -1,6 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { catalogApi } from '../catalog/catalogApi'
 import PhoneNumberField, { normalizePhoneNumber } from './PhoneNumberField'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { AxiosError } from 'axios'
@@ -14,7 +12,6 @@ export default function LoginPage() {
   const [loginMode, setLoginMode] = useState<'phone' | 'email'>('phone')
   const [phoneCountryIso2, setPhoneCountryIso2] = useState('AZ')
   const [phoneError, setPhoneError] = useState('')
-  const countries = useQuery({ queryKey: ['catalog', 'countries'], queryFn: catalogApi.countries })
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const auth = useAuth()
@@ -81,9 +78,9 @@ export default function LoginPage() {
               <label className="auth-field">
                 <span>Telefon nömrəsi</span>
                 <div className="auth-input-wrap auth-phone-input-wrap">
-                  <PhoneNumberField countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" placeholder="50 000 00 00" />
+                  <PhoneNumberField countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" />
                 </div>
-                {(phoneError || countries.isError) && <small className="auth-error">{phoneError || 'Ölkə siyahısını yükləmək mümkün olmadı.'}</small>}
+                {phoneError && <small className="auth-error">{phoneError}</small>}
               </label>
             ) : (
               <label className="auth-field">
