@@ -1,15 +1,12 @@
 <?php
 
-namespace App\\Http\\Controllers\\Api\\V1;
+namespace App\Http\Controllers\Api\V1;
 
-use App\\Http\\Controllers\\Controller;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-/**
- * Read-only reference data for public and authenticated forms.
- * The column names are defined by database/db.sql.
- */
+/** Read-only reference data sourced from the canonical database schema. */
 class CatalogController extends Controller
 {
     public function countries()
@@ -35,7 +32,8 @@ class CatalogController extends Controller
             ->where('is_active', 1);
 
         if (!empty($data['search'])) {
-            $query->where('name', 'like', '%' . addcslashes($data['search'], '%_\\\\') . '%');
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $data['search']);
+            $query->where('name', 'like', '%' . $search . '%');
         }
 
         return response()->json($query->orderBy('name')
