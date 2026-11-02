@@ -118,7 +118,8 @@ export default function MyLoadsPage() {
                     <div className="my-load-card-aside">
                       <small>Göstərilən qiymət</small>
                       <strong>{load.price === null ? 'Razılaşma ilə' : `${Number(load.price).toLocaleString('az-AZ')} ${load.currency ?? ''}`}</strong>
-                      <div className="my-load-actions">\n                        <button className="outline-action" onClick={() => navigate(`/loads/${load.id}/edit`)}>Redaktə et</button>
+                      <div className="my-load-actions">
+                        <button className="outline-action" onClick={() => navigate(`/loads/${load.id}/edit`)}>Redaktə et</button>
                         {load.status === 'draft' && <button className="outline-action" disabled={publish.isPending} onClick={() => publish.mutate(load.id)}>Dərc et</button>}
                         {['draft', 'published', 'has_applications', 'agreed'].includes(load.status) && <button className="outline-action is-danger" disabled={cancel.isPending} onClick={() => cancel.mutate(load.id)}>Ləğv et</button>}
                         {['draft', 'published', 'completed', 'cancelled'].includes(load.status) && <button className="icon-button my-load-archive" title="Arxivlə" aria-label="Arxivlə" disabled={archive.isPending} onClick={() => archive.mutate(load.id)}><ArrowDownToLine size={17} /></button>}
