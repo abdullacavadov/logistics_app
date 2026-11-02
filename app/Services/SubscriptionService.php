@@ -26,7 +26,10 @@ class SubscriptionService
             $p = DB::table('payments')->where('id', $paymentId)->lockForUpdate()->first();
             if (!$p || $p->period_applied) return false;
             $sub = DB::table('subscriptions')->where('id', $p->subscription_id)->lockForUpdate()->first();
+            if (!$sub) return false;
+
             $plan = DB::table('subscription_plans')->where('id', $sub->plan_id)->first();
+            if (!$plan) return false;
             $base = ($sub->ends_at && $sub->ends_at > now()) ? \Carbon\Carbon::parse($sub->ends_at) : now();
             $ends = $base->copy()->addMonths($plan->duration_months);
             DB::table('subscriptions')->where('id', $sub->id)->update([
