@@ -29,12 +29,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
-    if (countries.data?.length && !countries.data.some(country => country.iso2 === phoneCountryIso2)) {
-      setPhoneCountryIso2(countries.data[0].iso2)
-    }
-  }, [countries.data, phoneCountryIso2])
-
-  useEffect(() => {
     if (auth.data?.data.user) navigate('/', { replace: true })
   }, [auth.data, navigate])
 
@@ -99,7 +93,7 @@ export default function RegisterPage() {
             <div className="auth-form-row">
               <label className="auth-field">
                 <span>Telefon <small>(ən azı biri tələb olunur)</small></span>
-                <div className="auth-input-wrap auth-phone-input-wrap"><PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={phone} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setPhone(''); setPhoneError('') }} onChange={value => { setPhone(value); setPhoneError('') }} placeholder="50 000 00 00" /></div>
+                <div className="auth-input-wrap auth-phone-input-wrap"><PhoneNumberField countryIso2={phoneCountryIso2} value={phone} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setPhone(''); setPhoneError('') }} onChange={value => { setPhone(value); setPhoneError('') }} placeholder="50 000 00 00" /></div>
                 {phoneError && <small className="auth-error">{phoneError}</small>}
               </label>
               <label className="auth-field">
