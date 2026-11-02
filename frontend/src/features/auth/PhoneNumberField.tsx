@@ -67,11 +67,11 @@ export default function PhoneNumberField({
   const dynamicPlaceholder = exampleNumber ?? placeholder ?? 'Telefon nömrəsi'
 
   // Keep only national digits in state; formatting is derived from the selected country.
-  const nationalDigits = value.replace(/\\D/g, '')
+  const nationalDigits = value.replace(/\D/g, '')
   const formatted = code && nationalDigits ? new AsYouType(code).input(nationalDigits) : nationalDigits
 
   function handleInput(nextValue: string) {
-    const digits = nextValue.replace(/\\D/g, '')
+    const digits = nextValue.replace(/\D/g, '')
     if (!code) {
       onChange(digits)
       return
