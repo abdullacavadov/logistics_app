@@ -1,4 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { catalogApi } from '../catalog/catalogApi'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Phone, UserRound } from 'lucide-react'
 import type { AxiosError } from 'axios'
@@ -17,6 +19,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
+  const countries = useQuery({ queryKey: ['catalog', 'countries'], queryFn: catalogApi.countries })
+  const [countryId, setCountryId] = useState('')
   const [role, setRole] = useState<RegisterPayload['role']>('shipper')
   const [terms, setTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -33,7 +37,7 @@ export default function RegisterPage() {
       email: email.trim() || undefined,
       password,
       password_confirmation: passwordConfirmation,
-      country_id: 1,
+      country_id: Number(countryId),
       role,
       terms,
     }
@@ -89,9 +93,11 @@ export default function RegisterPage() {
             </div>
             <label className="auth-field">
               <span>Qeydiyyat ölkəsi</span>
-              <select className="auth-select" value="1" disabled aria-label="Qeydiyyat ölkəsi">
-                <option value="1">Azərbaycan</option>
+              <select className="auth-select" value={countryId} onChange={e => setCountryId(e.target.value)} required disabled={countries.isLoading || countries.isError}>
+                <option value="">{countries.isLoading ? 'Ölkələr yüklənir…' : 'Ölkə seçin'}</option>
+                {(countries.data ?? []).map(country => <option key={country.id} value={country.id}>{country.name}</option>)}
               </select>
+              {countries.isError && <small className="auth-error">Ölkə siyahısını yükləmək mümkün olmadı. Səhifəni yeniləyin.</small>}
             </label>
             <label className="auth-field">
               <span>Hesab növü</span>
@@ -116,7 +122,7 @@ export default function RegisterPage() {
               <span>Qeydiyyatdan keçməklə <Link to="/terms" target="_blank">İstifadə şərtlərini</Link> qəbul edirəm.</span>
             </label>
             {errorMessage && <p className="auth-error" role="alert">{errorMessage}</p>}
-            <button className="auth-submit" type="submit" disabled={registerMutation.isPending || (!phone.trim() && !email.trim())}>
+            <button className="auth-submit" type="submit" disabled={registerMutation.isPending || (!phone.trim() && !email.trim()) || !countryId}>
               {registerMutation.isPending ? 'Hesab yaradılır…' : 'Qeydiyyatı tamamla'} <ArrowRight size={18} />
             </button>
           </form>

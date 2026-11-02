@@ -52,7 +52,7 @@ export default function MarketplacePage() {
                     ? "Razılaşma ilə"
                     : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
             application:
-                load.application === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
+                load.applications === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
             date: formatLoadDate(load.created_at),
             source: "LogisticsApp",
             kind: "load",

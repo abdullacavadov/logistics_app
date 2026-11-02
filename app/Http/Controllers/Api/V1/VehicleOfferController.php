@@ -37,6 +37,7 @@ class VehicleOfferController extends Controller
             'available_from' => 'required|date|after_or_equal:today', 'available_to' => 'required|date|after_or_equal:available_from',
             'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'terms' => 'nullable|string|max:3000', 'activate' => 'boolean',
         ]);
+        if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         if (!DB::table('vehicles')->where(['id' => $d['vehicle_id'], 'user_id' => $r->user()->id, 'is_active' => 1])->exists()) return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil', 403);
         $status = !empty($d['activate']) ? 'active' : 'draft'; unset($d['activate']);
         if ($status === 'active' && $this->conflicts($d['vehicle_id'], $d['available_from'], $d['available_to'], null))
@@ -46,10 +47,64 @@ class VehicleOfferController extends Controller
         return response()->json(['data' => DB::table('vehicle_offers')->find($id)], 201);
     }
 
+    public function update(Request $r, int $id)
+    {
+        if ($e = $this->carrierOnly($r)) return $e;
+        $o = $this->owned($r, $id);
+        if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
+        if (!in_array($o->status, ['draft', 'active'])) {
+            return $this->err('locked', 'Bu statusda təklif dəyişdirilə bilməz', 409);
+        }
+
+        $data = $r->validate([
+            'vehicle_id' => 'sometimes|required|integer|exists:vehicles,id',
+            'from_country_id' => 'sometimes|required|exists:countries,id',
+            'from_location_id' => 'nullable|exists:locations,id',
+            'to_country_id' => 'sometimes|required|exists:countries,id',
+            'to_location_id' => 'nullable|exists:locations,id',
+            'available_from' => 'sometimes|required|date',
+            'available_to' => 'sometimes|required|date',
+            'price' => 'nullable|numeric|min:0',
+            'currency' => 'required_with:price|nullable|string|size:3',
+            'terms' => 'nullable|string|max:3000',
+        ]);
+
+        if (!$this->validLocationSelection($data, $o)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
+        $vehicleId = (int) ($data['vehicle_id'] ?? $o->vehicle_id);
+        if (!DB::table('vehicles')->where([
+            'id' => $vehicleId,
+            'user_id' => $r->user()->id,
+            'is_active' => 1,
+        ])->exists()) {
+            return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil və ya aktiv deyil', 403);
+        }
+
+        $from = $data['available_from'] ?? $o->available_from;
+        $to = $data['available_to'] ?? $o->available_to;
+        if ($to < $from) return $this->err('invalid_dates', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz', 422);
+        if ($o->status === 'active' && $this->conflicts($vehicleId, $from, $to, $id)) {
+            return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
+        }
+
+        DB::table('vehicle_offers')->where('id', $id)->update($data + [
+            'vehicle_id' => $vehicleId,
+            'updated_at' => now(),
+        ]);
+        $this->matcher->forOffer($id);
+
+        return response()->json(['data' => DB::table('vehicle_offers')->find($id)]);
+    }
+
     public function activate(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if ($o->status !== 'draft') return $this->err('bad_status', 'Yalnız qaralama aktivləşdirilə bilər', 409);
+        if (!DB::table('vehicles')->where([
+            'id' => $o->vehicle_id,
+            'user_id' => $r->user()->id,
+            'is_active' => 1,
+        ])->exists()) return $this->err('inactive_vehicle', 'Aktiv nəqliyyat vasitəsi seçilməlidir', 422);
         if ($o->available_to < date('Y-m-d')) return $this->err('expired', 'Təklifin müddəti bitib', 422);
         if ($this->conflicts($o->vehicle_id, $o->available_from, $o->available_to, $id)) return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'active', 'updated_at' => now()]);
@@ -59,6 +114,7 @@ class VehicleOfferController extends Controller
 
     public function cancel(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if (!in_array($o->status, ['draft', 'active', 'applied'])) return $this->err('bad_status', 'Bu statusdan ləğv mümkün deyil', 409);
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'cancelled', 'updated_at' => now()]);
@@ -69,11 +125,41 @@ class VehicleOfferController extends Controller
     /** Daşıyıcı: təklifə uyğun yüklər (bal və səbəblərlə). */
     public function matches(Request $r, int $id)
     {
+        if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         $rows = DB::table('matches as m')->join('loads as l', 'l.id', '=', 'm.load_id')->where('m.vehicle_offer_id', $id)->orderByDesc('m.score')
             ->select('m.score', 'm.reasons', 'l.id as load_id', 'l.title', 'l.from_country_id', 'l.to_country_id', 'l.pickup_from', 'l.pickup_to', 'l.weight_kg', 'l.price', 'l.currency')->get()
             ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
         return response()->json(['data' => $rows]);
+    }
+
+    private function validLocationSelection(array $data, ?object $existing = null): bool
+    {
+        foreach ([
+            ['country' => 'from_country_id', 'location' => 'from_location_id'],
+            ['country' => 'to_country_id', 'location' => 'to_location_id'],
+        ] as $pair) {
+            $locationId = array_key_exists($pair['location'], $data) ? $data[$pair['location']] : ($existing->{$pair['location']} ?? null);
+            $countryId = array_key_exists($pair['country'], $data) ? $data[$pair['country']] : ($existing->{$pair['country']} ?? null);
+            if ($locationId && (!$countryId || !DB::table('locations')->where([
+                'id' => $locationId,
+                'country_id' => $countryId,
+            ])->exists())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function carrierOnly(Request $r)
+    {
+        return DB::table('user_roles')->where([
+            'user_id' => $r->user()->id,
+            'role' => 'carrier',
+        ])->exists()
+            ? null
+            : $this->err('not_carrier', 'Daşıyıcı hüququ lazımdır', 403);
     }
 
     private function conflicts(int $vehicleId, string $from, string $to, ?int $exceptId): bool
