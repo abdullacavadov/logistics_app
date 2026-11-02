@@ -263,6 +263,17 @@
 
 ### 8.1. Tariflər
 
+- [x] Daşıyıcı tarifinin ölkəyə görə müəyyənləşdirilməsi biznes qaydası təsdiqlənib.
+- [x] Azərbaycan üzrə nümunə tarif: 3.99 USD / maşın / ay.
+- [x] Türkiyə üzrə nümunə tarif: 4.99 USD / maşın / ay.
+- [x] Fərdi sürücünün tarifi onun qeydiyyatda göstərdiyi ölkəyə əsaslanır.
+- [x] Şirkət qeydiyyatı zamanı maşın sayı daxil edilir.
+- [x] Şirkət üçün aylıq baza məbləği: ölkə üzrə bir maşının tarifi × qeydiyyata alınmış maşın sayı.
+- [x] Promokod faiz endirimi ölkəyə uyğun baza tarifinə tətbiq edilir və şirkətin bütün maşınlarına şamil olunur.
+- [ ] Promokodun etibarlılıq müddəti, istifadə limiti, bir şirkətə neçə dəfə tətbiqi və digər kampaniya kodları ilə birləşdirilməsi qaydaları admin tərəfindən idarə olunur.
+- [ ] Tarif və promokod hesablaması backend-də aparılır; frontend məbləği yalnız göstərir.
+- [ ] Abunəlik sifarişində tətbiq edilmiş tarif, maşın sayı, promokod, endirim faizi və yekun məbləğ snapshot kimi saxlanılır.
+- [ ] Maşın sayı sonradan dəyişdikdə dərhal prorata/əlavə ödəniş, növbəti dövrə tətbiq və ya başqa davranış biznes qaydası kimi müəyyənləşdirilir.
 - [ ] Daşıyıcı abunəliyi.
 - [ ] Biznes məkanı abunəliyi — yalnız ödəniş tələb edilən hallarda.
 - [ ] Tarif ölkəyə bağlanır.
@@ -276,6 +287,15 @@
 
 ### 8.2. Daşıyıcı abunəliyi UI və API
 
+- [x] Bütün daşıyıcı növləri üçün növbəti ödəniş DB-də saxlanılan tarixə əsasən yoxlanmalıdır.
+- [x] Ödəniş vaxtı çatdıqda sistem qeydiyyatlı ödəniş vasitəsindən avtomatik tutulma başladır.
+- [ ] Fərdi sürücü və şirkət üçün abunəlik hesablanması eyni ölkə-tarif qaydasından istifadə edir.
+- [ ] Şirkət abunəliyində maşın sayı və hər maşına düşən tarif ayrıca görünür.
+- [ ] Tətbiq edilmiş promokod və endirim hesablaması istifadəçiyə göstərilir.
+- [ ] Ödəniş cədvəli DB-də next_payment_at (və ya mövcud sxemdəki ekvivalent sahə) əsasında idarə olunur; faktiki sütun adı database/db.sql yoxlanıldıqdan sonra seçilir.
+- [ ] Vaxtı çatmış ödənişlər scheduler/queue vasitəsilə emal edilir; təkrar işə düşmə idempotent qorunur.
+- [ ] Ödəniş uğurlu olduqda növbəti ödəniş tarixi yeni billing dövrünə keçirilir.
+- [ ] Ödəniş uğursuz olduqda abunəlik və yenidən cəhd qaydası tətbiq edilir; eyni dövr üçün təkrar tutulma yaranmır.
 - [ ] Tariflər səhifəsi.
 - [ ] Cari abunəlik statusu.
 - [ ] Başlanğıc/bitmə və növbəti ödəniş tarixi.
@@ -289,6 +309,11 @@
 
 - [ ] Birbank-ın rəsmi inteqrasiya sənədləri və merchant şərtləri əldə edilib.
 - [ ] Təkrarlanan aylıq ödəniş dəstəyi təsdiqlənib.
+- [ ] Bütün daşıyıcı növləri üçün recurring charge DB-də saxlanılan növbəti ödəniş tarixinə görə başladılır.
+- [ ] Ödəniş başlamazdan əvvəl server DB-də abunəlik statusunu, next_payment_at tarixini, ölkə tarifini, maşın sayını və tətbiq edilmiş endirimi yenidən yoxlayır.
+- [ ] Kartdan tutulacaq yekun məbləğ serverdə yenidən hesablanır; brauzerdən gələn məbləğə etibar edilmir.
+- [ ] Kartın özü deyil, yalnız provayderin təhlükəsiz tokeni/referansı saxlanılır.
+- [ ] Hər billing dövrü üçün unikal idempotency açarı və ödəniş qeydi yaradılır.
 - [ ] Təkrar ödəniş razılığı və token mexanizmi təsdiqlənib.
 - [ ] Kart məlumatları platformada saxlanılmır.
 - [ ] Backend ödəniş sifarişi yaradır.
@@ -728,6 +753,11 @@
 - [ ] Müraciət gəldikdən sonra hansı yük sahələri dəyişdirilə bilər?
 - [ ] Razılaşma hansı əməliyyatla hüquqi/əməli status alır?
 - [ ] Birbank recurring payment/token funksiyasını bu merchant hesabı dəstəkləyirmi?
+- [ ] Ölkə tariflərinin tam siyahısı, valyutası və qüvvəyə minmə tarixləri hansılardır? (Azərbaycan 3.99 USD/maşın/ay, Türkiyə 4.99 USD/maşın/ay ilkin tarif nümunələridir.)
+- [ ] Şirkət maşın sayını artırdıqda/azaltdıqda dəyişiklik cari dövrə, yoxsa növbəti ödənişə tətbiq olunur?
+- [ ] Promokodun maksimum endirim faizi, son istifadə tarixi, istifadə limiti və təkrar tətbiq qaydası nədir?
+- [ ] Promokod yalnız ilk ödənişə, yoxsa ləğv edilənədək bütün təkrarlanan ödənişlərə tətbiq olunur?
+- [ ] Uğursuz avtomatik tutulmada retry intervalı, grace period və bildiriş qaydası nədir?
 - [ ] Birbank dəstəkləmirsə, əl ilə aylıq ödənişə keçid qəbul edilirmi?
 - [ ] Abunəlik üçün güzəşt müddəti varmı?
 - [ ] Uğursuz ödənişlər üçün retry cədvəli nədir?
