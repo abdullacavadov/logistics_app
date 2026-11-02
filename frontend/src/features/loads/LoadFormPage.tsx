@@ -135,7 +135,7 @@ export default function LoadFormPage() {
                 </section>
                 <section className="data-form-section"><h3>Marşrut</h3>
                   <div className="data-form-grid">
-                    <label className="data-field"><span>Yükləmə ölkəsi *</span><select required value={form.from_country_id} onChange={e => { set('from_country_id', e.target.value); set('from_location_id', '') }}><option value="">Ölkə seçin</option>{(countries.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+                    <label className="data-field"><span>Yükləmə ölkəsi *</span><select required value={form.from_country_id} onChange={e => { const selected = countries.data?.find(country => country.id === Number(e.target.value)); set('from_country_id', e.target.value); set('from_location_id', ''); if (!form.price && selected?.default_currency) set('currency', selected.default_currency) }}><option value="">Ölkə seçin</option>{(countries.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
                     <label className="data-field"><span>Yükləmə şəhəri</span><select value={form.from_location_id} onChange={e => set('from_location_id', e.target.value)} disabled={!form.from_country_id}><option value="">Şəhər seçin</option>{(fromLocations.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
                     <label className="data-field data-field-wide"><span>Yükləmə ünvanı</span><input maxLength={255} value={form.from_address} onChange={e => set('from_address', e.target.value)} /></label>
                     <label className="data-field"><span>Çatdırılma ölkəsi *</span><select required value={form.to_country_id} onChange={e => { set('to_country_id', e.target.value); set('to_location_id', '') }}><option value="">Ölkə seçin</option>{(countries.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
@@ -160,7 +160,7 @@ export default function LoadFormPage() {
                 <section className="data-form-section"><h3>Qiymət və dərc</h3>
                   <div className="data-form-grid">
                     <label className="data-field"><span>Qiymət</span><input type="number" min="0" step="0.01" value={form.price} onChange={e => set('price', e.target.value)} placeholder="Boş saxlanıla bilər" /></label>
-                    <label className="data-field"><span>Valyuta</span><select value={form.currency} onChange={e => set('currency', e.target.value)}><option value="AZN">AZN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="TRY">TRY</option><option value="GEL">GEL</option><option value="RUB">RUB</option></select></label>
+                    <label className="data-field"><span>Valyuta</span><select value={form.currency} onChange={e => set('currency', e.target.value)}>{Array.from(new Set([form.currency, ...(countries.data ?? []).flatMap(country => country.default_currency ? [country.default_currency] : [])])).map(currency => <option key={currency} value={currency}>{currency}</option>)}</select></label>
                   </div>
                   <div className="data-checkbox-row"><label><input type="checkbox" checked={form.price_negotiable} onChange={e => set('price_negotiable', e.target.checked)} /> Qiymət müzakirə oluna bilər</label>{!isEditing && <label><input type="checkbox" checked={form.publish} onChange={e => set('publish', e.target.checked)} /> Yadda saxladıqdan sonra dərc et</label>}</div>
                 </section>
