@@ -15,8 +15,14 @@ export interface Load {
   cargo_type_id: number | null
   from_country_id: number
   from_location_id: number | null
+  from_address?: string | null
+  from_lat?: number | string | null
+  from_lng?: number | string | null
   to_country_id: number
   to_location_id: number | null
+  to_address?: string | null
+  to_lat?: number | string | null
+  to_lng?: number | string | null
   pickup_from: string
   pickup_to: string | null
   delivery_by: string | null
@@ -28,8 +34,9 @@ export interface Load {
   temp_min: number | string | null
   temp_max: number | string | null
   is_hazardous: boolean
+  notes?: string | null
   price: number | string | null
-  application: 'web' | 'whatsapp';
+  applications: 'web' | 'whatsapp';
   currency: string | null
   price_negotiable: boolean
   status: LoadStatus

@@ -65,7 +65,10 @@ class LoadController extends Controller
         if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'shipper'])->exists())
             return $this->err('not_shipper', 'Yük elanı yaratmaq üçün yük sahibi hüququ lazımdır', 403); // ödəniş tələb olunmur (§2.2)
         $d = $r->validate($this->rules());
+        if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';
+        // Required by the canonical loads schema; the channel is selected server-side.
+        $d['applications'] = 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
         if ($d['status'] === 'published') $this->matcher->forLoad($id);
@@ -78,9 +81,24 @@ class LoadController extends Controller
         if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if (in_array($load->status, ['in_transit', 'completed', 'cancelled', 'archived'])) return $this->err('locked', 'Bu statusda elan dəyişdirilə bilməz', 409);
         $d = $r->validate($this->rules(true));
+        if (!$this->validLocationSelection($d, $load)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
-        if (in_array($load->status, ['has_applications', 'agreed']) && array_intersect(array_keys($d), self::CRITICAL))
+        $changedCritical = [];
+        foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
+            $oldValue = $load->{$field} ?? null;
+            $newValue = $d[$field];
+            $same = in_array($field, ['needs_refrigeration', 'is_hazardous'], true)
+                ? (bool) $oldValue === (bool) $newValue
+                : (($oldValue === null || $newValue === null)
+                    ? $oldValue === $newValue
+                    : (is_numeric($oldValue) && is_numeric($newValue)
+                        ? (float) $oldValue === (float) $newValue
+                        : (string) $oldValue === (string) $newValue));
+            if (!$same) $changedCritical[] = $field;
+        }
+        if (in_array($load->status, ['has_applications', 'agreed']) && $changedCritical) {
             return $this->err('critical_locked', 'Müraciət daxil olduqdan sonra marşrut, tarix və yük parametrləri dəyişdirilə bilməz', 409);
+        }
         DB::table('loads')->where('id', $id)->update($d + ['updated_at' => now()]);
         $this->audit($r, 'load.update', $id, (array) $load, $d);
         $this->matcher->forLoad($id);
@@ -134,6 +152,25 @@ class LoadController extends Controller
     {
         $l = DB::table('loads')->where('id', $id)->where('user_id', $r->user()->id)->first();
         return $l ?: $this->err('not_found', 'Elan tapılmadı', 404);
+    }
+
+    private function validLocationSelection(array $data, ?object $existing = null): bool
+    {
+        foreach ([
+            ['country' => 'from_country_id', 'location' => 'from_location_id'],
+            ['country' => 'to_country_id', 'location' => 'to_location_id'],
+        ] as $pair) {
+            $locationId = array_key_exists($pair['location'], $data) ? $data[$pair['location']] : ($existing->{$pair['location']} ?? null);
+            $countryId = array_key_exists($pair['country'], $data) ? $data[$pair['country']] : ($existing->{$pair['country']} ?? null);
+            if ($locationId && (!$countryId || !DB::table('locations')->where([
+                'id' => $locationId,
+                'country_id' => $countryId,
+            ])->exists())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function rules(bool $partial = false): array

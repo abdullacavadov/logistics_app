@@ -7,3 +7,5 @@
 6. Yük elanına müraciətdən sonra kritik sahələrin dəyişdirilməsi qaydası (§5.4)?
 7. Eyni daşıyıcının eyni yükə rədd edildikdən sonra təkrar müraciəti (§8.2)? Hazırda: pending/accepted varsa 409.
 8. Google Play / Apple Developer hesabları kimdə olacaq (§13.3)?
+
+9. Promo kodun endirim tipi və tətbiq qaydası nədir (§9.6)? Faiz, sabit məbləğ, istifadə limiti, bitmə tarixi və birləşdirilmə qaydası dəqiqləşməyib. Bu qərarlar və DB strukturu olmadan promo mexanizmi aktiv edilməməlidir.

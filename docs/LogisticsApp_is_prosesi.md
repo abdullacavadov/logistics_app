@@ -819,3 +819,25 @@ Hər yeni tapşırıq üçün aşağıdakı bloku doldur:
 **Qəbul tarixi:** `...`
 
 > Bir tapşırıq yalnız onun bütün alt işləri və qəbul meyarları yoxlanıldıqdan sonra `[x]` edilir. PR açılması və ya kodun yazılması avtomatik olaraq tamamlanma demək deyil.
+
+---
+
+## 2026-11-02 — Əsas workflow implementasiyası
+
+Aşağıdakı funksiyalar feature/complete-core-workflows branch-ində implementasiya edilib. Bu bəndlər qəsdən [ ] saxlanılır: build, avtomatlaşdırılmış test və real istifadəçi qəbul sınaqları hələ aparılmayıb. Yalnız həmin yoxlamalardan sonra [x] edilməlidir.
+
+- [ ] Ölkə, şəhər, yük kateqoriyası və nəqliyyat növü kataloq API-ləri.
+- [ ] Qeydiyyat formasında ölkələrin DB kataloqundan seçilməsi.
+- [ ] Yük elanı yaratma, redaktə, qaralama və dərc frontend axını.
+- [ ] Nəqliyyat vasitəsi CRUD frontend axını və backend sahiblik/rol yoxlamaları.
+- [ ] Daşıma təklifi yaratma, redaktə, aktivləşdirmə və ləğv frontend/backend axını.
+- [ ] Nəqliyyat vasitəsi parametrləri dəyişəndə əlaqəli aktiv təkliflərin uyğunlaşdırılmasının yenilənməsi.
+- [ ] DB dump-də loads.applications sütununun INSERT siyahısı ilə uyğunlaşdırılması.
+- [ ] Sanctum cookie sessiyası ilə təhlükəsiz lokal API smoke-test təlimatı.
+- [ ] Admin panelindən ölkə üzrə tarif versiyasının yaradılması və tarif tarixçəsi.
+- [ ] Daşıyıcı üçün ölkə və aktiv vasitə sayına əsaslanan abunəlik qiymət hesablaması və status görünüşü.
+- [ ] Promo kod mexanizmi — endirim tipi və qaydaları biznes qərarı kimi təsdiqlənməlidir.
+
+**Yoxlama statusu:** GitHub branch müqayisəsi aparılıb. Bu mühitdə PHP/Composer və frontend dependency-ləri ilə build/test icra etmək mümkün olmayıb; GitHub commit üçün CI statusu da yoxdur. Real browser, rol, DB və mobil sınaqlar istifadəçi tərəfindən aparılmalıdır.
+
+**Açıq bloklar:** Birbank recurring/token ödəniş inteqrasiyası rəsmi merchant sənədləri və provayder təsdiqi olmadan implementasiya edilmiş kimi təqdim edilmir. Promo kodun endirim tipi, limiti və tətbiq qaydası təsdiqlənməyib; bu qərarlar olmadan endirim hesablanmır.

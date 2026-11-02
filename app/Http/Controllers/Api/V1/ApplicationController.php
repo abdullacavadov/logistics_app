@@ -24,9 +24,17 @@ class ApplicationController extends Controller
         $load = DB::table('loads')->where('id', $loadId)->first();
         if (!$load || !in_array($load->status, ['published', 'has_applications'])) return $this->err('load_inactive', 'Elan aktiv deyil', 422); // 7
         if ($load->user_id === $user->id) return $this->err('own_load', 'Öz elanınıza müraciət edə bilməzsiniz', 422);                          // 8
-        if (!empty($data['vehicle_offer_id']) &&
-            !DB::table('vehicle_offers')->where(['id' => $data['vehicle_offer_id'], 'user_id' => $user->id])->exists())
-            return $this->err('forbidden_offer', 'Təklif sizə məxsus deyil', 403);
+        if (!empty($data['vehicle_offer_id'])) {
+            $offer = DB::table('vehicle_offers')->where([
+                'id' => $data['vehicle_offer_id'],
+                'user_id' => $user->id,
+            ])->first();
+
+            if (!$offer) return $this->err('forbidden_offer', 'Təklif sizə məxsus deyil', 403);
+            if ($offer->status !== 'active' || $offer->available_to < now()->toDateString()) {
+                return $this->err('offer_inactive', 'Müraciət üçün aktiv və vaxtı bitməmiş təklif seçilməlidir', 422);
+            }
+        }
 
         return DB::transaction(function () use ($data, $load, $user) {
             $exists = DB::table('applications')->where(['load_id' => $load->id, 'carrier_id' => $user->id])
