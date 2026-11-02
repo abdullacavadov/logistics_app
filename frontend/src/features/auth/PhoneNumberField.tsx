@@ -46,7 +46,7 @@ export default function PhoneNumberField({
 
   return (
     <div className="phone-number-control">
-      <label className="phone-country-picker" aria-label="Telefon ölkə kodu">
+      <div className="phone-country-picker" role="group" aria-label="Telefon ölkə kodu">
         {selected && <img src={`https://flagcdn.com/w40/${selected.iso2.toLowerCase()}.png`} alt="" width="24" height="18" loading="lazy" />}
         <span>{callingCode}</span>
         <span className="phone-country-chevron">▾</span>
@@ -60,7 +60,7 @@ export default function PhoneNumberField({
             <option key={country.id} value={country.iso2}>{country.name} ({dialCode(country.iso2)})</option>
           ))}
         </select>
-      </label>
+      </div>
       <input
         id={id}
         type="tel"
