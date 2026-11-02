@@ -29,6 +29,12 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
+    if (countries.data?.length && !countries.data.some(country => country.iso2 === phoneCountryIso2)) {
+      setPhoneCountryIso2(countries.data[0].iso2)
+    }
+  }, [countries.data, phoneCountryIso2])
+
+  useEffect(() => {
     if (auth.data?.data.user) navigate('/', { replace: true })
   }, [auth.data, navigate])
 
