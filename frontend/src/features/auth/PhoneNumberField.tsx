@@ -1,4 +1,5 @@
-import { AsYouType, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js'
+import { AsYouType, getCountryCallingCode, getExampleNumber, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js'
+import examples from 'libphonenumber-js/examples.mobile.json'
 import type { Country } from '../catalog/catalogApi'
 
 interface PhoneNumberFieldProps {
@@ -40,6 +41,12 @@ export default function PhoneNumberField({
   const selected = countries.find(country => country.iso2 === countryIso2) ?? countries[0]
   const selectedIso2 = selected?.iso2 ?? countryIso2
   const callingCode = dialCode(selectedIso2)
+  const exampleNumber = selectedIso2
+    ? getExampleNumber(selectedIso2 as CountryCode, examples)?.formatNational()
+    : undefined
+  const dynamicPlaceholder = placeholder === 'Telefon nömrəsi' || !placeholder
+    ? (exampleNumber ?? 'Telefon nömrəsi')
+    : (exampleNumber ?? placeholder)
   const formatted = value
     ? new AsYouType(selectedIso2 as CountryCode).input(value)
     : ''
@@ -69,7 +76,7 @@ export default function PhoneNumberField({
         required={required}
         value={formatted}
         onChange={event => onChange(event.target.value)}
-        placeholder={placeholder}
+        placeholder={dynamicPlaceholder}
       />
     </div>
   )
