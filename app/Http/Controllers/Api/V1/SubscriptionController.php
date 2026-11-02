@@ -67,6 +67,8 @@ class SubscriptionController extends Controller
         }
 
         $planId = DB::transaction(function () use ($request, $data) {
+            DB::table('countries')->where('id', $data['country_id'])->lockForUpdate()->first();
+
             DB::table('subscription_plans')
                 ->where('kind', $data['kind'])
                 ->where('country_id', $data['country_id'])
