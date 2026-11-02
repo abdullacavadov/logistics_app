@@ -6,7 +6,7 @@ export interface SubscriptionPlan {
   country_id: number
   iso2?: string
   country_name?: string
-  price: number | string
+  price?: number | string
   unit_price?: number | string
   currency: string
   duration_months: number
