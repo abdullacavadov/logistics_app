@@ -834,7 +834,10 @@ Aşağıdakı funksiyalar feature/complete-core-workflows branch-ində implement
 - [ ] Nəqliyyat vasitəsi parametrləri dəyişəndə əlaqəli aktiv təkliflərin uyğunlaşdırılmasının yenilənməsi.
 - [ ] DB dump-də loads.applications sütununun INSERT siyahısı ilə uyğunlaşdırılması.
 - [ ] Sanctum cookie sessiyası ilə təhlükəsiz lokal API smoke-test təlimatı.
+- [ ] Admin panelindən ölkə üzrə tarif versiyasının yaradılması və tarif tarixçəsi.
+- [ ] Daşıyıcı üçün ölkə və aktiv vasitə sayına əsaslanan abunəlik qiymət hesablaması və status görünüşü.
+- [ ] Promo kod mexanizmi — endirim tipi və qaydaları biznes qərarı kimi təsdiqlənməlidir.
 
 **Yoxlama statusu:** GitHub branch müqayisəsi aparılıb. Bu mühitdə PHP/Composer və frontend dependency-ləri ilə build/test icra etmək mümkün olmayıb; GitHub commit üçün CI statusu da yoxdur. Real browser, rol, DB və mobil sınaqlar istifadəçi tərəfindən aparılmalıdır.
 
-**Açıq blok:** Birbank recurring/token ödəniş inteqrasiyası rəsmi merchant sənədləri və provayder təsdiqi olmadan implementasiya edilmiş kimi təqdim edilmir.
+**Açıq bloklar:** Birbank recurring/token ödəniş inteqrasiyası rəsmi merchant sənədləri və provayder təsdiqi olmadan implementasiya edilmiş kimi təqdim edilmir. Promo kodun endirim tipi, limiti və tətbiq qaydası təsdiqlənməyib; bu qərarlar olmadan endirim hesablanmır.
