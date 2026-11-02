@@ -103,7 +103,7 @@ class VehicleController extends Controller
             'capacity_m3' => 'nullable|numeric|gt:0',
             'body_type' => 'nullable|string|max:60',
             'is_refrigerated' => 'boolean',
-            'reg_country_id' => 'nullable|exists:countries,id',
+            'reg_country_id' => $prefix . 'required|exists:countries,id',
             'company_id' => 'nullable|exists:companies,id',
         ];
     }
