@@ -1,0 +1,64 @@
+<?php
+
+namespace App\\Http\\Controllers\\Api\\V1;
+
+use App\\Http\\Controllers\\Controller;
+use Illuminate\\Http\\Request;
+use Illuminate\\Support\\Facades\\DB;
+
+/**
+ * Read-only reference data for public and authenticated forms.
+ * The column names are defined by database/db.sql.
+ */
+class CatalogController extends Controller
+{
+    public function countries()
+    {
+        return response()->json([
+            'data' => DB::table('countries')
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get(['id', 'iso2', 'name', 'default_currency']),
+        ]);
+    }
+
+    public function locations(Request $request)
+    {
+        $data = $request->validate([
+            'country_id' => 'required|integer|exists:countries,id',
+            'search' => 'nullable|string|max:120',
+            'per_page' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        $query = DB::table('locations')
+            ->where('country_id', $data['country_id'])
+            ->where('is_active', 1);
+
+        if (!empty($data['search'])) {
+            $query->where('name', 'like', '%' . addcslashes($data['search'], '%_\\\\') . '%');
+        }
+
+        return response()->json($query->orderBy('name')
+            ->paginate($data['per_page'] ?? 50, ['id', 'country_id', 'name', 'lat', 'lng']));
+    }
+
+    public function cargoTypes()
+    {
+        return response()->json([
+            'data' => DB::table('cargo_types')
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+        ]);
+    }
+
+    public function vehicleTypes()
+    {
+        return response()->json([
+            'data' => DB::table('vehicle_types')
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get(['id', 'name', 'is_refrigerated']),
+        ]);
+    }
+}
