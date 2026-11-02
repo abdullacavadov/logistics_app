@@ -23,11 +23,15 @@ class AuthController extends Controller
             'terms' => 'accepted',
         ]);
 
-        $user = DB::transaction(function () use ($data) {
+        $phone = isset($data['phone'])
+            ? preg_replace('/\s+/', ' ', trim($data['phone']))
+            : null;
+
+        $user = DB::transaction(function () use ($data, $phone) {
             $user = User::create([
                 'name' => $data['name'],
-                'phone' => $data['phone'] ?? null,
-                'email' => $data['email'] ?? null,
+                'phone' => $phone,
+                'email' => isset($data['email']) ? strtolower(trim($data['email'])) : null,
                 'password' => $data['password'],
                 'country_id' => $data['country_id'],
                 'terms_accepted_at' => now(),
@@ -57,7 +61,20 @@ class AuthController extends Controller
         ]);
 
         $field = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-        $user = User::where($field, $data['login'])->first();
+        $loginValue = $field === 'email'
+            ? strtolower(trim($data['login']))
+            : preg_replace('/\s+/', ' ', trim($data['login']));
+
+        $user = User::where($field, $loginValue)->first();
+
+        // Support accounts created before phone numbers were stored with formatting.
+        if (!$user && $field === 'phone') {
+            $legacyE164 = '+' . preg_replace('/\D+/', '', $loginValue);
+            $user = User::where('phone', $legacyE164)->first();
+            if ($user) {
+                $loginValue = $user->phone;
+            }
+        }
 
         if (!$user || $user->is_blocked) {
             return response()->json([
@@ -68,7 +85,7 @@ class AuthController extends Controller
             ], $user ? 403 : 401);
         }
 
-        if (!Auth::guard('web')->attempt([$field => $data['login'], 'password' => $data['password']])) {
+        if (!Auth::guard('web')->attempt([$field => $loginValue, 'password' => $data['password']])) {
             return response()->json([
                 'error' => ['code' => 'invalid_credentials', 'message' => 'Giriş məlumatları yanlışdır'],
             ], 401);

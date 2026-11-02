@@ -36,17 +36,28 @@ function dialCode(iso2: string): string {
   const code = countryCode(iso2)
   if (!code) return ''
   try {
-    return `+${getCountryCallingCode(code)}`
+    return '+' + getCountryCallingCode(code)
   } catch {
     return ''
   }
 }
 
+/** Return a validated, readable international number for API/DB storage. */
 export function normalizePhoneNumber(value: string, countryIso2: string): string | null {
   const code = countryCode(countryIso2)
   if (!code) return null
+
   const phone = parsePhoneNumberFromString(value, code)
-  return phone?.isValid() ? phone.number : null
+  if (!phone?.isValid()) return null
+
+  let national = phone.formatNational()
+
+  // Azerbaijan's domestic trunk prefix 0 is not part of the international number.
+  if (code === 'AZ') {
+    national = national.replace(/^0\s*/, '')
+  }
+
+  return ('+' + phone.countryCallingCode + ' ' + national).trim()
 }
 
 export default function PhoneNumberField({
@@ -66,12 +77,18 @@ export default function PhoneNumberField({
   const exampleNumber = code ? getExampleNumber(code, examples)?.formatNational() : undefined
   const dynamicPlaceholder = exampleNumber ?? placeholder ?? 'Telefon nömrəsi'
 
-  // Keep only national digits in state; formatting is derived from the selected country.
+  // Keep only national digits in state and format them for display.
   const nationalDigits = value.replace(/\D/g, '')
   const formatted = code && nationalDigits ? new AsYouType(code).input(nationalDigits) : nationalDigits
 
   function handleInput(nextValue: string) {
-    const digits = nextValue.replace(/\D/g, '')
+    let digits = nextValue.replace(/\D/g, '')
+
+    // Do not retain Azerbaijan's domestic leading zero after selecting +994.
+    if (selectedIso2 === 'AZ' && digits.startsWith('0')) {
+      digits = digits.replace(/^0+/, '')
+    }
+
     if (!code) {
       onChange(digits)
       return
@@ -86,7 +103,7 @@ export default function PhoneNumberField({
       <div className="phone-country-picker" role="group" aria-label="Telefon ölkə kodu">
         {selected && (
           <img
-            src={`https://flagcdn.com/w40/${selected.iso2.toLowerCase()}.png`}
+            src={'https://flagcdn.com/w40/' + selected.iso2.toLowerCase() + '.png'}
             alt=""
             width="24"
             height="18"
