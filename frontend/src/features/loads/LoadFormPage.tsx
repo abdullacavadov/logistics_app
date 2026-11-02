@@ -6,6 +6,7 @@ import { catalogApi } from '../catalog/catalogApi'
 import { loadsApi } from './api/loadsApi'
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from './hooks/useLoads'
 import type { CreateLoadPayload } from './types'
+import logoLight from '../../assets/img/logo-light.png'
 
 type FormState = {
   title: string; description: string; cargo_type_id: string
@@ -115,7 +116,7 @@ export default function LoadFormPage() {
   return (
     <div className="app-shell" data-theme="light">
       <aside className="sidebar form-sidebar">
-        <Link to="/" className="brand-lockup"><strong>YOLDAŞ</strong></Link>
+        <Link to="/" className="brand-lockup" aria-label="Yoldaş ana səhifə"><img className="brand-logo" src={logoLight} alt="Yoldaş" /></Link>
         <nav className="sidebar-scroll">
           <Link className="side-link" to="/my/loads"><ArrowLeft size={18} /> Mənim elanlarım</Link>
         </nav>
