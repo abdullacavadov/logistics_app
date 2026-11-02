@@ -1,12 +1,12 @@
 <?php
 
-namespace App\\Http\\Controllers\\Api\\V1;
+namespace App\Http\Controllers\Api\V1;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\User;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\Auth;
-use Illuminate\\Support\\Facades\\DB;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /** SPA authentication backed by Laravel's session cookie and Sanctum. */
 class AuthController extends Controller
@@ -24,7 +24,7 @@ class AuthController extends Controller
         ]);
 
         $phone = isset($data['phone'])
-            ? preg_replace('/\\s+/', ' ', trim($data['phone']))
+            ? preg_replace('/\s+/', ' ', trim($data['phone']))
             : null;
 
         $user = DB::transaction(function () use ($data, $phone) {
@@ -63,13 +63,13 @@ class AuthController extends Controller
         $field = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
         $loginValue = $field === 'email'
             ? strtolower(trim($data['login']))
-            : preg_replace('/\\s+/', ' ', trim($data['login']));
+            : preg_replace('/\s+/', ' ', trim($data['login']));
 
         $user = User::where($field, $loginValue)->first();
 
         // Support accounts created before phone numbers were stored with formatting.
         if (!$user && $field === 'phone') {
-            $legacyE164 = '+' . preg_replace('/\\D+/', '', $loginValue);
+            $legacyE164 = '+' . preg_replace('/\D+/', '', $loginValue);
             $user = User::where('phone', $legacyE164)->first();
             if ($user) {
                 $loginValue = $user->phone;
