@@ -1,8 +1,6 @@
-import { AsYouType, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js'
-import type { Country } from '../catalog/catalogApi'
+import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js'
 
 interface PhoneNumberFieldProps {
-  countries: Country[]
   countryIso2: string
   value: string
   onCountryChange: (iso2: string) => void
@@ -12,6 +10,11 @@ interface PhoneNumberFieldProps {
   required?: boolean
   id?: string
 }
+
+const regionNames = new Intl.DisplayNames(['az'], { type: 'region' })
+const phoneCountries = getCountries()
+  .map(iso2 => ({ iso2, name: regionNames.of(iso2) ?? iso2 }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'az'))
 
 function dialCode(iso2: string): string {
   try {
@@ -27,7 +30,6 @@ export function normalizePhoneNumber(value: string, countryIso2: string): string
 }
 
 export default function PhoneNumberField({
-  countries,
   countryIso2,
   value,
   onCountryChange,
@@ -37,7 +39,7 @@ export default function PhoneNumberField({
   required = false,
   id,
 }: PhoneNumberFieldProps) {
-  const selected = countries.find(country => country.iso2 === countryIso2) ?? countries[0]
+  const selected = phoneCountries.find(country => country.iso2 === countryIso2) ?? phoneCountries[0]
   const selectedIso2 = selected?.iso2 ?? countryIso2
   const callingCode = dialCode(selectedIso2)
   const formatted = value
@@ -54,10 +56,9 @@ export default function PhoneNumberField({
           aria-label="Telefon ölkə kodu"
           value={selectedIso2}
           onChange={event => onCountryChange(event.target.value)}
-          disabled={!countries.length}
         >
-          {countries.map(country => (
-            <option key={country.id} value={country.iso2}>{country.name} ({dialCode(country.iso2)})</option>
+          {phoneCountries.map(country => (
+            <option key={country.iso2} value={country.iso2}>{country.name} ({dialCode(country.iso2)})</option>
           ))}
         </select>
       </div>
