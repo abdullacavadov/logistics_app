@@ -10,7 +10,7 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
     Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-    // Ictimai (qonaq) — yalnız dərc olunmuş elanlar
+    // Public reference catalogues used by registration and load/vehicle forms\n    Route::get('catalog/countries', [CatalogController::class, 'countries'])->middleware('throttle:60,1');\n    Route::get('catalog/locations', [CatalogController::class, 'locations'])->middleware('throttle:60,1');\n    Route::get('catalog/cargo-types', [CatalogController::class, 'cargoTypes'])->middleware('throttle:60,1');\n    Route::get('catalog/vehicle-types', [CatalogController::class, 'vehicleTypes'])->middleware('throttle:60,1');\n\n    // Ictimai (qonaq) — yalnız dərc olunmuş elanlar
     Route::get('loads', [LoadController::class, 'index'])->middleware('throttle:60,1');
     Route::get('loads/{id}', [LoadController::class, 'show'])->whereNumber('id');
 
