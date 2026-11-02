@@ -87,7 +87,7 @@ export default function LoginPage() {
               <label className="auth-field">
                 <span>Telefon nömrəsi</span>
                 <div className="auth-input-wrap auth-phone-input-wrap">
-                  <PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" placeholder="50 000 00 00" />
+                  <PhoneNumberField countries={countries.data ?? []} countryIso2={phoneCountryIso2} value={login} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setLogin(''); setPhoneError('') }} onChange={value => { setLogin(value); setPhoneError('') }} autoComplete="tel" />
                 </div>
                 {(phoneError || countries.isError) && <small className="auth-error">{phoneError || 'Ölkə siyahısını yükləmək mümkün olmadı.'}</small>}
               </label>
