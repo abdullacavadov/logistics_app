@@ -46,6 +46,52 @@ class VehicleOfferController extends Controller
         return response()->json(['data' => DB::table('vehicle_offers')->find($id)], 201);
     }
 
+    public function update(Request $r, int $id)
+    {
+        $o = $this->owned($r, $id);
+        if ($o instanceof \\Illuminate\\Http\\JsonResponse) return $o;
+        if (!in_array($o->status, ['draft', 'active'])) {
+            return $this->err('locked', 'Bu statusda təklif dəyişdirilə bilməz', 409);
+        }
+
+        $data = $r->validate([
+            'vehicle_id' => 'sometimes|required|integer|exists:vehicles,id',
+            'from_country_id' => 'sometimes|required|exists:countries,id',
+            'from_location_id' => 'nullable|exists:locations,id',
+            'to_country_id' => 'sometimes|required|exists:countries,id',
+            'to_location_id' => 'nullable|exists:locations,id',
+            'available_from' => 'sometimes|required|date|after_or_equal:today',
+            'available_to' => 'sometimes|required|date|after_or_equal:available_from',
+            'price' => 'nullable|numeric|min:0',
+            'currency' => 'required_with:price|nullable|string|size:3',
+            'terms' => 'nullable|string|max:3000',
+        ]);
+
+        $vehicleId = (int) ($data['vehicle_id'] ?? $o->vehicle_id);
+        if (!DB::table('vehicles')->where([
+            'id' => $vehicleId,
+            'user_id' => $r->user()->id,
+            'is_active' => 1,
+        ])->exists()) {
+            return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil və ya aktiv deyil', 403);
+        }
+
+        $from = $data['available_from'] ?? $o->available_from;
+        $to = $data['available_to'] ?? $o->available_to;
+        if ($to < $from) return $this->err('invalid_dates', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz', 422);
+        if ($o->status === 'active' && $this->conflicts($vehicleId, $from, $to, $id)) {
+            return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
+        }
+
+        DB::table('vehicle_offers')->where('id', $id)->update($data + [
+            'vehicle_id' => $vehicleId,
+            'updated_at' => now(),
+        ]);
+        $this->matcher->forOffer($id);
+
+        return response()->json(['data' => DB::table('vehicle_offers')->find($id)]);
+    }
+
     public function activate(Request $r, int $id)
     {
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
