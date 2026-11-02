@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Save } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
 import { catalogApi } from '../catalog/catalogApi'
 import { loadsApi } from './api/loadsApi'
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from './hooks/useLoads'
