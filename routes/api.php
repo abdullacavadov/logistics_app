@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('my/offers', [VehicleOfferController::class, 'mine']);
         Route::post('offers', [VehicleOfferController::class, 'store']);
+        Route::put('offers/{id}', [VehicleOfferController::class, 'update'])->whereNumber('id');
         Route::post('offers/{id}/activate', [VehicleOfferController::class, 'activate'])->whereNumber('id');
         Route::post('offers/{id}/cancel', [VehicleOfferController::class, 'cancel'])->whereNumber('id');
         Route::get('offers/{id}/matches', [VehicleOfferController::class, 'matches'])->whereNumber('id');
