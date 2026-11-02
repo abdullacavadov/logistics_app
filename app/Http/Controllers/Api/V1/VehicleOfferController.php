@@ -139,8 +139,8 @@ class VehicleOfferController extends Controller
             ['country' => 'from_country_id', 'location' => 'from_location_id'],
             ['country' => 'to_country_id', 'location' => 'to_location_id'],
         ] as $pair) {
-            $locationId = $data[$pair['location']] ?? ($existing->{$pair['location']} ?? null);
-            $countryId = $data[$pair['country']] ?? ($existing->{$pair['country']} ?? null);
+            $locationId = array_key_exists($pair['location'], $data) ? $data[$pair['location']] : ($existing->{$pair['location']} ?? null);
+            $countryId = array_key_exists($pair['country'], $data) ? $data[$pair['country']] : ($existing->{$pair['country']} ?? null);
             if ($locationId && (!$countryId || !DB::table('locations')->where([
                 'id' => $locationId,
                 'country_id' => $countryId,
