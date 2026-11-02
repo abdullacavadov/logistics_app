@@ -65,7 +65,7 @@ class LoadController extends Controller
         if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'shipper'])->exists())
             return $this->err('not_shipper', 'Yük elanı yaratmaq üçün yük sahibi hüququ lazımdır', 403); // ödəniş tələb olunmur (§2.2)
         $d = $r->validate($this->rules());
-        $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';
+        $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';\n        // Required by the canonical loads schema; the channel is selected server-side.\n        $d['applications'] = 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
         if ($d['status'] === 'published') $this->matcher->forLoad($id);
