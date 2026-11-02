@@ -85,11 +85,13 @@ class LoadController extends Controller
         foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
             $oldValue = $load->{$field} ?? null;
             $newValue = $d[$field];
-            $same = ($oldValue === null || $newValue === null)
-                ? $oldValue === $newValue
-                : (is_numeric($oldValue) && is_numeric($newValue)
-                    ? (float) $oldValue === (float) $newValue
-                    : (string) $oldValue === (string) $newValue);
+            $same = in_array($field, ['needs_refrigeration', 'is_hazardous'], true)
+                ? (bool) $oldValue === (bool) $newValue
+                : (($oldValue === null || $newValue === null)
+                    ? $oldValue === $newValue
+                    : (is_numeric($oldValue) && is_numeric($newValue)
+                        ? (float) $oldValue === (float) $newValue
+                        : (string) $oldValue === (string) $newValue));
             if (!$same) $changedCritical[] = $field;
         }
         if (in_array($load->status, ['has_applications', 'agreed']) && $changedCritical) {
