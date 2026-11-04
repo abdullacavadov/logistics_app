@@ -15,17 +15,15 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:150',
-            'phone' => 'required_without:email|nullable|string|max:30|unique:users,phone',
-            'email' => 'required_without:phone|nullable|email|max:190|unique:users,email',
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/', 'unique:users,phone'],
+            'email' => 'nullable|email|max:190|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'country_id' => 'required|integer|exists:countries,id',
             'role' => 'required|in:shipper,carrier,business_owner',
             'terms' => 'accepted',
         ]);
 
-        $phone = isset($data['phone'])
-            ? preg_replace('/\s+/', ' ', trim($data['phone']))
-            : null;
+        $phone = '+' . preg_replace('/D+/', '', $data['phone']);
 
         $user = DB::transaction(function () use ($data, $phone) {
             $user = User::create([
@@ -63,14 +61,17 @@ class AuthController extends Controller
         $field = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
         $loginValue = $field === 'email'
             ? strtolower(trim($data['login']))
-            : preg_replace('/\s+/', ' ', trim($data['login']));
+            : '+' . preg_replace('/\D+/', '', $data['login']);
 
         $user = User::where($field, $loginValue)->first();
 
-        // Support accounts created before phone numbers were stored with formatting.
+        // Support legacy accounts whose phone numbers were stored with spaces or punctuation.
         if (!$user && $field === 'phone') {
-            $legacyE164 = '+' . preg_replace('/\D+/', '', $loginValue);
-            $user = User::where('phone', $legacyE164)->first();
+            $user = User::whereRaw(
+                "REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '(', ''), ')', '') = ?",
+                [$loginValue]
+            )->first();
+
             if ($user) {
                 $loginValue = $user->phone;
             }
