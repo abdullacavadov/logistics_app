@@ -57,7 +57,7 @@ export function normalizePhoneNumber(value: string, countryIso2: string): string
     national = national.replace(/^0\s*/, '')
   }
 
-  return ('+' + phone.countryCallingCode + ' ' + national).trim()
+  return phone.number
 }
 
 export default function PhoneNumberField({
