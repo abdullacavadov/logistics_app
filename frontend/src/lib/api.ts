@@ -3,7 +3,7 @@ import axios from 'axios'
 const backendOrigin = import.meta.env.VITE_BACKEND_ORIGIN ?? ''
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
   withXSRFToken: true,
   headers: {

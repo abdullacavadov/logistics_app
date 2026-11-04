@@ -26,6 +26,12 @@ export interface RegisterPayload {
 }
 
 export const authApi = {
+
+  async me(): Promise<AuthResponse> {
+    const { data } = await api.get<AuthResponse>('/auth/me')
+    return data
+  },
+
   async login(payload: { login: string; password: string }): Promise<AuthResponse> {
     await initializeCsrf()
     const { data } = await api.post<AuthResponse>('/auth/login', payload)
@@ -38,10 +44,7 @@ export const authApi = {
     return data
   },
 
-  async me(): Promise<AuthResponse> {
-    const { data } = await api.get<AuthResponse>('/auth/me')
-    return data
-  },
+
 
   async logout(): Promise<void> {
     await initializeCsrf()
