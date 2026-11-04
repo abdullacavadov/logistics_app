@@ -16,7 +16,7 @@ export interface AuthResponse {
 
 export interface RegisterPayload {
   name: string
-  phone?: string
+  phone: string
   email?: string
   password: string
   password_confirmation: string
