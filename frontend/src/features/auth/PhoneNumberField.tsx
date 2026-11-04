@@ -50,13 +50,7 @@ export function normalizePhoneNumber(value: string, countryIso2: string): string
   const phone = parsePhoneNumberFromString(value, code)
   if (!phone?.isValid()) return null
 
-  let national = phone.formatNational()
-
-  // Azerbaijan's domestic trunk prefix 0 is not part of the international number.
-  if (code === 'AZ') {
-    national = national.replace(/^0\s*/, '')
-  }
-
+  // E.164 excludes the national trunk prefix and formatting characters.
   return phone.number
 }
 
