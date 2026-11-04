@@ -23,7 +23,8 @@ class AuthController extends Controller
             'terms' => 'accepted',
         ]);
 
-        $phone = '+' . preg_replace('/D+/', '', $data['phone']);
+        // Validation guarantees an E.164 value (for example, +994501234567).
+        $phone = $data['phone'];
 
         $user = DB::transaction(function () use ($data, $phone) {
             $user = User::create([
