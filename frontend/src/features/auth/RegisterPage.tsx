@@ -34,15 +34,19 @@ export default function RegisterPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const normalizedPhone = phone.trim() ? normalizePhoneNumber(phone, phoneCountryIso2) : undefined
-    if (phone.trim() && !normalizedPhone) {
+    if (!phone.trim()) {
+      setPhoneError('Qeydiyyat üçün telefon nömrəsi mütləqdir.')
+      return
+    }
+    const normalizedPhone = normalizePhoneNumber(phone, phoneCountryIso2)
+    if (!normalizedPhone) {
       setPhoneError('Seçilmiş ölkəyə uyğun düzgün telefon nömrəsi daxil edin.')
       return
     }
     setPhoneError('')
     const payload: RegisterPayload = {
       name: name.trim(),
-      phone: normalizedPhone || undefined,
+      phone: normalizedPhone,
       email: email.trim() || undefined,
       password,
       password_confirmation: passwordConfirmation,
@@ -92,8 +96,8 @@ export default function RegisterPage() {
             </label>
             <div className="auth-form-row">
               <label className="auth-field">
-                <span>Telefon <small>(ən azı biri tələb olunur)</small></span>
-                <div className="auth-input-wrap auth-phone-input-wrap"><PhoneNumberField countryIso2={phoneCountryIso2} value={phone} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setPhone(''); setPhoneError('') }} onChange={value => { setPhone(value); setPhoneError('') }} /></div>
+                <span>Telefon <small>(məcburidir)</small></span>
+                <div className="auth-input-wrap auth-phone-input-wrap"><PhoneNumberField required countryIso2={phoneCountryIso2} value={phone} onCountryChange={iso2 => { setPhoneCountryIso2(iso2); setPhone(''); setPhoneError('') }} onChange={value => { setPhone(value); setPhoneError('') }} /></div>
                 {phoneError && <small className="auth-error">{phoneError}</small>}
               </label>
               <label className="auth-field">
@@ -132,7 +136,7 @@ export default function RegisterPage() {
               <span>Qeydiyyatdan keçməklə <Link to="/terms" target="_blank">İstifadə şərtlərini</Link> qəbul edirəm.</span>
             </label>
             {errorMessage && <p className="auth-error" role="alert">{errorMessage}</p>}
-            <button className="auth-submit" type="submit" disabled={registerMutation.isPending || (!phone.trim() && !email.trim()) || !countryId}>
+            <button className="auth-submit" type="submit" disabled={registerMutation.isPending || !phone.trim() || !countryId}>
               {registerMutation.isPending ? 'Hesab yaradılır…' : 'Qeydiyyatı tamamla'} <ArrowRight size={18} />
             </button>
           </form>
