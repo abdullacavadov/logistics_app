@@ -28,7 +28,7 @@ function getVehicleTypeImage(imagePath: string | null | undefined): string | und
     if (!imagePath) return undefined;
 
     // DB values may be filenames, relative paths, or legacy Windows/URL paths.
-    const filename = imagePath.replace(/\\\\/g, "/").split("/").pop();
+    const filename = imagePath.replace(/\\/g, "/").split("/").pop();
     if (!filename) return undefined;
 
     const match = Object.entries(vehicleTypeImageUrls).find(([path]) =>
