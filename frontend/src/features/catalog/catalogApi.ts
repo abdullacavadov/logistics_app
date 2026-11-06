@@ -15,7 +15,7 @@ export interface Location {
   lng: number | null
 }
 
-export interface NamedCatalogItem {
+export interface LoadVehicleType {\n  id: number\n  name: string\n  category: string\n  capacity_m3: number | null\n  image_path: string\n}\n\nexport interface NamedCatalogItem {
   id: number
   name: string
   is_refrigerated?: boolean
