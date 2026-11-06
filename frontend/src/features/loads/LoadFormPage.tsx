@@ -17,6 +17,25 @@ import type { CreateLoadPayload } from "./types";
 import logoLight from "../../assets/img/logo-light.png";
 
 type Target = "from" | "to";
+
+// Vite processes these assets and returns their production-safe URLs.
+const vehicleTypeImageUrls = import.meta.glob(
+    "../../assets/img/vehicle-types/*",
+    { eager: true, import: "default", query: "?url" },
+) as Record<string, string>;
+
+function getVehicleTypeImage(imagePath: string | null | undefined): string | undefined {
+    if (!imagePath) return undefined;
+
+    // DB values may be filenames, relative paths, or legacy Windows/URL paths.
+    const filename = imagePath.replace(/\\\\/g, "/").split("/").pop();
+    if (!filename) return undefined;
+
+    const match = Object.entries(vehicleTypeImageUrls).find(([path]) =>
+        path.split("/").pop()?.toLowerCase() === filename.toLowerCase(),
+    );
+    return match?.[1];
+}
 type State = {
     cargo_type_id: string;
     from_country_id: string;
@@ -841,12 +860,10 @@ export default function LoadFormPage() {
                                             setActiveBodyCategory(group.key)
                                         }
                                     >
-                                        {group.imagePath && (
+                                        {getVehicleTypeImage(group.imagePath) && (
                                             <img
-                                                src={getVehicleTypeImage(
-                                                    vehicleType.image,
-                                                )}
-                                                alt={vehicleType.name}
+                                                src={getVehicleTypeImage(group.imagePath)}
+                                                alt={group.label}
                                             />
                                         )}
                                         <span>{group.label}</span>
