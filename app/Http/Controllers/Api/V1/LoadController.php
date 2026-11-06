@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'required_vehicle_type_id', 'needs_refrigeration'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'required_vehicle_type_id', 'load_vehicle_type_id', 'needs_refrigeration'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -71,7 +71,6 @@ class LoadController extends Controller
         $d['applications'] = 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
-        if ($d['status'] === 'published') $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)], 201);
     }
 
@@ -101,7 +100,7 @@ class LoadController extends Controller
         }
         DB::table('loads')->where('id', $id)->update($d + ['updated_at' => now()]);
         $this->audit($r, 'load.update', $id, (array) $load, $d);
-        $this->matcher->forLoad($id);
+        if (in_array($load->status, self::PUBLIC_STATUSES, true)) $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)]);
     }
 
@@ -196,7 +195,8 @@ class LoadController extends Controller
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
             'volume_m3' => 'nullable|numeric|gt:0',
             'pallets' => $s . 'required|integer|min:1',
-            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',\n            'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
+            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
             'needs_refrigeration' => 'boolean',
             'temp_min' => 'nullable|numeric',
             'temp_max' => 'nullable|numeric|gte:temp_min',
@@ -218,6 +218,7 @@ class LoadController extends Controller
             ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
             ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
             ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
+            ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'l.load_vehicle_type_id')
             ->select(array_map(fn($column) => "l.$column", $this->publicColumns()))
             ->addSelect(
                 'fc.name as from_country_name',
@@ -227,7 +228,8 @@ class LoadController extends Controller
                 'tc.iso2 as to_country_iso2',
                 DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'),
                 'ct.name as cargo_type_name',
-                'vt.name as vehicle_type_name'
+                'vt.name as vehicle_type_name',
+                'lvt.name as load_vehicle_type_name'
             );
     }
 
@@ -249,6 +251,7 @@ class LoadController extends Controller
             'volume_m3',
             'pallets',
             'required_vehicle_type_id',
+            'load_vehicle_type_id',
             'needs_refrigeration',
             'temp_min',
             'temp_max',
