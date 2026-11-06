@@ -36,7 +36,15 @@ class LoadController extends Controller
         $load = DB::table('loads')->where('id', $id)->first();
         $uid = auth('sanctum')->id();
         if (!$load || (!in_array($load->status, self::PUBLIC_STATUSES) && $load->user_id !== $uid)) return $this->err('not_found', 'Elan tapılmadı', 404);
-        if ($load->user_id === $uid) return response()->json(['data' => $load]);
+        if ($load->user_id === $uid) {
+            $load->from_location_name = $load->from_location_id
+                ? DB::table('locations')->where('id', $load->from_location_id)->value('name')
+                : null;
+            $load->to_location_name = $load->to_location_id
+                ? DB::table('locations')->where('id', $load->to_location_id)->value('name')
+                : null;
+            return response()->json(['data' => $load]);
+        }
 
         $publicLoad = $this->publicQuery()->where('l.id', $id)->first();
         return response()->json(['data' => $publicLoad]);
