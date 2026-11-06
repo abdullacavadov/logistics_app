@@ -40,9 +40,9 @@ export const catalogApi = {
     const { data } = await api.get<{ data: Country[] }>('/catalog/countries')
     return data.data
   },
-  async locations(countryId: number): Promise<Location[]> {
+  async locations(countryId: number, search = ''): Promise<Location[]> {
     const { data } = await api.get<CatalogPage<Location>>('/catalog/locations', {
-      params: { country_id: countryId, per_page: 100 },
+      params: { country_id: countryId, per_page: 100, search: search || undefined },
     })
     return data.data
   },
