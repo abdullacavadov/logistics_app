@@ -43,6 +43,7 @@ class ImportGeoNamesCities extends Command
         }
 
         $cities = [];
+        $cityAliases = [];
         $cityFile = new SplFileObject($this->argument('cities'));
         while (!$cityFile->eof()) {
             $line = trim($cityFile->fgets());
@@ -52,6 +53,7 @@ class ImportGeoNamesCities extends Command
 
             $geonameId = (int) $row[0];
             $asciiName = trim($row[2]) ?: trim($row[1]);
+            $cityAliases[$geonameId] = array_unique([trim($row[1]), trim($row[2])]);
             $cities[$geonameId] = [
                 'geoname_id' => $geonameId,
                 'country_id' => $countries[$row[8]],
@@ -65,6 +67,30 @@ class ImportGeoNamesCities extends Command
         if (!$cities) {
             $this->warn('No cities matched the countries currently stored in the database.');
         } else {
+            // Attach GeoNames IDs to matching legacy rows first, preserving IDs already referenced by loads/offers.
+            $legacyNames = [];
+            foreach (DB::table('locations')->whereNull('geoname_id')->get(['id', 'country_id', 'name']) as $legacy) {
+                $legacyNames[$legacy->country_id.'|'.mb_strtolower(trim($legacy->name))] = $legacy->id;
+            }
+            foreach ($cities as $geonameId => $city) {
+                $matchedId = null;
+                foreach ($cityAliases[$geonameId] as $alias) {
+                    $key = $city['country_id'].'|'.mb_strtolower($alias);
+                    if (isset($legacyNames[$key])) {
+                        $matchedId = $legacyNames[$key];
+                        break;
+                    }
+                }
+                if ($matchedId) {
+                    DB::table('locations')->where('id', $matchedId)->update([
+                        'geoname_id' => $geonameId,
+                        'name' => $city['name'],
+                        'lat' => $city['lat'],
+                        'lng' => $city['lng'],
+                        'is_active' => 1,
+                    ]);
+                }
+            }
             foreach (array_chunk(array_values($cities), 500) as $chunk) {
                 DB::table('locations')->upsert($chunk, ['geoname_id'], ['country_id', 'name', 'lat', 'lng', 'is_active']);
             }
