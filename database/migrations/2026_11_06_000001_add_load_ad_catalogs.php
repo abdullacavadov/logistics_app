@@ -21,6 +21,7 @@ return new class extends Migration {
 
         Schema::table('loads', function (Blueprint $table) {
             $table->unsignedBigInteger('load_vehicle_type_id')->nullable()->after('required_vehicle_type_id');
+            $table->unsignedInteger('quantity')->nullable()->after('pallets');
             $table->foreign('load_vehicle_type_id')->references('id')->on('load_vehicle_types');
         });
 
@@ -76,7 +77,7 @@ return new class extends Migration {
     {
         Schema::table('loads', function (Blueprint $table) {
             $table->dropForeign(['load_vehicle_type_id']);
-            $table->dropColumn('load_vehicle_type_id');
+            $table->dropColumn(['load_vehicle_type_id', 'quantity']);
         });
         DB::statement("ALTER TABLE loads MODIFY status ENUM('draft','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft'");
         Schema::dropIfExists('location_translations');
