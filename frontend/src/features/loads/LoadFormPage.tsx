@@ -82,12 +82,15 @@ export default function LoadFormPage() {
     const [step, setStep] = useState<"country" | "city">("country");
     const [country, setCountry] = useState<Country | null>(null);
     const [search, setSearch] = useState("");
+    const [bodyModalOpen, setBodyModalOpen] = useState(false);
+    const [bodySearch, setBodySearch] = useState("");
     const modalCities = useQuery({
         queryKey: ["catalog", "locations", country?.id, "modal", search],
         queryFn: () => catalogApi.locations(country!.id, search),
         enabled: !!country && step === "city",
     });
     const countries = countriesQ.data ?? [];
+    const bodyTypesFiltered = useMemo(() => bodies.filter((x) => x.name.toLowerCase().includes(bodySearch.toLowerCase())), [bodies, bodySearch]);
     const bodies = bodiesQ.data ?? [];
     const cargo = (cargoQ.data ?? []).find(
         (x) => String(x.id) === form.cargo_type_id,
@@ -382,37 +385,18 @@ export default function LoadFormPage() {
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Yük yeri növü *</h3>
-                                    <div className="load-body-type-grid">
-                                        {bodies.map((x) => (
-                                            <button
-                                                type="button"
-                                                key={x.id}
-                                                className={
-                                                    form.load_vehicle_type_id ===
-                                                    String(x.id)
-                                                        ? "load-body-type is-selected"
-                                                        : "load-body-type"
-                                                }
-                                                onClick={() =>
-                                                    set(
-                                                        "load_vehicle_type_id",
-                                                        String(x.id),
-                                                    )
-                                                }
-                                            >
-                                                <img
-                                                    src={x.image_path}
-                                                    alt=""
-                                                />
-                                                <span>{x.name}</span>
-                                                {x.capacity_m3 ? (
-                                                    <small>
-                                                        {x.capacity_m3} m³
-                                                    </small>
-                                                ) : null}
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <button type="button" className="load-place-trigger load-body-type-trigger"
+                                        aria-haspopup="dialog" aria-expanded={bodyModalOpen}
+                                        onClick={() => { setBodySearch(""); setBodyModalOpen(true); }}>
+                                        {form.load_vehicle_type_id ? (
+                                            <>
+                                                <img className="load-body-type-trigger-image"
+                                                    src={bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.image_path} alt="" />
+                                                <span>{bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.name}</span>
+                                            </>
+                                        ) : <span>Yük yeri növünü seçin</span>}
+                                        <Search size={16} />
+                                    </button>
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Yükləmə tarixi</h3>
@@ -682,6 +666,33 @@ export default function LoadFormPage() {
                                 Ölkə siyahısına qayıt
                             </button>
                         )}
+                    </section>
+                </div>
+            )}
+            {bodyModalOpen && (
+                <div className="load-modal-backdrop" onMouseDown={(e) => {
+                    if (e.target === e.currentTarget) setBodyModalOpen(false);
+                }}>
+                    <section className="load-place-modal load-body-modal" role="dialog" aria-modal="true" aria-labelledby="load-body-modal-title">
+                        <header>
+                            <div><h3 id="load-body-modal-title">Yük yeri növünü seçin</h3><p>Mövcud növlərdən birini seçin</p></div>
+                            <button type="button" onClick={() => setBodyModalOpen(false)} aria-label="Bağla"><X /></button>
+                        </header>
+                        <label className="load-modal-search">
+                            <Search size={18} />
+                            <input autoFocus value={bodySearch} onChange={(e) => setBodySearch(e.target.value)} placeholder="Yük yeri növü axtar…" />
+                        </label>
+                        <div className="load-body-modal-grid">
+                            {bodyTypesFiltered.map((x) => (
+                                <button type="button" key={x.id}
+                                    className={form.load_vehicle_type_id === String(x.id) ? "load-body-type is-selected" : "load-body-type"}
+                                    onClick={() => { set("load_vehicle_type_id", String(x.id)); setBodyModalOpen(false); }}>
+                                    <img src={x.image_path} alt="" /><span>{x.name}</span>
+                                    {x.capacity_m3 ? <small>{x.capacity_m3} m³</small> : null}
+                                </button>
+                            ))}
+                            {bodyTypesFiltered.length === 0 && <p className="load-body-empty">Uyğun yük yeri növü tapılmadı.</p>}
+                        </div>
                     </section>
                 </div>
             )}
