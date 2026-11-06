@@ -658,6 +658,14 @@ CREATE TABLE `load_vehicle_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `load_vehicle_type_translations` (
+  `load_vehicle_type_id` bigint(20) UNSIGNED NOT NULL,
+  `locale` varchar(8) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`load_vehicle_type_id`, `locale`),
+  CONSTRAINT `load_vehicle_type_translations_type_id_foreign` FOREIGN KEY (`load_vehicle_type_id`) REFERENCES `load_vehicle_types` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `country_translations` (
   `country_id` bigint(20) UNSIGNED NOT NULL,
   `locale` varchar(8) NOT NULL,
@@ -695,6 +703,8 @@ INSERT INTO `load_vehicle_types` (`name`, `category`, `capacity_m3`, `image_path
 ('Alçaq platformalı','low_loader',NULL,'/images/load-vehicle-types/low-loader.svg',150,1),
 ('Konteyner daşıyıcı','container_carrier',NULL,'/images/load-vehicle-types/container-carrier.svg',160,1),
 ('Digər','other',NULL,'/images/load-vehicle-types/other.svg',170,1);
+
+INSERT INTO `load_vehicle_type_translations` (`load_vehicle_type_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `load_vehicle_types`;
 
 --
 -- Индексы сохранённых таблиц
