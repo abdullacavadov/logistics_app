@@ -9,9 +9,9 @@ import type { CreateLoadPayload } from "./types";
 import logoLight from "../../assets/img/logo-light.png";
 
 type Target = "from" | "to";
-type State = { cargo_type_id:string; from_country_id:string; from_location_id:string; to_country_id:string; to_location_id:string; weight_ton:string; volume_m3:string; count:string; load_vehicle_type_id:string; date_mode:"ready"|"choose"; pickup_from:string; notes:string; price_mode:"negotiable"|"fixed"; price:string; currency:string };
+type State = { cargo_type_id:string; from_country_id:string; from_location_id:string; from_location_name:string; to_country_id:string; to_location_id:string; to_location_name:string; weight_ton:string; volume_m3:string; count:string; load_vehicle_type_id:string; date_mode:"ready"|"choose"; pickup_from:string; notes:string; price_mode:"negotiable"|"fixed"; price:string; currency:string };
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const initial:State={cargo_type_id:"",from_country_id:"",from_location_id:"",to_country_id:"",to_location_id:"",weight_ton:"",volume_m3:"",count:"",load_vehicle_type_id:"",date_mode:"ready",pickup_from:today(),notes:"",price_mode:"negotiable",price:"",currency:"AZN"};
+const initial:State={cargo_type_id:"",from_country_id:"",from_location_id:"",from_location_name:"",to_country_id:"",to_location_id:"",to_location_name:"",weight_ton:"",volume_m3:"",count:"",load_vehicle_type_id:"",date_mode:"ready",pickup_from:today(),notes:"",price_mode:"negotiable",price:"",currency:"AZN"};
 
 export default function LoadFormPage(){
  const {id}=useParams(); const loadId=id?Number(id):null; const editing=loadId!==null&&Number.isFinite(loadId);
@@ -22,8 +22,6 @@ export default function LoadFormPage(){
  const [form,setForm]=useState<State>(initial);
  const [target,setTarget]=useState<Target|null>(null); const [step,setStep]=useState<"country"|"city">("country");
  const [country,setCountry]=useState<Country|null>(null); const [search,setSearch]=useState("");
- const fromCities=useQuery({queryKey:["catalog","locations",form.from_country_id],queryFn:()=>catalogApi.locations(Number(form.from_country_id)),enabled:!!form.from_country_id});
- const toCities=useQuery({queryKey:["catalog","locations",form.to_country_id],queryFn:()=>catalogApi.locations(Number(form.to_country_id)),enabled:!!form.to_country_id});
  const modalCities=useQuery({queryKey:["catalog","locations",country?.id,"modal",search],queryFn:()=>catalogApi.locations(country!.id,search),enabled:!!country&&step==="city"});
  const countries=countriesQ.data??[]; const bodies=bodiesQ.data??[];
  const cargo=(cargoQ.data??[]).find(x=>String(x.id)===form.cargo_type_id);
@@ -32,11 +30,10 @@ export default function LoadFormPage(){
  function set<K extends keyof State>(key:K,value:State[K]){setForm(v=>({...v,[key]:value}));}
  function openPlace(t:Target){setTarget(t);setStep("country");setCountry(null);setSearch("");}
  function pickCountry(c:Country){setCountry(c);setStep("city");setSearch("");}
- function pickCity(city:Location|null){if(!target||!country)return;setForm(v=>target==="from"?({...v,from_country_id:String(country.id),from_location_id:city?String(city.id):""}):({...v,to_country_id:String(country.id),to_location_id:city?String(city.id):""}));setTarget(null);}
+ function pickCity(city:Location|null){if(!target||!country)return;setForm(v=>target==="from"?({...v,from_country_id:String(country.id),from_location_id:city?String(city.id):"",from_location_name:city?.name??""}):({...v,to_country_id:String(country.id),to_location_id:city?String(city.id):"",to_location_name:city?.name??""}));setTarget(null);}
  const countriesFiltered=useMemo(()=>countries.filter(x=>x.name.toLowerCase().includes(search.toLowerCase())),[countries,search]);
  const citiesFiltered=useMemo(()=>(modalCities.data??[]).filter(x=>x.name.toLowerCase().includes(search.toLowerCase())),[modalCities.data,search]);
  const countryLabel=(id:string)=>countries.find(x=>String(x.id)===id)?.name??"Ölkə seçin";
- const cityLabel=(id:string,rows:Location[]|undefined)=>rows?.find(x=>String(x.id)===id)?.name??"";
  function submit(e:FormEvent){e.preventDefault();const p:CreateLoadPayload={title:cargo?.name??"Yük",cargo_type_id:Number(form.cargo_type_id),from_country_id:Number(form.from_country_id),from_location_id:Number(form.from_location_id)||null,to_country_id:Number(form.to_country_id),to_location_id:Number(form.to_location_id)||null,pickup_from:form.date_mode==="ready"?today():form.pickup_from,weight_kg:Number(form.weight_ton)*1000,volume_m3:form.volume_m3?Number(form.volume_m3):null,quantity:Number(form.count),load_vehicle_type_id:Number(form.load_vehicle_type_id),notes:form.notes.trim()||null,price:form.price_mode==="fixed"&&form.price?Number(form.price):null,currency:form.price_mode==="fixed"&&form.price?form.currency:null,price_negotiable:form.price_mode==="negotiable",publish:true};mutation.mutate(p);}
  const busy=countriesQ.isLoading||cargoQ.isLoading||bodiesQ.isLoading||(editing&&loadQuery.isLoading);
  const err=mutation.error as {response?:{data?:{error?:{message?:string};errors?:Record<string,string[]>;message?:string}}}|null;
@@ -49,8 +46,8 @@ export default function LoadFormPage(){
  <section className="data-form-section"><h3>Yük məlumatları</h3>
  <label className="data-field data-field-wide"><span>Yük növü *</span><select required value={form.cargo_type_id} onChange={e=>set("cargo_type_id",e.target.value)}><option value="">Yük növünü seçin</option>{(cargoQ.data??[]).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
  <div className="data-form-grid">
- <div className="data-field"><span>Haradan *</span><button type="button" className="load-place-trigger" onClick={()=>openPlace("from")}><MapPin size={17}/>{countryLabel(form.from_country_id)}{form.from_location_id?", "+cityLabel(form.from_location_id,fromCities.data):""}<Search size={16}/></button></div>
- <div className="data-field"><span>Haraya *</span><button type="button" className="load-place-trigger" onClick={()=>openPlace("to")}><MapPin size={17}/>{countryLabel(form.to_country_id)}{form.to_location_id?", "+cityLabel(form.to_location_id,toCities.data):""}<Search size={16}/></button></div>
+ <div className="data-field"><span>Haradan *</span><button type="button" className="load-place-trigger" onClick={()=>openPlace("from")}><MapPin size={17}/>{countryLabel(form.from_country_id)}{form.from_location_name?", "+form.from_location_name:""}<Search size={16}/></button></div>
+ <div className="data-field"><span>Haraya *</span><button type="button" className="load-place-trigger" onClick={()=>openPlace("to")}><MapPin size={17}/>{countryLabel(form.to_country_id)}{form.to_location_name?", "+form.to_location_name:""}<Search size={16}/></button></div>
  <label className="data-field"><span>Çəki (ton) *</span><input required type="number" min="0.01" step="0.01" value={form.weight_ton} onChange={e=>set("weight_ton",e.target.value)} placeholder="Məs. 20"/></label>
  <label className="data-field"><span>Həcm (m³)</span><input type="number" min="0.01" step="0.01" value={form.volume_m3} onChange={e=>set("volume_m3",e.target.value)}/></label>
  <label className="data-field"><span>Say *</span><input required type="number" min="1" step="1" value={form.count} onChange={e=>set("count",e.target.value)}/></label>
