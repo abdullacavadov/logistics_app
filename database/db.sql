@@ -356,7 +356,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (5, '2026_11_01_000001_create_core_tables', 1),
 (6, '2026_11_01_000002_create_cargo_tables', 1),
 (7, '2026_11_01_000003_create_subscription_tables', 1),
-(8, '2026_11_01_000004_create_matching_settings', 2);
+(8, '2026_11_01_000004_create_matching_settings', 2),
+(9, '2026_11_06_000001_add_load_ad_catalogs', 3);
 
 -- --------------------------------------------------------
 
@@ -983,7 +984,7 @@ ALTER TABLE `matches`
 -- AUTO_INCREMENT для таблицы `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT для таблицы `payments`
