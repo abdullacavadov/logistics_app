@@ -66,7 +66,7 @@ class LoadController extends Controller
             return $this->err('not_shipper', 'Yük elanı yaratmaq üçün yük sahibi hüququ lazımdır', 403); // ödəniş tələb olunmur (§2.2)
         $d = $r->validate($this->rules());
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
-        $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';
+        $d['status'] = 'pending_moderation';
         // Required by the canonical loads schema; the channel is selected server-side.
         $d['applications'] = 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
@@ -179,7 +179,7 @@ class LoadController extends Controller
         return [
             'title' => $s . 'required|string|max:200',
             'description' => 'nullable|string|max:5000',
-            'cargo_type_id' => 'nullable|exists:cargo_types,id',
+            'cargo_type_id' => $s . 'required|exists:cargo_types,id',
             'from_country_id' => $s . 'required|exists:countries,id',
             'from_location_id' => 'nullable|exists:locations,id',
             'from_address' => 'nullable|string|max:255',
@@ -195,8 +195,8 @@ class LoadController extends Controller
             'delivery_by' => 'nullable|date|after_or_equal:pickup_from',
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
             'volume_m3' => 'nullable|numeric|gt:0',
-            'pallets' => 'nullable|integer|min:1',
-            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'pallets' => $s . 'required|integer|min:1',
+            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',\n            'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
             'needs_refrigeration' => 'boolean',
             'temp_min' => 'nullable|numeric',
             'temp_max' => 'nullable|numeric|gte:temp_min',
