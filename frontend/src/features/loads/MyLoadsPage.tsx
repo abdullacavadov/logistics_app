@@ -11,6 +11,8 @@ import { useAuth, useLogout } from '../auth/hooks/useAuth'
 
 const statusLabels: Record<LoadStatus, string> = {
   draft: 'Qaralama',
+  pending_moderation: 'Moderasiya gözləyir',
+  rejected: 'Rədd edilib',
   published: 'Dərc olunub',
   has_applications: 'Müraciətlər var',
   agreed: 'Razılaşdırılıb',
