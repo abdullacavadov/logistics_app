@@ -11,7 +11,7 @@ class ImportGeoNamesCities extends Command
     protected $signature = 'catalog:import-geonames
         {cities : Path to GeoNames cities5000.txt}
         {alternates : Path to GeoNames alternateNamesV2.txt}
-        {country-info : Path to GeoNames countryInfo.txt}';
+        {countryInfo : Path to GeoNames countryInfo.txt}';
 
     protected $description = 'Import GeoNames cities and az/ru/en/tr translations into the location and country catalogs';
 
@@ -23,7 +23,7 @@ class ImportGeoNamesCities extends Command
             return self::FAILURE;
         }
 
-        foreach (['cities', 'alternates', 'country-info'] as $argument) {
+        foreach (['cities', 'alternates', 'countryInfo'] as $argument) {
             $path = $this->argument($argument);
             if (!is_file($path) || !is_readable($path)) {
                 $this->error('File is missing or unreadable: '.$path);
@@ -32,7 +32,7 @@ class ImportGeoNamesCities extends Command
         }
 
         $countryGeoNames = [];
-        $countryInfo = new SplFileObject($this->argument('country-info'));
+        $countryInfo = new SplFileObject($this->argument('countryInfo'));
         while (!$countryInfo->eof()) {
             $line = trim($countryInfo->fgets());
             if ($line === '' || str_starts_with($line, '#')) continue;
@@ -78,6 +78,7 @@ class ImportGeoNamesCities extends Command
                     $key = $city['country_id'].'|'.mb_strtolower($alias);
                     if (isset($legacyNames[$key])) {
                         $matchedId = $legacyNames[$key];
+                        unset($legacyNames[$key]);
                         break;
                     }
                 }
@@ -124,6 +125,7 @@ class ImportGeoNamesCities extends Command
             $row = explode("\t", $line);
             if (count($row) < 4 || !in_array($row[2], ['az', 'ru', 'en', 'tr'], true) || trim($row[3]) === '') continue;
 
+            if (isset($row[4]) && $row[4] !== '1') continue;
             $geonameId = (int) $row[1];
             $name = mb_substr(trim($row[3]), 0, 150);
             if (isset($ids[$geonameId])) {
