@@ -104,6 +104,33 @@ class LoadController extends Controller
         return response()->json(['data' => DB::table('loads')->find($id)]);
     }
 
+    public function moderate(Request $r, int $id)
+    {
+        if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'admin'])->exists()) {
+            return $this->err('forbidden', 'Bu əməliyyat üçün administrator hüququ lazımdır', 403);
+        }
+
+        $data = $r->validate([
+            'decision' => 'required|in:approve,reject',
+            'reason' => 'nullable|string|max:500',
+        ]);
+        $load = DB::table('loads')->where('id', $id)->first();
+        if (!$load) return $this->err('not_found', 'Elan tapılmadı', 404);
+        if ($load->status !== 'pending_moderation') {
+            return $this->err('bad_status', 'Yalnız moderasiya gözləyən elanlara qərar verilə bilər', 409);
+        }
+
+        $status = $data['decision'] === 'approve' ? 'published' : 'rejected';
+        DB::table('loads')->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
+        $this->audit($r, 'load.moderated', $id, ['status' => $load->status], [
+            'status' => $status,
+            'reason' => $data['reason'] ?? null,
+        ]);
+        $matches = $status === 'published' ? $this->matcher->forLoad($id) : 0;
+
+        return response()->json(['data' => ['id' => $id, 'status' => $status, 'matches' => $matches]]);
+    }
+
     public function publish(Request $r, int $id)
     {
         $load = $this->owned($r, $id);
@@ -116,11 +143,11 @@ class LoadController extends Controller
 
     public function cancel(Request $r, int $id)
     {
-        return $this->moveTo($r, $id, 'cancelled', ['draft', 'published', 'has_applications', 'agreed']);
+        return $this->moveTo($r, $id, 'cancelled', ['draft', 'pending_moderation', 'published', 'has_applications', 'agreed']);
     }
     public function archive(Request $r, int $id)
     {
-        return $this->moveTo($r, $id, 'archived', ['draft', 'published', 'has_applications', 'completed', 'cancelled']);
+        return $this->moveTo($r, $id, 'archived', ['draft', 'pending_moderation', 'published', 'has_applications', 'completed', 'cancelled']);
     }
 
     private function moveTo(Request $r, int $id, string $to, array $from)
