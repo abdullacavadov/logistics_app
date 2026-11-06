@@ -110,6 +110,7 @@ export interface CreateLoadPayload {
   weight_kg: number
   volume_m3?: number | null
   pallets?: number | null
+  quantity?: number | null
   required_vehicle_type_id?: number | null
   load_vehicle_type_id?: number | null
   needs_refrigeration?: boolean
