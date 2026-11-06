@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Search, X, MapPin } from "lucide-react";
-import { catalogApi, type Country, type Location } from "../catalog/catalogApi";
+import { catalogApi, getCatalogLocale, type Country, type Location } from "../catalog/catalogApi";
 import { loadsApi } from "./api/loadsApi";
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from "./hooks/useLoads";
 import type { CreateLoadPayload } from "./types";
@@ -64,9 +64,10 @@ export default function LoadFormPage() {
     const editing = loadId !== null && Number.isFinite(loadId);
     const navigate = useNavigate();
     const qc = useQueryClient();
+    const catalogLocale = getCatalogLocale();
     const loadQuery = useLoad(editing ? loadId : null);
     const countriesQ = useQuery({
-        queryKey: ["catalog", "countries"],
+        queryKey: ["catalog", "countries", catalogLocale],
         queryFn: catalogApi.countries,
     });
     const cargoQ = useQuery({
@@ -74,7 +75,7 @@ export default function LoadFormPage() {
         queryFn: catalogApi.cargoTypes,
     });
     const bodiesQ = useQuery({
-        queryKey: ["catalog", "load-vehicle-types"],
+        queryKey: ["catalog", "load-vehicle-types", catalogLocale],
         queryFn: catalogApi.loadVehicleTypes,
     });
     const [form, setForm] = useState<State>(initial);
@@ -85,13 +86,13 @@ export default function LoadFormPage() {
     const [bodyModalOpen, setBodyModalOpen] = useState(false);
     const [bodySearch, setBodySearch] = useState("");
     const modalCities = useQuery({
-        queryKey: ["catalog", "locations", country?.id, "modal", search],
+        queryKey: ["catalog", "locations", country?.id, "modal", search, catalogLocale],
         queryFn: () => catalogApi.locations(country!.id, search),
         enabled: !!country && step === "city",
     });
     const countries = countriesQ.data ?? [];
-    const bodyTypesFiltered = useMemo(() => bodies.filter((x) => x.name.toLowerCase().includes(bodySearch.toLowerCase())), [bodies, bodySearch]);
     const bodies = bodiesQ.data ?? [];
+    const bodyTypesFiltered = useMemo(() => bodies.filter((x) => x.name.toLowerCase().includes(bodySearch.toLowerCase())), [bodies, bodySearch]);
     const cargo = (cargoQ.data ?? []).find(
         (x) => String(x.id) === form.cargo_type_id,
     );
