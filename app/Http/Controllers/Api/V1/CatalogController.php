@@ -58,13 +58,17 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function loadVehicleTypes()
+    public function loadVehicleTypes(Request $request)
     {
+        $locale = $request->query('locale', 'az');
         return response()->json([
-            'data' => DB::table('load_vehicle_types')
-                ->where('is_active', 1)
-                ->orderBy('sort_order')
-                ->get(['id', 'name', 'category', 'capacity_m3', 'image_path']),
+            'data' => DB::table('load_vehicle_types as t')
+                ->leftJoin('load_vehicle_type_translations as tr', function ($join) use ($locale) {
+                    $join->on('tr.load_vehicle_type_id', '=', 't.id')->where('tr.locale', '=', $locale);
+                })
+                ->where('t.is_active', 1)
+                ->orderBy('t.sort_order')
+                ->get(['t.id', DB::raw('COALESCE(tr.name, t.name) as name'), 't.category', 't.capacity_m3', 't.image_path']),
         ]);
     }
 
