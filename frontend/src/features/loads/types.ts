@@ -17,11 +17,13 @@ export interface Load {
   cargo_type_id: number | null
   from_country_id: number
   from_location_id: number | null
+  from_location_name?: string | null
   from_address?: string | null
   from_lat?: number | string | null
   from_lng?: number | string | null
   to_country_id: number
   to_location_id: number | null
+  to_location_name?: string | null
   to_address?: string | null
   to_lat?: number | string | null
   to_lng?: number | string | null
