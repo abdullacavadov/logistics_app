@@ -23,14 +23,6 @@ export interface LoadVehicleType {
   image_path: string
 }
 
-export interface LoadVehicleType {
-  id: number
-  name: string
-  category: string
-  capacity_m3: number | null
-  image_path: string
-}
-
 export interface NamedCatalogItem {
   id: number
   name: string
