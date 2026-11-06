@@ -104,6 +104,29 @@ class LoadController extends Controller
         return response()->json(['data' => DB::table('loads')->find($id)]);
     }
 
+    public function adminPending(Request $r)
+    {
+        if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'admin'])->exists()) {
+            return $this->err('forbidden', 'Bu siyahı üçün administrator hüququ lazımdır', 403);
+        }
+
+        $rows = DB::table('loads as l')
+            ->join('users as u', 'u.id', '=', 'l.user_id')
+            ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
+            ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
+            ->where('l.status', 'pending_moderation')
+            ->orderBy('l.created_at')
+            ->select('l.*', 'u.name as shipper_name', 'ct.name as cargo_type_name',
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'))
+            ->paginate($r->integer('per_page', 20));
+
+        return response()->json($rows);
+    }
+
     public function moderate(Request $r, int $id)
     {
         if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'admin'])->exists()) {
