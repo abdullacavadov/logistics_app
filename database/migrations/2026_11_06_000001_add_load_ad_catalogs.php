@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->foreign('load_vehicle_type_id')->references('id')->on('load_vehicle_types');
         });
 
-        DB::statement("ALTER TABLE loads MODIFY status ENUM('draft','pending_moderation','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft'");
+        DB::statement("ALTER TABLE loads MODIFY status ENUM('draft','pending_moderation','rejected','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft'");
 
         Schema::create('country_translations', function (Blueprint $table) {
             $table->unsignedBigInteger('country_id');
