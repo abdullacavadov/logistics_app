@@ -1,5 +1,6 @@
 export type LoadStatus =
   | 'draft'
+  | 'pending_moderation'
   | 'published'
   | 'has_applications'
   | 'agreed'
@@ -30,6 +31,7 @@ export interface Load {
   volume_m3: number | string | null
   pallets: number | null
   required_vehicle_type_id: number | null
+  load_vehicle_type_id?: number | null
   needs_refrigeration: boolean
   temp_min: number | string | null
   temp_max: number | string | null
@@ -109,6 +111,7 @@ export interface CreateLoadPayload {
   volume_m3?: number | null
   pallets?: number | null
   required_vehicle_type_id?: number | null
+  load_vehicle_type_id?: number | null
   needs_refrigeration?: boolean
   temp_min?: number | null
   temp_max?: number | null
