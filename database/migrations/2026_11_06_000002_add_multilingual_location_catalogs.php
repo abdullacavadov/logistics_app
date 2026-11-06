@@ -30,6 +30,14 @@ return new class extends Migration {
             DB::table('country_translations')->upsert($rows, ['country_id', 'locale'], ['name']);
         }
 
+        foreach (DB::table('locations')->get(['id', 'name']) as $location) {
+            $rows = [];
+            foreach (['az', 'ru', 'en', 'tr'] as $locale) {
+                $rows[] = ['location_id' => $location->id, 'locale' => $locale, 'name' => $location->name];
+            }
+            DB::table('location_translations')->upsert($rows, ['location_id', 'locale'], ['name']);
+        }
+
         $typeTranslations = [
             'Tent 86 m³' => ['az' => 'Tent 86 m³', 'ru' => 'Тент 86 м³', 'en' => 'Curtainsider 86 m³', 'tr' => 'Tent 86 m³'],
             'Tent 90 m³' => ['az' => 'Tent 90 m³', 'ru' => 'Тент 90 м³', 'en' => 'Curtainsider 90 m³', 'tr' => 'Tent 90 m³'],
