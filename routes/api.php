@@ -35,6 +35,7 @@ Route::prefix('v1')->group(function () {
         Route::get('admin/subscription-plans', [SubscriptionController::class, 'adminIndex']);
         Route::post('admin/subscription-plans', [SubscriptionController::class, 'storePlan']);
         Route::post('loads', [LoadController::class, 'store']);
+        Route::get('admin/loads/pending', [LoadController::class, 'adminPending']);
         Route::post('admin/loads/{id}/moderate', [LoadController::class, 'moderate'])->whereNumber('id');
         Route::put('loads/{id}', [LoadController::class, 'update'])->whereNumber('id');
         Route::post('loads/{id}/publish', [LoadController::class, 'publish'])->whereNumber('id');
