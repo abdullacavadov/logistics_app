@@ -15,7 +15,23 @@ export interface Location {
   lng: number | null
 }
 
-export interface LoadVehicleType {\n  id: number\n  name: string\n  category: string\n  capacity_m3: number | null\n  image_path: string\n}\n\nexport interface NamedCatalogItem {
+export interface LoadVehicleType {
+  id: number
+  name: string
+  category: string
+  capacity_m3: number | null
+  image_path: string
+}
+
+export interface LoadVehicleType {
+  id: number
+  name: string
+  category: string
+  capacity_m3: number | null
+  image_path: string
+}
+
+export interface NamedCatalogItem {
   id: number
   name: string
   is_refrigerated?: boolean
@@ -44,6 +60,10 @@ export const catalogApi = {
   },
   async vehicleTypes(): Promise<NamedCatalogItem[]> {
     const { data } = await api.get<{ data: NamedCatalogItem[] }>('/catalog/vehicle-types')
+    return data.data
+  },
+  async loadVehicleTypes(): Promise<LoadVehicleType[]> {
+    const { data } = await api.get<{ data: LoadVehicleType[] }>('/catalog/load-vehicle-types')
     return data.data
   },
 }
