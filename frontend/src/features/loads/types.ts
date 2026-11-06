@@ -31,9 +31,9 @@ export interface Load {
   weight_kg: number | string
   volume_m3: number | string | null
   pallets: number | null
-  quantity?: number | null
+  quantity: number
   required_vehicle_type_id: number | null
-  load_vehicle_type_id?: number | null
+  load_vehicle_type_id: number
   needs_refrigeration: boolean
   temp_min: number | string | null
   temp_max: number | string | null
@@ -53,6 +53,7 @@ export interface Load {
   to_name?: string
   cargo_type_name?: string | null
   vehicle_type_name?: string | null
+  load_vehicle_type_name?: string | null
 }
 
 export interface PaginatedResponse<T> {
@@ -95,7 +96,7 @@ export interface LoadFilters {
 export interface CreateLoadPayload {
   title: string
   description?: string | null
-  cargo_type_id?: number | null
+  cargo_type_id: number
   from_country_id: number
   from_location_id?: number | null
   from_address?: string | null
