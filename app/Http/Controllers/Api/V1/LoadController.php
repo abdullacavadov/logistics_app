@@ -80,6 +80,7 @@ class LoadController extends Controller
         if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if (in_array($load->status, ['in_transit', 'completed', 'cancelled', 'archived'])) return $this->err('locked', 'Bu statusda elan dəyişdirilə bilməz', 409);
         $d = $r->validate($this->rules(true));
+        if ($load->status === 'rejected') $d['status'] = 'pending_moderation';
         if (!$this->validLocationSelection($d, $load)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
         $changedCritical = [];
@@ -170,7 +171,7 @@ class LoadController extends Controller
     }
     public function archive(Request $r, int $id)
     {
-        return $this->moveTo($r, $id, 'archived', ['draft', 'pending_moderation', 'published', 'has_applications', 'completed', 'cancelled']);
+        return $this->moveTo($r, $id, 'archived', ['draft', 'pending_moderation', 'rejected', 'published', 'has_applications', 'completed', 'cancelled']);
     }
 
     private function moveTo(Request $r, int $id, string $to, array $from)
