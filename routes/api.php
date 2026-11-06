@@ -16,7 +16,8 @@ Route::prefix('v1')->group(function () {
     Route::get('catalog/countries', [CatalogController::class, 'countries'])->middleware('throttle:60,1');
     Route::get('catalog/locations', [CatalogController::class, 'locations'])->middleware('throttle:60,1');
     Route::get('catalog/cargo-types', [CatalogController::class, 'cargoTypes'])->middleware('throttle:60,1');
-    Route::get('catalog/vehicle-types', [CatalogController::class, 'vehicleTypes'])->middleware('throttle:60,1');\n    Route::get('catalog/load-vehicle-types', [CatalogController::class, 'loadVehicleTypes'])->middleware('throttle:60,1');
+    Route::get('catalog/vehicle-types', [CatalogController::class, 'vehicleTypes'])->middleware('throttle:60,1');
+    Route::get('catalog/load-vehicle-types', [CatalogController::class, 'loadVehicleTypes'])->middleware('throttle:60,1');
 
     // Ictimai (qonaq) — yalnız dərc olunmuş elanlar
     Route::get('loads', [LoadController::class, 'index'])->middleware('throttle:60,1');
