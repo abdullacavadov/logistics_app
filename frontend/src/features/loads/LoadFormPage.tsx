@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Search, X, MapPin } from "lucide-react";
-import { catalogApi, getCatalogLocale, type CatalogLocale, type Country, type LoadVehicleType, type Location } from "../catalog/catalogApi";
+import {
+    catalogApi,
+    getCatalogLocale,
+    type CatalogLocale,
+    type Country,
+    type LoadVehicleType,
+    type Location,
+} from "../catalog/catalogApi";
 import "./load-body-picker.css";
 import { loadsApi } from "./api/loadsApi";
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from "./hooks/useLoads";
@@ -39,18 +46,52 @@ const today = () => {
         String(d.getDate()).padStart(2, "0")
     );
 };
-const LOAD_BODY_CATEGORY_LABELS: Record<string, Record<CatalogLocale, string>> = {
+const LOAD_BODY_CATEGORY_LABELS: Record<
+    string,
+    Record<CatalogLocale, string>
+> = {
     tent: { az: "Tent", ru: "Тент", en: "Curtainsider", tr: "Tent" },
-    mega_tent: { az: "Mega tent", ru: "Мега-тент", en: "Mega curtainsider", tr: "Mega tent" },
-    refrigerator: { az: "Soyuduculu yarımqoşqu", ru: "Рефрижератор", en: "Refrigerated trailer", tr: "Frigorifik" },
-    car_carrier: { az: "Avtodaşıyan", ru: "Автовоз", en: "Car carrier", tr: "Araç taşıyıcı" },
-    low_loader: { az: "Alçaq platformalı", ru: "Низкорамный трал", en: "Low loader", tr: "Lowbed" },
-    container_carrier: { az: "Konteyner daşıyıcı", ru: "Контейнеровоз", en: "Container carrier", tr: "Konteyner taşıyıcı" },
+    mega_tent: {
+        az: "Mega tent",
+        ru: "Мега-тент",
+        en: "Mega curtainsider",
+        tr: "Mega tent",
+    },
+    refrigerator: {
+        az: "Soyuduculu yarımqoşqu",
+        ru: "Рефрижератор",
+        en: "Refrigerated trailer",
+        tr: "Frigorifik",
+    },
+    car_carrier: {
+        az: "Avtodaşıyan",
+        ru: "Автовоз",
+        en: "Car carrier",
+        tr: "Araç taşıyıcı",
+    },
+    low_loader: {
+        az: "Alçaq platformalı",
+        ru: "Низкорамный трал",
+        en: "Low loader",
+        tr: "Lowbed",
+    },
+    container_carrier: {
+        az: "Konteyner daşıyıcı",
+        ru: "Контейнеровоз",
+        en: "Container carrier",
+        tr: "Konteyner taşıyıcı",
+    },
     other: { az: "Digər", ru: "Другое", en: "Other", tr: "Diğer" },
 };
 
-function loadBodyCategoryLabel(category: string, locale: CatalogLocale): string {
-    return LOAD_BODY_CATEGORY_LABELS[category]?.[locale] ?? category.replaceAll("_", " ");
+function loadBodyCategoryLabel(
+    category: string,
+    locale: CatalogLocale,
+): string {
+    return (
+        LOAD_BODY_CATEGORY_LABELS[category]?.[locale] ??
+        category.replaceAll("_", " ")
+    );
 }
 
 const initial: State = {
@@ -100,9 +141,18 @@ export default function LoadFormPage() {
     const [search, setSearch] = useState("");
     const [bodyModalOpen, setBodyModalOpen] = useState(false);
     const [bodySearch, setBodySearch] = useState("");
-    const [activeBodyCategory, setActiveBodyCategory] = useState<string | null>(null);
+    const [activeBodyCategory, setActiveBodyCategory] = useState<string | null>(
+        null,
+    );
     const modalCities = useQuery({
-        queryKey: ["catalog", "locations", country?.id, "modal", search, catalogLocale],
+        queryKey: [
+            "catalog",
+            "locations",
+            country?.id,
+            "modal",
+            search,
+            catalogLocale,
+        ],
         queryFn: () => catalogApi.locations(country!.id, search),
         enabled: !!country && step === "city",
     });
@@ -125,19 +175,28 @@ export default function LoadFormPage() {
     const bodyGroupsFiltered = useMemo(() => {
         const query = bodySearch.trim().toLocaleLowerCase();
         if (!query) return bodyGroups;
-        return bodyGroups.filter((group) =>
-            group.label.toLocaleLowerCase().includes(query) ||
-            group.items.some((item) => item.name.toLocaleLowerCase().includes(query)),
+        return bodyGroups.filter(
+            (group) =>
+                group.label.toLocaleLowerCase().includes(query) ||
+                group.items.some((item) =>
+                    item.name.toLocaleLowerCase().includes(query),
+                ),
         );
     }, [bodyGroups, bodySearch]);
-    const activeBodyGroup = bodyGroups.find((group) => group.key === activeBodyCategory) ?? null;
+    const activeBodyGroup =
+        bodyGroups.find((group) => group.key === activeBodyCategory) ?? null;
     const activeBodyItems = useMemo(() => {
         if (!activeBodyGroup) return [];
         const query = bodySearch.trim().toLocaleLowerCase();
-        if (!query || activeBodyGroup.label.toLocaleLowerCase().includes(query)) {
+        if (
+            !query ||
+            activeBodyGroup.label.toLocaleLowerCase().includes(query)
+        ) {
             return activeBodyGroup.items;
         }
-        return activeBodyGroup.items.filter((item) => item.name.toLocaleLowerCase().includes(query));
+        return activeBodyGroup.items.filter((item) =>
+            item.name.toLocaleLowerCase().includes(query),
+        );
     }, [activeBodyGroup, bodySearch]);
     const cargo = (cargoQ.data ?? []).find(
         (x) => String(x.id) === form.cargo_type_id,
@@ -432,11 +491,22 @@ export default function LoadFormPage() {
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Yük yeri növü *</h3>
-                                    <button type="button" className="load-place-trigger load-body-type-trigger"
-                                        aria-haspopup="dialog" aria-expanded={bodyModalOpen}
-                                        onClick={() => { setBodySearch(""); setBodyModalOpen(true); }}>
+                                    <button
+                                        type="button"
+                                        className="load-place-trigger load-body-type-trigger"
+                                        aria-haspopup="dialog"
+                                        aria-expanded={bodyModalOpen}
+                                        onClick={() => {
+                                            setBodySearch("");
+                                            setBodyModalOpen(true);
+                                        }}
+                                    >
                                         <span>
-                                            {bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.name ?? "Yük yeri növünü seçin"}
+                                            {bodies.find(
+                                                (x) =>
+                                                    String(x.id) ===
+                                                    form.load_vehicle_type_id,
+                                            )?.name ?? "Yük yeri növünü seçin"}
                                         </span>
                                         <Search size={16} />
                                     </button>
@@ -577,10 +647,10 @@ export default function LoadFormPage() {
                                             </label>
                                             <label className="data-field">
                                                 <span>Valyuta</span>
-                                                <input disabled
+                                                <input
+                                                    disabled
                                                     value="USD"
-                                                >
-                                                </input>
+                                                ></input>
                                             </label>
                                         </div>
                                     )}
@@ -731,9 +801,14 @@ export default function LoadFormPage() {
                         <header>
                             <div>
                                 <h3 id="load-body-modal-title">
-                                    {activeBodyGroup?.label ?? "Yük yeri növünü seçin"}
+                                    {activeBodyGroup?.label ??
+                                        "Yük yeri növünü seçin"}
                                 </h3>
-                                <p>{activeBodyGroup ? "Alt kateqoriyanı seçin" : "Əsas kateqoriyanı seçin"}</p>
+                                <p>
+                                    {activeBodyGroup
+                                        ? "Alt kateqoriyanı seçin"
+                                        : "Əsas kateqoriyanı seçin"}
+                                </p>
                             </div>
                             <button
                                 type="button"
@@ -762,15 +837,28 @@ export default function LoadFormPage() {
                                         type="button"
                                         key={group.key}
                                         className="load-body-category-card"
-                                        onClick={() => setActiveBodyCategory(group.key)}
+                                        onClick={() =>
+                                            setActiveBodyCategory(group.key)
+                                        }
                                     >
-                                        {group.imagePath && <img src={group.imagePath} alt="" />}
+                                        {group.imagePath && (
+                                            <img
+                                                src={getVehicleTypeImage(
+                                                    vehicleType.image,
+                                                )}
+                                                alt={vehicleType.name}
+                                            />
+                                        )}
                                         <span>{group.label}</span>
-                                        <small>{group.items.length} alt növ</small>
+                                        <small>
+                                            {group.items.length} alt növ
+                                        </small>
                                     </button>
                                 ))}
                                 {bodyGroupsFiltered.length === 0 && (
-                                    <p className="load-body-empty">Uyğun kateqoriya və ya növ tapılmadı.</p>
+                                    <p className="load-body-empty">
+                                        Uyğun kateqoriya və ya növ tapılmadı.
+                                    </p>
                                 )}
                             </div>
                         ) : (
@@ -780,19 +868,33 @@ export default function LoadFormPage() {
                                         <button
                                             type="button"
                                             key={item.id}
-                                            className={form.load_vehicle_type_id === String(item.id) ? "load-body-subcategory-option is-selected" : "load-body-subcategory-option"}
+                                            className={
+                                                form.load_vehicle_type_id ===
+                                                String(item.id)
+                                                    ? "load-body-subcategory-option is-selected"
+                                                    : "load-body-subcategory-option"
+                                            }
                                             onClick={() => {
-                                                set("load_vehicle_type_id", String(item.id));
+                                                set(
+                                                    "load_vehicle_type_id",
+                                                    String(item.id),
+                                                );
                                                 setBodyModalOpen(false);
                                                 setActiveBodyCategory(null);
                                             }}
                                         >
                                             <span>{item.name}</span>
-                                            {item.capacity_m3 ? <small>{item.capacity_m3} m³</small> : null}
+                                            {item.capacity_m3 ? (
+                                                <small>
+                                                    {item.capacity_m3} m³
+                                                </small>
+                                            ) : null}
                                         </button>
                                     ))}
                                     {activeBodyItems.length === 0 && (
-                                        <p className="load-body-empty">Bu kateqoriyada uyğun növ tapılmadı.</p>
+                                        <p className="load-body-empty">
+                                            Bu kateqoriyada uyğun növ tapılmadı.
+                                        </p>
                                     )}
                                 </div>
                                 <button
