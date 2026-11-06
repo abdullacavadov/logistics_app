@@ -286,6 +286,7 @@ INSERT INTO `loads` (`id`, `user_id`, `title`, `description`, `cargo_type_id`, `
 
 CREATE TABLE `locations` (
   `id` bigint(20) UNSIGNED NOT NULL,
+  `geoname_id` bigint(20) UNSIGNED DEFAULT NULL,
   `country_id` bigint(20) UNSIGNED NOT NULL,
   `name` varchar(120) NOT NULL,
   `lat` decimal(9,6) DEFAULT NULL,
@@ -357,7 +358,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (6, '2026_11_01_000002_create_cargo_tables', 1),
 (7, '2026_11_01_000003_create_subscription_tables', 1),
 (8, '2026_11_01_000004_create_matching_settings', 2),
-(9, '2026_11_06_000001_add_load_ad_catalogs', 3);
+(9, '2026_11_06_000001_add_load_ad_catalogs', 3),
+(10, '2026_11_06_000002_add_multilingual_location_catalogs', 4);
 
 -- --------------------------------------------------------
 
@@ -683,6 +685,9 @@ CREATE TABLE `location_translations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `country_translations` (`country_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `countries`;
+INSERT INTO `country_translations` (`country_id`, `locale`, `name`) SELECT `id`, 'ru', CASE `iso2` WHEN 'AZ' THEN 'Азербайджан' WHEN 'TR' THEN 'Турция' WHEN 'GE' THEN 'Грузия' WHEN 'RU' THEN 'Россия' WHEN 'KZ' THEN 'Казахстан' WHEN 'DE' THEN 'Германия' ELSE `name` END FROM `countries`;
+INSERT INTO `country_translations` (`country_id`, `locale`, `name`) SELECT `id`, 'en', CASE `iso2` WHEN 'AZ' THEN 'Azerbaijan' WHEN 'TR' THEN 'Turkey' WHEN 'GE' THEN 'Georgia' WHEN 'RU' THEN 'Russia' WHEN 'KZ' THEN 'Kazakhstan' WHEN 'DE' THEN 'Germany' ELSE `name` END FROM `countries`;
+INSERT INTO `country_translations` (`country_id`, `locale`, `name`) SELECT `id`, 'tr', CASE `iso2` WHEN 'AZ' THEN 'Azerbaycan' WHEN 'TR' THEN 'Türkiye' WHEN 'GE' THEN 'Gürcistan' WHEN 'RU' THEN 'Rusya' WHEN 'KZ' THEN 'Kazakistan' WHEN 'DE' THEN 'Almanya' ELSE `name` END FROM `countries`;
 INSERT INTO `location_translations` (`location_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `locations`;
 
 INSERT INTO `load_vehicle_types` (`name`, `category`, `capacity_m3`, `image_path`, `sort_order`, `is_active`) VALUES
@@ -705,6 +710,58 @@ INSERT INTO `load_vehicle_types` (`name`, `category`, `capacity_m3`, `image_path
 ('Digər','other',NULL,'/images/load-vehicle-types/other.svg',170,1);
 
 INSERT INTO `load_vehicle_type_translations` (`load_vehicle_type_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `load_vehicle_types`;
+INSERT INTO `load_vehicle_type_translations` (`load_vehicle_type_id`, `locale`, `name`) VALUES
+(1, 'ru', 'Тент 86 м³'),
+(1, 'en', 'Curtainsider 86 m³'),
+(1, 'tr', 'Tent 86 m³'),
+(2, 'ru', 'Тент 90 м³'),
+(2, 'en', 'Curtainsider 90 m³'),
+(2, 'tr', 'Tent 90 m³'),
+(3, 'ru', 'Тент 92 м³'),
+(3, 'en', 'Curtainsider 92 m³'),
+(3, 'tr', 'Tent 92 m³'),
+(4, 'ru', 'Тент 96 м³'),
+(4, 'en', 'Curtainsider 96 m³'),
+(4, 'tr', 'Tent 96 m³'),
+(5, 'ru', 'Тент 100 м³'),
+(5, 'en', 'Curtainsider 100 m³'),
+(5, 'tr', 'Tent 100 m³'),
+(6, 'ru', 'Тент 105 м³'),
+(6, 'en', 'Curtainsider 105 m³'),
+(6, 'tr', 'Tent 105 m³'),
+(7, 'ru', 'Тент 110 м³'),
+(7, 'en', 'Curtainsider 110 m³'),
+(7, 'tr', 'Tent 110 m³'),
+(8, 'ru', 'Мега-тент 110 м³'),
+(8, 'en', 'Mega curtainsider 110 m³'),
+(8, 'tr', 'Mega tent 110 m³'),
+(9, 'ru', 'Мега-тент 120 м³'),
+(9, 'en', 'Mega curtainsider 120 m³'),
+(9, 'tr', 'Mega tent 120 m³'),
+(10, 'ru', 'Мега-тент 130 м³'),
+(10, 'en', 'Mega curtainsider 130 m³'),
+(10, 'tr', 'Mega tent 130 m³'),
+(11, 'ru', 'Мега-тент 140 м³'),
+(11, 'en', 'Mega curtainsider 140 m³'),
+(11, 'tr', 'Mega tent 140 m³'),
+(12, 'ru', 'Рефрижератор с режимом'),
+(12, 'en', 'Refrigerated trailer'),
+(12, 'tr', 'Frigorifik (soğutmalı)'),
+(13, 'ru', 'Рефрижератор без режима'),
+(13, 'en', 'Refrigerated trailer (no temperature setting)'),
+(13, 'tr', 'Frigorifik (rejimsiz)'),
+(14, 'ru', 'Автовоз'),
+(14, 'en', 'Car transporter'),
+(14, 'tr', 'Araç taşıyıcı'),
+(15, 'ru', 'Низкорамный трал'),
+(15, 'en', 'Low loader'),
+(15, 'tr', 'Lowbed (alçak yataklı)'),
+(16, 'ru', 'Контейнеровоз'),
+(16, 'en', 'Container carrier'),
+(16, 'tr', 'Konteyner taşıyıcı'),
+(17, 'ru', 'Другое'),
+(17, 'en', 'Other'),
+(17, 'tr', 'Diğer');
 
 --
 -- Индексы сохранённых таблиц
@@ -801,6 +858,7 @@ ALTER TABLE `loads`
 --
 ALTER TABLE `locations`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `locations_geoname_id_unique` (`geoname_id`),
   ADD KEY `locations_country_id_name_index` (`country_id`,`name`);
 
 --
@@ -994,7 +1052,7 @@ ALTER TABLE `matches`
 -- AUTO_INCREMENT для таблицы `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT для таблицы `payments`

@@ -1,5 +1,13 @@
 import { api } from '../../lib/api'
 
+export type CatalogLocale = 'az' | 'ru' | 'en' | 'tr'
+
+export function getCatalogLocale(): CatalogLocale {
+  const candidates = [localStorage.getItem('locale'), localStorage.getItem('language'), document.documentElement.lang]
+  const value = candidates.find((x): x is string => !!x && ['az', 'ru', 'en', 'tr'].includes(x.toLowerCase()))
+  return (value?.toLowerCase() as CatalogLocale) ?? 'az'
+}
+
 export interface Country {
   id: number
   iso2: string
@@ -37,12 +45,12 @@ export interface CatalogPage<T> {
 
 export const catalogApi = {
   async countries(): Promise<Country[]> {
-    const { data } = await api.get<{ data: Country[] }>('/catalog/countries')
+    const { data } = await api.get<{ data: Country[] }>('/catalog/countries', { params: { locale: getCatalogLocale() } })
     return data.data
   },
   async locations(countryId: number, search = ''): Promise<Location[]> {
     const { data } = await api.get<CatalogPage<Location>>('/catalog/locations', {
-      params: { country_id: countryId, per_page: 100, search: search || undefined },
+      params: { country_id: countryId, per_page: 100, search: search || undefined, locale: getCatalogLocale() },
     })
     return data.data
   },
@@ -55,7 +63,7 @@ export const catalogApi = {
     return data.data
   },
   async loadVehicleTypes(): Promise<LoadVehicleType[]> {
-    const { data } = await api.get<{ data: LoadVehicleType[] }>('/catalog/load-vehicle-types')
+    const { data } = await api.get<{ data: LoadVehicleType[] }>('/catalog/load-vehicle-types', { params: { locale: getCatalogLocale() } })
     return data.data
   },
 }
