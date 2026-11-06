@@ -31,9 +31,9 @@ export interface Load {
   weight_kg: number | string
   volume_m3: number | string | null
   pallets: number | null
-  quantity: number
+  quantity?: number | null
   required_vehicle_type_id: number | null
-  load_vehicle_type_id: number
+  load_vehicle_type_id?: number | null
   needs_refrigeration: boolean
   temp_min: number | string | null
   temp_max: number | string | null
@@ -113,9 +113,9 @@ export interface CreateLoadPayload {
   weight_kg: number
   volume_m3?: number | null
   pallets?: number | null
-  quantity?: number | null
+  quantity: number
   required_vehicle_type_id?: number | null
-  load_vehicle_type_id?: number | null
+  load_vehicle_type_id: number
   needs_refrigeration?: boolean
   temp_min?: number | null
   temp_max?: number | null
