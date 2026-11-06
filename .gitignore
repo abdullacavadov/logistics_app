@@ -23,6 +23,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
+database/import/geonames/*
+
 # Frontend generated files
 /frontend/node_modules/
 /frontend/dist/
