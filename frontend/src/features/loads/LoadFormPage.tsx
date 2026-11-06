@@ -269,7 +269,7 @@ export default function LoadFormPage() {
                                 <section className="data-form-section">
                                     <h3>Ümumi məlumat</h3>
                                     <label className="data-field data-field-wide">
-                                        <span>Elan başlığı *</span>
+                                        <span>Yük növü *</span>
                                         <input
                                             required
                                             maxLength={200}
@@ -277,7 +277,7 @@ export default function LoadFormPage() {
                                             onChange={(e) =>
                                                 set("title", e.target.value)
                                             }
-                                            placeholder="Məsələn: Bakı – Tbilisi, 20 ton yük"
+                                            placeholder="Məsələn: Metal profillər"
                                         />
                                     </label>
                                     <label className="data-field data-field-wide">
