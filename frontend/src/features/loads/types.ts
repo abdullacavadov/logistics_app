@@ -1,6 +1,7 @@
 export type LoadStatus =
   | 'draft'
   | 'pending_moderation'
+  | 'rejected'
   | 'published'
   | 'has_applications'
   | 'agreed'
@@ -30,6 +31,7 @@ export interface Load {
   weight_kg: number | string
   volume_m3: number | string | null
   pallets: number | null
+  quantity?: number | null
   required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
   needs_refrigeration: boolean
