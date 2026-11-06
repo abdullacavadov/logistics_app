@@ -24,7 +24,7 @@ export default function LoadFormPage(){
  const [country,setCountry]=useState<Country|null>(null); const [search,setSearch]=useState("");
  const fromCities=useQuery({queryKey:["catalog","locations",form.from_country_id],queryFn:()=>catalogApi.locations(Number(form.from_country_id)),enabled:!!form.from_country_id});
  const toCities=useQuery({queryKey:["catalog","locations",form.to_country_id],queryFn:()=>catalogApi.locations(Number(form.to_country_id)),enabled:!!form.to_country_id});
- const modalCities=useQuery({queryKey:["catalog","locations",country?.id,"modal"],queryFn:()=>catalogApi.locations(country!.id),enabled:!!country&&step==="city"});
+ const modalCities=useQuery({queryKey:["catalog","locations",country?.id,"modal",search],queryFn:()=>catalogApi.locations(country!.id,search),enabled:!!country&&step==="city"});
  const countries=countriesQ.data??[]; const bodies=bodiesQ.data??[];
  const cargo=(cargoQ.data??[]).find(x=>String(x.id)===form.cargo_type_id);
  useEffect(()=>{const l=loadQuery.data?.data;if(!l)return;setForm({cargo_type_id:String(l.cargo_type_id??""),from_country_id:String(l.from_country_id),from_location_id:String(l.from_location_id??""),to_country_id:String(l.to_country_id),to_location_id:String(l.to_location_id??""),weight_ton:String(Number(l.weight_kg??0)/1000),volume_m3:String(l.volume_m3??""),count:String(l.quantity??l.pallets??""),load_vehicle_type_id:String(l.load_vehicle_type_id??""),date_mode:"choose",pickup_from:l.pickup_from??today(),notes:l.notes??"",price_mode:l.price_negotiable?"negotiable":"fixed",price:String(l.price??""),currency:l.currency??"AZN"});},[loadQuery.data]);
