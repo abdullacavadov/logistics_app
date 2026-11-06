@@ -50,7 +50,17 @@ class CatalogController extends Controller
         ]);
     }
 
-    public function loadVehicleTypes()\n    {\n        return response()->json([\n            'data' => DB::table('load_vehicle_types')\n                ->where('is_active', 1)\n                ->orderBy('sort_order')\n                ->get(['id', 'name', 'category', 'capacity_m3', 'image_path']),\n        ]);\n    }\n\n    public function vehicleTypes()
+    public function loadVehicleTypes()
+    {
+        return response()->json([
+            'data' => DB::table('load_vehicle_types')
+                ->where('is_active', 1)
+                ->orderBy('sort_order')
+                ->get(['id', 'name', 'category', 'capacity_m3', 'image_path']),
+        ]);
+    }
+
+    public function vehicleTypes()
     {
         return response()->json([
             'data' => DB::table('vehicle_types')
