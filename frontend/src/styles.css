@@ -1943,3 +1943,15 @@ select:focus-visible {
 .load-modal-list p{padding:10px}
 .load-modal-back{padding:12px 20px 18px;color:#2563eb;text-align:left}
 @media(max-width:640px){.load-body-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.load-place-modal{max-height:88vh}.load-choice{flex:1}}
+
+/* Searchable load body type selector modal */
+.load-body-type-trigger { min-height: 58px; justify-content: space-between; }
+.load-body-type-trigger > span { flex: 1; text-align: left; }
+.load-body-type-trigger-image { width: 42px; height: 34px; object-fit: contain; margin-right: 10px; }
+.load-body-modal { width: min(680px, calc(100vw - 32px)); }
+.load-body-modal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-height: min(56vh, 520px); overflow-y: auto; padding: 14px 2px; }
+.load-body-modal-grid .load-body-type { min-height: 94px; display: flex; align-items: center; gap: 12px; text-align: left; }
+.load-body-modal-grid .load-body-type img { width: 66px; height: 52px; object-fit: contain; flex: none; }
+.load-body-modal-grid .load-body-type span { flex: 1; }
+.load-body-empty { grid-column: 1 / -1; color: var(--text-soft); padding: 20px; text-align: center; }
+@media (max-width: 560px) { .load-body-modal-grid { grid-template-columns: 1fr; } }
