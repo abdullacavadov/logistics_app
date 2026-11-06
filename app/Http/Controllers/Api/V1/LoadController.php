@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'required_vehicle_type_id', 'needs_refrigeration'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'needs_refrigeration'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -36,7 +36,15 @@ class LoadController extends Controller
         $load = DB::table('loads')->where('id', $id)->first();
         $uid = auth('sanctum')->id();
         if (!$load || (!in_array($load->status, self::PUBLIC_STATUSES) && $load->user_id !== $uid)) return $this->err('not_found', 'Elan tapılmadı', 404);
-        if ($load->user_id === $uid) return response()->json(['data' => $load]);
+        if ($load->user_id === $uid) {
+            $load->from_location_name = $load->from_location_id
+                ? DB::table('locations')->where('id', $load->from_location_id)->value('name')
+                : null;
+            $load->to_location_name = $load->to_location_id
+                ? DB::table('locations')->where('id', $load->to_location_id)->value('name')
+                : null;
+            return response()->json(['data' => $load]);
+        }
 
         $publicLoad = $this->publicQuery()->where('l.id', $id)->first();
         return response()->json(['data' => $publicLoad]);
@@ -66,12 +74,11 @@ class LoadController extends Controller
             return $this->err('not_shipper', 'Yük elanı yaratmaq üçün yük sahibi hüququ lazımdır', 403); // ödəniş tələb olunmur (§2.2)
         $d = $r->validate($this->rules());
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
-        $d['status'] = ($r->boolean('publish')) ? 'published' : 'draft';
+        $d['status'] = 'pending_moderation';
         // Required by the canonical loads schema; the channel is selected server-side.
         $d['applications'] = 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
-        if ($d['status'] === 'published') $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)], 201);
     }
 
@@ -81,6 +88,7 @@ class LoadController extends Controller
         if ($load instanceof \Illuminate\Http\JsonResponse) return $load;
         if (in_array($load->status, ['in_transit', 'completed', 'cancelled', 'archived'])) return $this->err('locked', 'Bu statusda elan dəyişdirilə bilməz', 409);
         $d = $r->validate($this->rules(true));
+        if ($load->status === 'rejected') $d['status'] = 'pending_moderation';
         if (!$this->validLocationSelection($d, $load)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
         $changedCritical = [];
@@ -101,8 +109,58 @@ class LoadController extends Controller
         }
         DB::table('loads')->where('id', $id)->update($d + ['updated_at' => now()]);
         $this->audit($r, 'load.update', $id, (array) $load, $d);
-        $this->matcher->forLoad($id);
+        if (in_array($load->status, self::PUBLIC_STATUSES, true)) $this->matcher->forLoad($id);
         return response()->json(['data' => DB::table('loads')->find($id)]);
+    }
+
+    public function adminPending(Request $r)
+    {
+        if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'admin'])->exists()) {
+            return $this->err('forbidden', 'Bu siyahı üçün administrator hüququ lazımdır', 403);
+        }
+
+        $rows = DB::table('loads as l')
+            ->join('users as u', 'u.id', '=', 'l.user_id')
+            ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
+            ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
+            ->where('l.status', 'pending_moderation')
+            ->orderBy('l.created_at')
+            ->select('l.*', 'u.name as shipper_name', 'ct.name as cargo_type_name',
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'))
+            ->paginate($r->integer('per_page', 20));
+
+        return response()->json($rows);
+    }
+
+    public function moderate(Request $r, int $id)
+    {
+        if (!DB::table('user_roles')->where(['user_id' => $r->user()->id, 'role' => 'admin'])->exists()) {
+            return $this->err('forbidden', 'Bu əməliyyat üçün administrator hüququ lazımdır', 403);
+        }
+
+        $data = $r->validate([
+            'decision' => 'required|in:approve,reject',
+            'reason' => 'nullable|string|max:500',
+        ]);
+        $load = DB::table('loads')->where('id', $id)->first();
+        if (!$load) return $this->err('not_found', 'Elan tapılmadı', 404);
+        if ($load->status !== 'pending_moderation') {
+            return $this->err('bad_status', 'Yalnız moderasiya gözləyən elanlara qərar verilə bilər', 409);
+        }
+
+        $status = $data['decision'] === 'approve' ? 'published' : 'rejected';
+        DB::table('loads')->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
+        $this->audit($r, 'load.moderated', $id, ['status' => $load->status], [
+            'status' => $status,
+            'reason' => $data['reason'] ?? null,
+        ]);
+        $matches = $status === 'published' ? $this->matcher->forLoad($id) : 0;
+
+        return response()->json(['data' => ['id' => $id, 'status' => $status, 'matches' => $matches]]);
     }
 
     public function publish(Request $r, int $id)
@@ -117,11 +175,11 @@ class LoadController extends Controller
 
     public function cancel(Request $r, int $id)
     {
-        return $this->moveTo($r, $id, 'cancelled', ['draft', 'published', 'has_applications', 'agreed']);
+        return $this->moveTo($r, $id, 'cancelled', ['draft', 'pending_moderation', 'published', 'has_applications', 'agreed']);
     }
     public function archive(Request $r, int $id)
     {
-        return $this->moveTo($r, $id, 'archived', ['draft', 'published', 'has_applications', 'completed', 'cancelled']);
+        return $this->moveTo($r, $id, 'archived', ['draft', 'pending_moderation', 'rejected', 'published', 'has_applications', 'completed', 'cancelled']);
     }
 
     private function moveTo(Request $r, int $id, string $to, array $from)
@@ -179,7 +237,7 @@ class LoadController extends Controller
         return [
             'title' => $s . 'required|string|max:200',
             'description' => 'nullable|string|max:5000',
-            'cargo_type_id' => 'nullable|exists:cargo_types,id',
+            'cargo_type_id' => $s . 'required|exists:cargo_types,id',
             'from_country_id' => $s . 'required|exists:countries,id',
             'from_location_id' => 'nullable|exists:locations,id',
             'from_address' => 'nullable|string|max:255',
@@ -195,8 +253,10 @@ class LoadController extends Controller
             'delivery_by' => 'nullable|date|after_or_equal:pickup_from',
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
             'volume_m3' => 'nullable|numeric|gt:0',
+            'quantity' => $s . 'required|integer|min:1',
             'pallets' => 'nullable|integer|min:1',
             'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
+            'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
             'needs_refrigeration' => 'boolean',
             'temp_min' => 'nullable|numeric',
             'temp_max' => 'nullable|numeric|gte:temp_min',
@@ -218,6 +278,7 @@ class LoadController extends Controller
             ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
             ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
             ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
+            ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'l.load_vehicle_type_id')
             ->select(array_map(fn($column) => "l.$column", $this->publicColumns()))
             ->addSelect(
                 'fc.name as from_country_name',
@@ -227,7 +288,8 @@ class LoadController extends Controller
                 'tc.iso2 as to_country_iso2',
                 DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'),
                 'ct.name as cargo_type_name',
-                'vt.name as vehicle_type_name'
+                'vt.name as vehicle_type_name',
+                'lvt.name as load_vehicle_type_name'
             );
     }
 
@@ -248,7 +310,9 @@ class LoadController extends Controller
             'weight_kg',
             'volume_m3',
             'pallets',
+            'quantity',
             'required_vehicle_type_id',
+            'load_vehicle_type_id',
             'needs_refrigeration',
             'temp_min',
             'temp_max',

@@ -15,6 +15,14 @@ export interface Location {
   lng: number | null
 }
 
+export interface LoadVehicleType {
+  id: number
+  name: string
+  category: string
+  capacity_m3: number | null
+  image_path: string
+}
+
 export interface NamedCatalogItem {
   id: number
   name: string
@@ -32,9 +40,9 @@ export const catalogApi = {
     const { data } = await api.get<{ data: Country[] }>('/catalog/countries')
     return data.data
   },
-  async locations(countryId: number): Promise<Location[]> {
+  async locations(countryId: number, search = ''): Promise<Location[]> {
     const { data } = await api.get<CatalogPage<Location>>('/catalog/locations', {
-      params: { country_id: countryId, per_page: 100 },
+      params: { country_id: countryId, per_page: 100, search: search || undefined },
     })
     return data.data
   },
@@ -44,6 +52,10 @@ export const catalogApi = {
   },
   async vehicleTypes(): Promise<NamedCatalogItem[]> {
     const { data } = await api.get<{ data: NamedCatalogItem[] }>('/catalog/vehicle-types')
+    return data.data
+  },
+  async loadVehicleTypes(): Promise<LoadVehicleType[]> {
+    const { data } = await api.get<{ data: LoadVehicleType[] }>('/catalog/load-vehicle-types')
     return data.data
   },
 }

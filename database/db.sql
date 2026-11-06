@@ -254,7 +254,9 @@ CREATE TABLE `loads` (
   `weight_kg` decimal(10,2) NOT NULL,
   `volume_m3` decimal(8,2) DEFAULT NULL,
   `pallets` int(10) UNSIGNED DEFAULT NULL,
+  `quantity` int(10) UNSIGNED DEFAULT NULL,
   `required_vehicle_type_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `load_vehicle_type_id` bigint(20) UNSIGNED DEFAULT NULL,
   `needs_refrigeration` tinyint(1) NOT NULL DEFAULT 0,
   `temp_min` decimal(5,1) DEFAULT NULL,
   `temp_max` decimal(5,1) DEFAULT NULL,
@@ -264,7 +266,7 @@ CREATE TABLE `loads` (
   `currency` char(3) DEFAULT NULL,
   `applications` enum('web','whatsapp') NOT NULL,
   `price_negotiable` tinyint(1) NOT NULL DEFAULT 1,
-  `status` enum('draft','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft',
+  `status` enum('draft','pending_moderation','rejected','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -354,7 +356,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (5, '2026_11_01_000001_create_core_tables', 1),
 (6, '2026_11_01_000002_create_cargo_tables', 1),
 (7, '2026_11_01_000003_create_subscription_tables', 1),
-(8, '2026_11_01_000004_create_matching_settings', 2);
+(8, '2026_11_01_000004_create_matching_settings', 2),
+(9, '2026_11_06_000001_add_load_ad_catalogs', 3);
 
 -- --------------------------------------------------------
 
@@ -640,6 +643,69 @@ INSERT INTO `vehicle_types` (`id`, `name`, `is_refrigerated`, `is_active`) VALUE
 (5, 'Platforma', 0, 1),
 (6, 'Sisternli', 0, 1);
 
+
+-- Load body types shown in the new load-ad form
+CREATE TABLE `load_vehicle_types` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(120) NOT NULL,
+  `category` varchar(40) NOT NULL,
+  `capacity_m3` smallint(5) UNSIGNED DEFAULT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `sort_order` smallint(5) UNSIGNED NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `load_vehicle_type_translations` (
+  `load_vehicle_type_id` bigint(20) UNSIGNED NOT NULL,
+  `locale` varchar(8) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`load_vehicle_type_id`, `locale`),
+  CONSTRAINT `load_vehicle_type_translations_type_id_foreign` FOREIGN KEY (`load_vehicle_type_id`) REFERENCES `load_vehicle_types` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `country_translations` (
+  `country_id` bigint(20) UNSIGNED NOT NULL,
+  `locale` varchar(8) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`country_id`, `locale`),
+  CONSTRAINT `country_translations_country_id_foreign` FOREIGN KEY (`country_id`) REFERENCES `countries` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `location_translations` (
+  `location_id` bigint(20) UNSIGNED NOT NULL,
+  `locale` varchar(8) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  PRIMARY KEY (`location_id`, `locale`),
+  CONSTRAINT `location_translations_location_id_foreign` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `country_translations` (`country_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `countries`;
+INSERT INTO `location_translations` (`location_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `locations`;
+
+INSERT INTO `load_vehicle_types` (`name`, `category`, `capacity_m3`, `image_path`, `sort_order`, `is_active`) VALUES
+('Tent 86 m³','tent',86,'/images/load-vehicle-types/tent.svg',10,1),
+('Tent 90 m³','tent',90,'/images/load-vehicle-types/tent.svg',20,1),
+('Tent 92 m³','tent',92,'/images/load-vehicle-types/tent.svg',30,1),
+('Tent 96 m³','tent',96,'/images/load-vehicle-types/tent.svg',40,1),
+('Tent 100 m³','tent',100,'/images/load-vehicle-types/tent.svg',50,1),
+('Tent 105 m³','tent',105,'/images/load-vehicle-types/tent.svg',60,1),
+('Tent 110 m³','tent',110,'/images/load-vehicle-types/tent.svg',70,1),
+('Mega tent 110 m³','mega_tent',110,'/images/load-vehicle-types/mega-tent.svg',80,1),
+('Mega tent 120 m³','mega_tent',120,'/images/load-vehicle-types/mega-tent.svg',90,1),
+('Mega tent 130 m³','mega_tent',130,'/images/load-vehicle-types/mega-tent.svg',100,1),
+('Mega tent 140 m³','mega_tent',140,'/images/load-vehicle-types/mega-tent.svg',110,1),
+('Ref — rejimli','refrigerator',NULL,'/images/load-vehicle-types/ref.svg',120,1),
+('Ref — rejimsiz','refrigerator',NULL,'/images/load-vehicle-types/ref.svg',130,1),
+('Avtodaşıyan','car_carrier',NULL,'/images/load-vehicle-types/car-carrier.svg',140,1),
+('Alçaq platformalı','low_loader',NULL,'/images/load-vehicle-types/low-loader.svg',150,1),
+('Konteyner daşıyıcı','container_carrier',NULL,'/images/load-vehicle-types/container-carrier.svg',160,1),
+('Digər','other',NULL,'/images/load-vehicle-types/other.svg',170,1);
+
+INSERT INTO `load_vehicle_type_translations` (`load_vehicle_type_id`, `locale`, `name`) SELECT `id`, 'az', `name` FROM `load_vehicle_types`;
+
 --
 -- Индексы сохранённых таблиц
 --
@@ -726,6 +792,7 @@ ALTER TABLE `loads`
   ADD KEY `loads_to_country_id_foreign` (`to_country_id`),
   ADD KEY `loads_to_location_id_foreign` (`to_location_id`),
   ADD KEY `loads_required_vehicle_type_id_foreign` (`required_vehicle_type_id`),
+  ADD KEY `loads_load_vehicle_type_id_foreign` (`load_vehicle_type_id`),
   ADD KEY `loads_status_pickup_from_index` (`status`,`pickup_from`),
   ADD KEY `loads_from_country_id_to_country_id_index` (`from_country_id`,`to_country_id`);
 
@@ -927,7 +994,7 @@ ALTER TABLE `matches`
 -- AUTO_INCREMENT для таблицы `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT для таблицы `payments`
@@ -1010,6 +1077,7 @@ ALTER TABLE `loads`
   ADD CONSTRAINT `loads_from_country_id_foreign` FOREIGN KEY (`from_country_id`) REFERENCES `countries` (`id`),
   ADD CONSTRAINT `loads_from_location_id_foreign` FOREIGN KEY (`from_location_id`) REFERENCES `locations` (`id`),
   ADD CONSTRAINT `loads_required_vehicle_type_id_foreign` FOREIGN KEY (`required_vehicle_type_id`) REFERENCES `vehicle_types` (`id`),
+  ADD CONSTRAINT `loads_load_vehicle_type_id_foreign` FOREIGN KEY (`load_vehicle_type_id`) REFERENCES `load_vehicle_types` (`id`),
   ADD CONSTRAINT `loads_to_country_id_foreign` FOREIGN KEY (`to_country_id`) REFERENCES `countries` (`id`),
   ADD CONSTRAINT `loads_to_location_id_foreign` FOREIGN KEY (`to_location_id`) REFERENCES `locations` (`id`),
   ADD CONSTRAINT `loads_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);

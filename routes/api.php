@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function () {
     Route::get('catalog/locations', [CatalogController::class, 'locations'])->middleware('throttle:60,1');
     Route::get('catalog/cargo-types', [CatalogController::class, 'cargoTypes'])->middleware('throttle:60,1');
     Route::get('catalog/vehicle-types', [CatalogController::class, 'vehicleTypes'])->middleware('throttle:60,1');
+    Route::get('catalog/load-vehicle-types', [CatalogController::class, 'loadVehicleTypes'])->middleware('throttle:60,1');
 
     // Ictimai (qonaq) — yalnız dərc olunmuş elanlar
     Route::get('loads', [LoadController::class, 'index'])->middleware('throttle:60,1');
@@ -35,6 +36,8 @@ Route::prefix('v1')->group(function () {
         Route::get('admin/subscription-plans', [SubscriptionController::class, 'adminIndex']);
         Route::post('admin/subscription-plans', [SubscriptionController::class, 'storePlan']);
         Route::post('loads', [LoadController::class, 'store']);
+        Route::get('admin/loads/pending', [LoadController::class, 'adminPending']);
+        Route::post('admin/loads/{id}/moderate', [LoadController::class, 'moderate'])->whereNumber('id');
         Route::put('loads/{id}', [LoadController::class, 'update'])->whereNumber('id');
         Route::post('loads/{id}/publish', [LoadController::class, 'publish'])->whereNumber('id');
         Route::post('loads/{id}/cancel', [LoadController::class, 'cancel'])->whereNumber('id');

@@ -1,6 +1,7 @@
 export type LoadStatus =
   | 'draft'
   | 'pending_moderation'
+  | 'rejected'
   | 'published'
   | 'has_applications'
   | 'agreed'
@@ -16,11 +17,13 @@ export interface Load {
   cargo_type_id: number | null
   from_country_id: number
   from_location_id: number | null
+  from_location_name?: string | null
   from_address?: string | null
   from_lat?: number | string | null
   from_lng?: number | string | null
   to_country_id: number
   to_location_id: number | null
+  to_location_name?: string | null
   to_address?: string | null
   to_lat?: number | string | null
   to_lng?: number | string | null
@@ -30,6 +33,7 @@ export interface Load {
   weight_kg: number | string
   volume_m3: number | string | null
   pallets: number | null
+  quantity?: number | null
   required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
   needs_refrigeration: boolean
@@ -51,6 +55,7 @@ export interface Load {
   to_name?: string
   cargo_type_name?: string | null
   vehicle_type_name?: string | null
+  load_vehicle_type_name?: string | null
 }
 
 export interface PaginatedResponse<T> {
@@ -93,7 +98,7 @@ export interface LoadFilters {
 export interface CreateLoadPayload {
   title: string
   description?: string | null
-  cargo_type_id?: number | null
+  cargo_type_id: number
   from_country_id: number
   from_location_id?: number | null
   from_address?: string | null
@@ -110,8 +115,9 @@ export interface CreateLoadPayload {
   weight_kg: number
   volume_m3?: number | null
   pallets?: number | null
+  quantity: number
   required_vehicle_type_id?: number | null
-  load_vehicle_type_id?: number | null
+  load_vehicle_type_id: number
   needs_refrigeration?: boolean
   temp_min?: number | null
   temp_max?: number | null
