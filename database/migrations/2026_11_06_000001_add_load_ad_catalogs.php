@@ -19,6 +19,14 @@ return new class extends Migration {
             $table->timestamps();
         });
 
+        Schema::create('load_vehicle_type_translations', function (Blueprint $table) {
+            $table->unsignedBigInteger('load_vehicle_type_id');
+            $table->string('locale', 8);
+            $table->string('name', 150);
+            $table->primary(['load_vehicle_type_id', 'locale']);
+            $table->foreign('load_vehicle_type_id')->references('id')->on('load_vehicle_types')->cascadeOnDelete();
+        });
+
         Schema::table('loads', function (Blueprint $table) {
             $table->unsignedBigInteger('load_vehicle_type_id')->nullable()->after('required_vehicle_type_id');
             $table->unsignedInteger('quantity')->nullable()->after('pallets');
@@ -80,6 +88,7 @@ return new class extends Migration {
             $table->dropColumn(['load_vehicle_type_id', 'quantity']);
         });
         DB::statement("ALTER TABLE loads MODIFY status ENUM('draft','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft'");
+        Schema::dropIfExists('load_vehicle_type_translations');
         Schema::dropIfExists('location_translations');
         Schema::dropIfExists('country_translations');
         Schema::dropIfExists('load_vehicle_types');
