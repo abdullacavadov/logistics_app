@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Search, X, MapPin } from "lucide-react";
-import { catalogApi, getCatalogLocale, type Country, type Location } from "../catalog/catalogApi";
+import { catalogApi, getCatalogLocale, type CatalogLocale, type Country, type LoadVehicleType, type Location } from "../catalog/catalogApi";
+import "./load-body-picker.css";
 import { loadsApi } from "./api/loadsApi";
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from "./hooks/useLoads";
 import type { CreateLoadPayload } from "./types";
@@ -38,6 +39,20 @@ const today = () => {
         String(d.getDate()).padStart(2, "0")
     );
 };
+const LOAD_BODY_CATEGORY_LABELS: Record<string, Record<CatalogLocale, string>> = {
+    tent: { az: "Tent", ru: "Тент", en: "Curtainsider", tr: "Tent" },
+    mega_tent: { az: "Mega tent", ru: "Мега-тент", en: "Mega curtainsider", tr: "Mega tent" },
+    refrigerator: { az: "Soyuduculu yarımqoşqu", ru: "Рефрижератор", en: "Refrigerated trailer", tr: "Frigorifik" },
+    car_carrier: { az: "Avtodaşıyan", ru: "Автовоз", en: "Car carrier", tr: "Araç taşıyıcı" },
+    low_loader: { az: "Alçaq platformalı", ru: "Низкорамный трал", en: "Low loader", tr: "Lowbed" },
+    container_carrier: { az: "Konteyner daşıyıcı", ru: "Контейнеровоз", en: "Container carrier", tr: "Konteyner taşıyıcı" },
+    other: { az: "Digər", ru: "Другое", en: "Other", tr: "Diğer" },
+};
+
+function loadBodyCategoryLabel(category: string, locale: CatalogLocale): string {
+    return LOAD_BODY_CATEGORY_LABELS[category]?.[locale] ?? category.replaceAll("_", " ");
+}
+
 const initial: State = {
     cargo_type_id: "",
     from_country_id: "",
@@ -85,6 +100,7 @@ export default function LoadFormPage() {
     const [search, setSearch] = useState("");
     const [bodyModalOpen, setBodyModalOpen] = useState(false);
     const [bodySearch, setBodySearch] = useState("");
+    const [activeBodyCategory, setActiveBodyCategory] = useState<string | null>(null);
     const modalCities = useQuery({
         queryKey: ["catalog", "locations", country?.id, "modal", search, catalogLocale],
         queryFn: () => catalogApi.locations(country!.id, search),
@@ -92,7 +108,37 @@ export default function LoadFormPage() {
     });
     const countries = countriesQ.data ?? [];
     const bodies = bodiesQ.data ?? [];
-    const bodyTypesFiltered = useMemo(() => bodies.filter((x) => x.name.toLowerCase().includes(bodySearch.toLowerCase())), [bodies, bodySearch]);
+    const bodyGroups = useMemo(() => {
+        const grouped = new Map<string, LoadVehicleType[]>();
+        for (const body of bodies) {
+            const items = grouped.get(body.category) ?? [];
+            items.push(body);
+            grouped.set(body.category, items);
+        }
+        return Array.from(grouped, ([key, items]) => ({
+            key,
+            label: loadBodyCategoryLabel(key, catalogLocale),
+            imagePath: items[0]?.image_path ?? "",
+            items,
+        }));
+    }, [bodies, catalogLocale]);
+    const bodyGroupsFiltered = useMemo(() => {
+        const query = bodySearch.trim().toLocaleLowerCase();
+        if (!query) return bodyGroups;
+        return bodyGroups.filter((group) =>
+            group.label.toLocaleLowerCase().includes(query) ||
+            group.items.some((item) => item.name.toLocaleLowerCase().includes(query)),
+        );
+    }, [bodyGroups, bodySearch]);
+    const activeBodyGroup = bodyGroups.find((group) => group.key === activeBodyCategory) ?? null;
+    const activeBodyItems = useMemo(() => {
+        if (!activeBodyGroup) return [];
+        const query = bodySearch.trim().toLocaleLowerCase();
+        if (!query || activeBodyGroup.label.toLocaleLowerCase().includes(query)) {
+            return activeBodyGroup.items;
+        }
+        return activeBodyGroup.items.filter((item) => item.name.toLocaleLowerCase().includes(query));
+    }, [activeBodyGroup, bodySearch]);
     const cargo = (cargoQ.data ?? []).find(
         (x) => String(x.id) === form.cargo_type_id,
     );
@@ -389,13 +435,9 @@ export default function LoadFormPage() {
                                     <button type="button" className="load-place-trigger load-body-type-trigger"
                                         aria-haspopup="dialog" aria-expanded={bodyModalOpen}
                                         onClick={() => { setBodySearch(""); setBodyModalOpen(true); }}>
-                                        {form.load_vehicle_type_id ? (
-                                            <>
-                                                <img className="load-body-type-trigger-image"
-                                                    src={bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.image_path} alt="" />
-                                                <span>{bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.name}</span>
-                                            </>
-                                        ) : <span>Yük yeri növünü seçin</span>}
+                                        <span>
+                                            {bodies.find((x) => String(x.id) === form.load_vehicle_type_id)?.name ?? "Yük yeri növünü seçin"}
+                                        </span>
                                         <Search size={16} />
                                     </button>
                                 </section>
@@ -671,29 +713,97 @@ export default function LoadFormPage() {
                 </div>
             )}
             {bodyModalOpen && (
-                <div className="load-modal-backdrop" onMouseDown={(e) => {
-                    if (e.target === e.currentTarget) setBodyModalOpen(false);
-                }}>
-                    <section className="load-place-modal load-body-modal" role="dialog" aria-modal="true" aria-labelledby="load-body-modal-title">
+                <div
+                    className="load-modal-backdrop"
+                    onMouseDown={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setBodyModalOpen(false);
+                            setActiveBodyCategory(null);
+                        }
+                    }}
+                >
+                    <section
+                        className="load-place-modal load-body-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="load-body-modal-title"
+                    >
                         <header>
-                            <div><h3 id="load-body-modal-title">Yük yeri növünü seçin</h3><p>Mövcud növlərdən birini seçin</p></div>
-                            <button type="button" onClick={() => setBodyModalOpen(false)} aria-label="Bağla"><X /></button>
+                            <div>
+                                <h3 id="load-body-modal-title">
+                                    {activeBodyGroup?.label ?? "Yük yeri növünü seçin"}
+                                </h3>
+                                <p>{activeBodyGroup ? "Alt kateqoriyanı seçin" : "Əsas kateqoriyanı seçin"}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setBodyModalOpen(false);
+                                    setActiveBodyCategory(null);
+                                }}
+                                aria-label="Bağla"
+                            >
+                                <X />
+                            </button>
                         </header>
                         <label className="load-modal-search">
                             <Search size={18} />
-                            <input autoFocus value={bodySearch} onChange={(e) => setBodySearch(e.target.value)} placeholder="Yük yeri növü axtar…" />
+                            <input
+                                autoFocus
+                                value={bodySearch}
+                                onChange={(e) => setBodySearch(e.target.value)}
+                                placeholder="Kateqoriya və ya növ axtar…"
+                            />
                         </label>
-                        <div className="load-body-modal-grid">
-                            {bodyTypesFiltered.map((x) => (
-                                <button type="button" key={x.id}
-                                    className={form.load_vehicle_type_id === String(x.id) ? "load-body-type is-selected" : "load-body-type"}
-                                    onClick={() => { set("load_vehicle_type_id", String(x.id)); setBodyModalOpen(false); }}>
-                                    <img src={x.image_path} alt="" /><span>{x.name}</span>
-                                    {x.capacity_m3 ? <small>{x.capacity_m3} m³</small> : null}
+                        {!activeBodyGroup ? (
+                            <div className="load-body-category-grid">
+                                {bodyGroupsFiltered.map((group) => (
+                                    <button
+                                        type="button"
+                                        key={group.key}
+                                        className="load-body-category-card"
+                                        onClick={() => setActiveBodyCategory(group.key)}
+                                    >
+                                        {group.imagePath && <img src={group.imagePath} alt="" />}
+                                        <span>{group.label}</span>
+                                        <small>{group.items.length} alt növ</small>
+                                    </button>
+                                ))}
+                                {bodyGroupsFiltered.length === 0 && (
+                                    <p className="load-body-empty">Uyğun kateqoriya və ya növ tapılmadı.</p>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="load-body-subcategory-list">
+                                    {activeBodyItems.map((item) => (
+                                        <button
+                                            type="button"
+                                            key={item.id}
+                                            className={form.load_vehicle_type_id === String(item.id) ? "load-body-subcategory-option is-selected" : "load-body-subcategory-option"}
+                                            onClick={() => {
+                                                set("load_vehicle_type_id", String(item.id));
+                                                setBodyModalOpen(false);
+                                                setActiveBodyCategory(null);
+                                            }}
+                                        >
+                                            <span>{item.name}</span>
+                                            {item.capacity_m3 ? <small>{item.capacity_m3} m³</small> : null}
+                                        </button>
+                                    ))}
+                                    {activeBodyItems.length === 0 && (
+                                        <p className="load-body-empty">Bu kateqoriyada uyğun növ tapılmadı.</p>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="load-modal-back"
+                                    onClick={() => setActiveBodyCategory(null)}
+                                >
+                                    Əsas kateqoriyalara qayıt
                                 </button>
-                            ))}
-                            {bodyTypesFiltered.length === 0 && <p className="load-body-empty">Uyğun yük yeri növü tapılmadı.</p>}
-                        </div>
+                            </>
+                        )}
                     </section>
                 </div>
             )}
