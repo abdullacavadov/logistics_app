@@ -85,13 +85,12 @@ export function ListingCard({
                     <Truck size={15} />
                     {item.vehicle}
                 </span>
-                {item.needs_refrigeration !== 0 &&
-                    item.needs_refrigeration !== null &&
-                    item.needs_refrigeration !== undefined && (
-                        <span>
-                            <ThermometerSnowflake size={15} />
-                        </span>
-                    )}
+                {(item.needsRefrigeration ?? Boolean(item.needs_refrigeration)) && (
+                    <span className="refrigeration-tag">
+                        <ThermometerSnowflake size={15} />
+                        Soyuduculu nəqliyyat
+                    </span>
+                )}
                 {item.volume !== null && item.volume !== undefined && (
                     <span>
                         <Ruler size={15} />
@@ -113,12 +112,12 @@ export function ListingCard({
                     </span>
                 )}
             </div>
-            {item.pickupDate && (
+            {(item.isReadyForLoading || item.pickupDate) && (
                 <div className="listing-meta">
                     <span>
                         <CalendarDays size={14} />
-                        Yükləmə tarixi: {formatDate(item.pickupDate)}
-                        {item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
+                        Yükləmə: {item.isReadyForLoading ? "Yükləməyə hazır" : formatDate(item.pickupDate ?? "")}
+                        {!item.isReadyForLoading && item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
                     </span>
                 </div>
             )}
