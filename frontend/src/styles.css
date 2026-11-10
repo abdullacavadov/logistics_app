@@ -819,6 +819,13 @@ select:focus-visible {
 .listing-specs svg {
     color: var(--muted);
 }
+.listing-specs .refrigeration-tag {
+    color: var(--primary);
+    font-weight: 650;
+}
+.listing-specs .refrigeration-tag svg {
+    color: var(--primary);
+}
 .listing-footer {
     display: flex;
     align-items: center;
