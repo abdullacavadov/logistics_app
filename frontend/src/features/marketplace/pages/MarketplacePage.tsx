@@ -46,7 +46,7 @@ export default function MarketplacePage() {
             toFlag: load.to_country_iso2 ?? "",
             cargo: load.cargo_type_name ?? "Digər yük",
             weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
-            vehicle: load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
+            vehicle: load.load_vehicle_type_name ?? load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
             price:
                 load.price === null
                     ? "Razılaşma ilə"
@@ -54,6 +54,12 @@ export default function MarketplacePage() {
             application:
                 load.applications === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
             date: formatLoadDate(load.created_at),
+            pickupDate: formatLoadDate(load.pickup_from),
+            pickupTo: load.pickup_to ? formatLoadDate(load.pickup_to) : null,
+            deliveryBy: load.delivery_by ? formatLoadDate(load.delivery_by) : null,
+            volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
+            quantity: load.quantity ?? null,
+            pallets: load.pallets ?? null,
             source: "LogisticsApp",
             kind: "load",
         }),
