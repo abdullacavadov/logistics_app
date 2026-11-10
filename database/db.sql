@@ -249,6 +249,7 @@ CREATE TABLE `loads` (
   `to_lat` decimal(9,6) DEFAULT NULL,
   `to_lng` decimal(9,6) DEFAULT NULL,
   `pickup_from` date NOT NULL,
+  `is_ready_for_loading` tinyint(1) NOT NULL DEFAULT 0,
   `pickup_to` date DEFAULT NULL,
   `delivery_by` date DEFAULT NULL,
   `weight_kg` decimal(10,2) NOT NULL,
