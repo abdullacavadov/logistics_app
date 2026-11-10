@@ -10,6 +10,12 @@ export type Listing = {
     price: string;
     application: string;
     date: string;
+    pickupDate?: string;
+    pickupTo?: string | null;
+    deliveryBy?: string | null;
+    volume?: string | null;
+    quantity?: number | null;
+    pallets?: number | null;
     source: string;
     urgent?: boolean;
     kind: "load" | "vehicle";
