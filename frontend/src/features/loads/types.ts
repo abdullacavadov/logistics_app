@@ -28,6 +28,7 @@ export interface Load {
   to_lat?: number | string | null
   to_lng?: number | string | null
   pickup_from: string
+  is_ready_for_loading: boolean
   pickup_to: string | null
   delivery_by: string | null
   weight_kg: number | string
@@ -36,7 +37,7 @@ export interface Load {
   quantity?: number | null
   required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
-  needs_refrigeration: number
+  needs_refrigeration: number | boolean
   temp_min: number | string | null
   temp_max: number | string | null
   is_hazardous: boolean
@@ -110,6 +111,7 @@ export interface CreateLoadPayload {
   to_lat?: number | null
   to_lng?: number | null
   pickup_from: string
+  is_ready_for_loading?: boolean
   pickup_to?: string | null
   delivery_by?: string | null
   weight_kg: number
