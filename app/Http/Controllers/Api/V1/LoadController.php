@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'needs_refrigeration'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -95,7 +95,7 @@ class LoadController extends Controller
         foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
             $oldValue = $load->{$field} ?? null;
             $newValue = $d[$field];
-            $same = in_array($field, ['needs_refrigeration', 'is_hazardous', 'is_ready_for_loading'], true)
+            $same = in_array($field, ['is_hazardous', 'is_ready_for_loading'], true)
                 ? (bool) $oldValue === (bool) $newValue
                 : (($oldValue === null || $newValue === null)
                     ? $oldValue === $newValue
@@ -240,14 +240,8 @@ class LoadController extends Controller
             'cargo_type_id' => $s . 'required|exists:cargo_types,id',
             'from_country_id' => $s . 'required|exists:countries,id',
             'from_location_id' => 'nullable|exists:locations,id',
-            'from_address' => 'nullable|string|max:255',
-            'from_lat' => 'nullable|numeric|between:-90,90',
-            'from_lng' => 'nullable|numeric|between:-180,180',
             'to_country_id' => $s . 'required|exists:countries,id',
             'to_location_id' => 'nullable|exists:locations,id',
-            'to_address' => 'nullable|string|max:255',
-            'to_lat' => 'nullable|numeric|between:-90,90',
-            'to_lng' => 'nullable|numeric|between:-180,180',
             'pickup_from' => $s . 'required|date|after_or_equal:today',
             'is_ready_for_loading' => 'boolean',
             'pickup_to' => 'nullable|date|after_or_equal:pickup_from',
@@ -258,7 +252,6 @@ class LoadController extends Controller
             'pallets' => 'nullable|integer|min:1',
             'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
             'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
-            'needs_refrigeration' => 'boolean',
             'temp_min' => 'nullable|numeric',
             'temp_max' => 'nullable|numeric|gte:temp_min',
             'is_hazardous' => 'boolean',
@@ -315,7 +308,6 @@ class LoadController extends Controller
             'quantity',
             'required_vehicle_type_id',
             'load_vehicle_type_id',
-            'needs_refrigeration',
             'temp_min',
             'temp_max',
             'is_hazardous',

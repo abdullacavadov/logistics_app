@@ -37,7 +37,6 @@ export interface Load {
   quantity?: number | null
   required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
-  needs_refrigeration: number | boolean
   temp_min: number | string | null
   temp_max: number | string | null
   is_hazardous: boolean

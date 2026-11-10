@@ -19,7 +19,6 @@ class MatchingService
         if (($offer['status'] ?? '') !== 'active' || $offer['available_to'] < $today) return null;
         if ($load['weight_kg'] > $vehicle['capacity_kg']) return null;
         if (!empty($load['volume_m3']) && !empty($vehicle['capacity_m3']) && $load['volume_m3'] > $vehicle['capacity_m3']) return null;
-        if (!empty($load['needs_refrigeration']) && empty($vehicle['is_refrigerated'])) return null;
         if (!empty($load['required_vehicle_type_id']) && $load['required_vehicle_type_id'] != $vehicle['vehicle_type_id']) return null;
         $pEnd = $load['pickup_to'] ?? $load['pickup_from'];
         if ($load['pickup_from'] > $offer['available_to'] || $pEnd < $offer['available_from']) return null;

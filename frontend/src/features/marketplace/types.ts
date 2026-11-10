@@ -1,5 +1,4 @@
 export type Listing = {
-    needs_refrigeration: number | boolean | null;
     id: string;
     from: string;
     to: string;

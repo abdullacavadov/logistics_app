@@ -16,7 +16,6 @@ $ok('çəki tutumu aşır -> uyğun deyil', $m->score(['weight_kg'=>25000] + $lo
 $ok('marşrut uyğun gəlmir', $m->score(['from_country_id'=>9,'to_country_id'=>8] + $load, $offer, $veh, $today) === null);
 $ok('tarixlər uyğun gəlmir', $m->score(['pickup_from'=>'2026-12-01','pickup_to'=>'2026-12-02'] + $load, $offer, $veh, $today) === null);
 $ok('vasitə növü yanlış', $m->score(['required_vehicle_type_id'=>7] + $load, $offer, $veh, $today) === null);
-$ok('soyuduculu tələb, vasitə soyuduculu deyil', $m->score(['needs_refrigeration'=>1] + $load, $offer, $veh, $today) === null);
 $ok('təklifin müddəti bitib', $m->score($load, $offer, $veh, '2026-11-20') === null);
 $r2 = $m->score($load, ['currency'=>'USD'] + $offer, $veh, $today);
 $ok('valyuta fərqli -> neytral qiymət balı', $r2 && $r2['score'] < $r['score']);

@@ -3,6 +3,7 @@ import { faWhatsapp, faTelegram } from "@fortawesome/free-brands-svg-icons";
 import {
     Map,
     Bookmark,
+    Package,
     Clock3,
     MoveRight,
     ThermometerSnowflake,
@@ -10,7 +11,6 @@ import {
     Weight,
     Monitor,
     CalendarDays,
-    Ruler,
     Boxes,
 } from "lucide-react";
 import type { Listing } from "../types";
@@ -81,19 +81,23 @@ export function ListingCard({
                     <Weight size={15} />
                     {item.weight}
                 </span>
-                <span>
-                    <Truck size={15} />
-                    {item.vehicle}
-                </span>
-                {(item.needsRefrigeration ?? Boolean(item.needs_refrigeration)) && (
-                    <span className="refrigeration-tag">
+                {item.vehicle === "Ref — rejimli" || item.vehicle === "Ref — rejimsiz" ? (
+                    <span>
+                        <Truck size={15} />
+                        <span className="refrigeration-tag">
                         <ThermometerSnowflake size={15} />
-                        Soyuduculu nəqliyyat
+                        {item.vehicle}
+                    </span></span>
+                ) : (
+                    <span>
+                        <Truck size={15} />
+                        {item.vehicle}
                     </span>
                 )}
+                
                 {item.volume !== null && item.volume !== undefined && (
                     <span>
-                        <Ruler size={15} />
+                        <Package size={15} />
                         {item.volume}
                     </span>
                 )}
@@ -116,14 +120,14 @@ export function ListingCard({
                 <div className="listing-meta">
                     <span>
                         <CalendarDays size={14} />
-                        Yükləmə: {item.isReadyForLoading ? "Yükləməyə hazır" : formatDate(item.pickupDate ?? "")}
+                        <b>Yükləmə:</b> {item.isReadyForLoading ? "Yükləməyə hazır" : formatDate(item.pickupDate ?? "")}
                         {!item.isReadyForLoading && item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
                     </span>
                 </div>
             )}
             <div className="listing-footer">
                 <div>
-                    <small>Təklif olunan qiymət</small>
+                    <small><b>Təklif olunan qiymət</b></small>
                     <strong className="price">{item.price}</strong>
                 </div>
                 <button className="outline-action" onClick={onSelect}>
@@ -133,7 +137,7 @@ export function ListingCard({
             <div className="listing-meta">
                 <span>
                     <Clock3 size={14} />
-                    Elan tarixi: {item.date}
+                    {item.date}
                 </span>
                 {item.application === "WhatsApp-dan" ? (
                     <span style={{ color: "#1db053" }}>

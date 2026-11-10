@@ -813,8 +813,13 @@ select:focus-visible {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: var(--text-soft);
+    color: var(--text);
     font-size: 10px;
+}
+
+.listing-meta span b {
+    font-weight: 700;
+    color: var(--text-soft);
 }
 .listing-specs svg {
     color: var(--muted);

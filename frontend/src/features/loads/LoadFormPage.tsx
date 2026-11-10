@@ -50,7 +50,6 @@ type State = {
     load_vehicle_type_id: string;
     date_mode: "ready" | "choose";
     pickup_from: string;
-    needs_refrigeration: boolean;
     notes: string;
     price_mode: "negotiable" | "fixed";
     price: string;
@@ -128,7 +127,6 @@ const initial: State = {
     load_vehicle_type_id: "",
     date_mode: "ready",
     pickup_from: today(),
-    needs_refrigeration: false,
     notes: "",
     price_mode: "negotiable",
     price: "",
@@ -239,7 +237,6 @@ export default function LoadFormPage() {
             load_vehicle_type_id: String(l.load_vehicle_type_id ?? ""),
             date_mode: l.is_ready_for_loading ? "ready" : "choose",
             pickup_from: l.pickup_from ?? today(),
-            needs_refrigeration: Boolean(l.needs_refrigeration),
             notes: l.notes ?? "",
             price_mode: l.price_negotiable ? "negotiable" : "fixed",
             price: String(l.price ?? ""),
@@ -330,7 +327,6 @@ export default function LoadFormPage() {
             : null,
           price_negotiable: form.price_mode === "negotiable",
           publish: true,
-          needs_refrigeration: form.needs_refrigeration
         };
         mutation.mutate(p);
     }
@@ -590,19 +586,7 @@ export default function LoadFormPage() {
                                         </label>
                                     )}
                                 </section>
-                                <section className="data-form-section">
-                                    <h3>Temperatur tələbi</h3>
-                                    <label className="load-choice">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.needs_refrigeration}
-                                            onChange={(e) =>
-                                                set("needs_refrigeration", e.target.checked)
-                                            }
-                                        />
-                                        Soyuduculu nəqliyyat tələb olunur
-                                    </label>
-                                </section>
+                                
                                 <section className="data-form-section">
                                     <h3>Əlavə məlumat</h3>
                                     <label className="data-field data-field-wide">
