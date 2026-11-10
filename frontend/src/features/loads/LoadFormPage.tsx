@@ -130,7 +130,7 @@ const initial: State = {
     notes: "",
     price_mode: "negotiable",
     price: "",
-    currency: "AZN",
+    currency: "USD",
 };
 
 export default function LoadFormPage() {
@@ -240,7 +240,7 @@ export default function LoadFormPage() {
             notes: l.notes ?? "",
             price_mode: l.price_negotiable ? "negotiable" : "fixed",
             price: String(l.price ?? ""),
-            currency: l.currency ?? "AZN",
+            currency: l.currency ?? "USD",
         });
     }, [loadQuery.data]);
     const mutation = useMutation({

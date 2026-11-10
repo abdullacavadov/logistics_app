@@ -168,7 +168,7 @@ Invoke-Api $adminSession $adminXsrf "/admin/subscription-plans" "POST" @{
     kind = "carrier"
     country_id = 1
     price = 12.50
-    currency = "AZN"
+    currency = "USD"
     duration_months = 1
 }
 ~~~

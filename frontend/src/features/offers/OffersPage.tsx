@@ -6,7 +6,7 @@ import { catalogApi } from '../catalog/catalogApi'
 import { vehiclesApi } from '../vehicles/vehiclesApi'
 import { offersApi, type OfferPayload, type VehicleOffer } from './offersApi'
 
-const blank = { vehicle_id: '', from_country_id: '', from_location_id: '', to_country_id: '', to_location_id: '', available_from: '', available_to: '', price: '', currency: 'AZN', terms: '', activate: true }
+const blank = { vehicle_id: '', from_country_id: '', from_location_id: '', to_country_id: '', to_location_id: '', available_from: '', available_to: '', price: '', currency: 'USD', terms: '', activate: true }
 const statusLabel: Record<VehicleOffer['status'], string> = { draft: 'Qaralama', active: 'Aktiv', applied: 'Müraciət var', agreed: 'Razılaşdırılıb', busy: 'Məşğuldur', completed: 'Tamamlanıb', cancelled: 'Ləğv edilib', expired: 'Müddəti bitib' }
 
 export default function OffersPage() {
@@ -29,7 +29,7 @@ export default function OffersPage() {
 
   function edit(offer: VehicleOffer) {
     setEditing(offer.id)
-    setForm({ vehicle_id: String(offer.vehicle_id), from_country_id: String(offer.from_country_id), from_location_id: String(offer.from_location_id ?? ''), to_country_id: String(offer.to_country_id), to_location_id: String(offer.to_location_id ?? ''), available_from: offer.available_from, available_to: offer.available_to, price: String(offer.price ?? ''), currency: offer.currency ?? 'AZN', terms: offer.terms ?? '', activate: offer.status === 'active' })
+    setForm({ vehicle_id: String(offer.vehicle_id), from_country_id: String(offer.from_country_id), from_location_id: String(offer.from_location_id ?? ''), to_country_id: String(offer.to_country_id), to_location_id: String(offer.to_location_id ?? ''), available_from: offer.available_from, available_to: offer.available_to, price: String(offer.price ?? ''), currency: offer.currency ?? 'USD', terms: offer.terms ?? '', activate: offer.status === 'active' })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

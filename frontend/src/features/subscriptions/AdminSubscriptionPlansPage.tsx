@@ -12,7 +12,7 @@ export default function AdminSubscriptionPlansPage() {
   const isAdmin = auth.data?.data.roles.includes('admin') ?? false
   const countries = useQuery({ queryKey: ['catalog', 'countries'], queryFn: catalogApi.countries })
   const plans = useQuery({ queryKey: ['admin', 'subscription-plans'], queryFn: subscriptionsApi.adminList, enabled: isAdmin })
-  const [form, setForm] = useState({ kind: 'carrier' as 'carrier' | 'business_place', country_id: '', price: '', currency: 'AZN', duration_months: '1' })
+  const [form, setForm] = useState({ kind: 'carrier' as 'carrier' | 'business_place', country_id: '', price: '', currency: 'USD', duration_months: '1' })
   const save = useMutation({
     mutationFn: subscriptionsApi.createPlan,
     onSuccess: async () => {
