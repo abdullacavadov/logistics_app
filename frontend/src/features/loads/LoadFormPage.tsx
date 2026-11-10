@@ -327,6 +327,7 @@ export default function LoadFormPage() {
             : null,
           price_negotiable: form.price_mode === "negotiable",
           publish: true,
+          needs_refrigeration: 0
         };
         mutation.mutate(p);
     }
