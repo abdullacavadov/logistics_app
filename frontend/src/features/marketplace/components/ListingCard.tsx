@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
-import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight, Monitor, CalendarDays, Ruler, Boxes } from 'lucide-react'
+import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight, Monitor, CalendarDays, Ruler, Boxes, Snowflake } from 'lucide-react'
 import type { Listing } from '../types'
 import { CountryFlag } from './CountryFlag'
 
@@ -52,6 +52,7 @@ export function ListingCard({
                 <span><Weight size={15} />{item.weight}</span>
                 <span><Truck size={15} />{item.vehicle}</span>
                 {item.volume && <span><Ruler size={15} />{item.volume}</span>}
+                {item.needsRefrigeration && <span className="refrigeration-tag"><Snowflake size={15} />Soyuduculu nəqliyyat</span>}
                 {item.quantity !== null && item.quantity !== undefined && (
                     <span><Boxes size={15} />Say: {item.quantity}</span>
                 )}
@@ -60,15 +61,13 @@ export function ListingCard({
                 )}
                 {item.urgent && <span><span className="urgent-tag">Təcili yük</span></span>}
             </div>
-            {item.pickupDate && (
-                <div className="listing-meta">
-                    <span>
-                        <CalendarDays size={14} />
-                        Yükləmə: {item.pickupDate}{item.pickupTo ? ` – ${item.pickupTo}` : ""}
-                    </span>
-                    {item.deliveryBy && <span>Çatdırılma: {item.deliveryBy}</span>}
-                </div>
-            )}
+            <div className="listing-meta">
+                <span>
+                    <CalendarDays size={14} />
+                    Yükləmə: {item.isReadyForLoading ? "Yükləməyə hazır" : (item.pickupDate ?? "Tarix göstərilməyib")}{item.pickupTo ? ` – ${item.pickupTo}` : ""}
+                </span>
+                {item.deliveryBy && <span>Çatdırılma: {item.deliveryBy}</span>}
+            </div>
             <div className="listing-footer">
                 <div>
                     <small>Təklif olunan qiymət</small>
