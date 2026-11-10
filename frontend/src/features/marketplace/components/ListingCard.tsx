@@ -1,8 +1,31 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
-import { ArrowRight, Bookmark, Clock3, MoveRight, Package, Truck, Weight, Monitor, CalendarDays, Ruler, Boxes } from 'lucide-react'
-import type { Listing } from '../types'
-import { CountryFlag } from './CountryFlag'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp, faTelegram } from "@fortawesome/free-brands-svg-icons";
+import {
+    Map,
+    Bookmark,
+    Clock3,
+    MoveRight,
+    ThermometerSnowflake,
+    Truck,
+    Weight,
+    Monitor,
+    CalendarDays,
+    Ruler,
+    Boxes,
+} from "lucide-react";
+import type { Listing } from "../types";
+import { CountryFlag } from "./CountryFlag";
+
+function formatDate(date: string) {
+    if (!date) return "";
+
+    const normalized = date.includes("T") ? date.split("T")[0] : date;
+    const match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (!match) return date;
+
+    const [, year, month, day] = match;
+    return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
+}
 
 export function ListingCard({
     item,
@@ -18,55 +41,85 @@ export function ListingCard({
     return (
         <article className="listing-card">
             <div className="listing-top">
-                <span className="listing-id">REF: {item.id}</span>
-                <span className="source">
-                    <span className="source-dot" /> {item.source}
-                </span>
+                <h3>
+                    <strong>{item.cargo}</strong>
+                </h3>
+
                 <button
                     className={"icon-button save " + (saved ? "is-saved" : "")}
                     onClick={onSave}
                     aria-label="Yadda saxla"
                 >
-                    <Bookmark size={17} fill={saved ? "currentColor" : "none"} />
+                    <Bookmark
+                        size={17}
+                        fill={saved ? "currentColor" : "none"}
+                    />
                 </button>
             </div>
             <button className="route-row" onClick={onSelect}>
                 <div className="route-end">
-                    <CountryFlag flag={item.fromFlag} className="country-flag" />
+                    <CountryFlag
+                        flag={item.fromFlag}
+                        className="country-flag"
+                    />
                     <span>
                         <strong>{item.from}</strong>
-                        <small>Yükləmə nöqtəsi</small>
                     </span>
                 </div>
-                <div className="route-track"><MoveRight size={15} /></div>
+                <div className="route-track">
+                    <MoveRight size={15} />
+                </div>
                 <div className="route-end destination">
                     <CountryFlag flag={item.toFlag} className="country-flag" />
                     <span>
                         <strong>{item.to}</strong>
-                        <small>Təyinat nöqtəsi</small>
                     </span>
                 </div>
             </button>
             <div className="listing-specs">
-                <span><Package size={15} />{item.cargo}</span>
-                <span><Weight size={15} />{item.weight}</span>
-                <span><Truck size={15} />{item.vehicle}</span>
-                {item.volume && <span><Ruler size={15} />{item.volume}</span>}
+                <span>
+                    <Weight size={15} />
+                    {item.weight}
+                </span>
+                <span>
+                    <Truck size={15} />
+                    {item.vehicle}
+                </span>
+                {item.needs_refrigeration !== 0 &&
+                    item.needs_refrigeration !== null &&
+                    item.needs_refrigeration !== undefined && (
+                        <span>
+                            <ThermometerSnowflake size={15} />
+                        </span>
+                    )}
+                {item.volume !== null && item.volume !== undefined && (
+                    <span>
+                        <Ruler size={15} />
+                        {item.volume}
+                    </span>
+                )}
                 {item.quantity !== null && item.quantity !== undefined && (
-                    <span><Boxes size={15} />Say: {item.quantity}</span>
+                    <span>
+                        <Boxes size={15} />
+                        Say: {item.quantity}
+                    </span>
                 )}
-                {item.pallets !== null && item.pallets !== undefined && item.pallets > 0 && (
-                    <span>Palet: {item.pallets}</span>
+                {item.pallets !== null &&
+                    item.pallets !== undefined &&
+                    item.pallets > 0 && <span>Palet: {item.pallets}</span>}
+                {item.urgent && (
+                    <span>
+                        <span className="urgent-tag">Təcili yük</span>
+                    </span>
                 )}
-                {item.urgent && <span><span className="urgent-tag">Təcili yük</span></span>}
             </div>
             {item.pickupDate && (
                 <div className="listing-meta">
                     <span>
                         <CalendarDays size={14} />
-                        Yükləmə: {item.pickupDate}{item.pickupTo ? ` – ${item.pickupTo}` : ""}
+                        Yükləmə tarixi: {formatDate(item.pickupDate)}
+                        {item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
                     </span>
-                    {item.deliveryBy && <span>Çatdırılma: {item.deliveryBy}</span>}
                 </div>
             )}
             <div className="listing-footer">
@@ -75,18 +128,28 @@ export function ListingCard({
                     <strong className="price">{item.price}</strong>
                 </div>
                 <button className="outline-action" onClick={onSelect}>
-                    Ətraflı <ArrowRight size={15} />
+                    <Map size={15} /> Xəritədə bax 
                 </button>
             </div>
             <div className="listing-meta">
-                <span><Clock3 size={14} />Elan tarixi: {item.date}</span>
+                <span>
+                    <Clock3 size={14} />
+                    Elan tarixi: {item.date}
+                </span>
                 {item.application === "WhatsApp-dan" ? (
                     <span style={{ color: "#1db053" }}>
-                        <FontAwesomeIcon icon={faWhatsapp} />{item.application}
+                        <FontAwesomeIcon icon={faWhatsapp} />
+                        {item.application}
+                    </span>
+                ) : item.application === "Telegram-dan" ? (
+                    <span style={{ color: "#0088cc" }}>
+                        <FontAwesomeIcon icon={faTelegram} />
+                        {item.application}
                     </span>
                 ) : (
                     <span style={{ color: "var(--brand-orange)" }}>
-                        <Monitor size={14} />{item.application}
+                        <Monitor size={14} />
+                        {item.application}
                     </span>
                 )}
             </div>

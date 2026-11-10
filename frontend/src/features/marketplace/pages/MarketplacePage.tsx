@@ -51,8 +51,15 @@ export default function MarketplacePage() {
                 load.price === null
                     ? "Razılaşma ilə"
                     : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
-            application:
-                load.applications === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
+            application: (() => {
+                const application = String(load.applications ?? "").toLowerCase();
+
+                if (application === "whatsapp") return "WhatsApp-dan";
+                if (application === "telegram") return "Telegram-dan";
+                if (application === "web") return "Saytdan";
+
+                return "Saytdan";
+            })(),
             date: formatLoadDate(load.created_at),
             pickupDate: formatLoadDate(load.pickup_from),
             pickupTo: load.pickup_to ? formatLoadDate(load.pickup_to) : null,
@@ -60,7 +67,8 @@ export default function MarketplacePage() {
             volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
             quantity: load.quantity ?? null,
             pallets: load.pallets ?? null,
-            source: "LogisticsApp",
+            needs_refrigeration: null,
+            source: "Sayt",
             kind: "load",
         }),
     );

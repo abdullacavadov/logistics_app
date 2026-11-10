@@ -306,29 +306,27 @@ export default function LoadFormPage() {
     function submit(e: FormEvent) {
         e.preventDefault();
         const p: CreateLoadPayload = {
-            title: cargo?.name ?? "Yük",
-            cargo_type_id: Number(form.cargo_type_id),
-            from_country_id: Number(form.from_country_id),
-            from_location_id: Number(form.from_location_id) || null,
-            to_country_id: Number(form.to_country_id),
-            to_location_id: Number(form.to_location_id) || null,
-            pickup_from:
-                form.date_mode === "ready" ? today() : form.pickup_from,
-            weight_kg: Number(form.weight_ton) * 1000,
-            volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
-            quantity: Number(form.count),
-            load_vehicle_type_id: Number(form.load_vehicle_type_id),
-            notes: form.notes.trim() || null,
-            price:
-                form.price_mode === "fixed" && form.price
-                    ? Number(form.price)
-                    : null,
-            currency:
-                form.price_mode === "fixed" && form.price
-                    ? form.currency
-                    : null,
-            price_negotiable: form.price_mode === "negotiable",
-            publish: true,
+          title: cargo?.name ?? "Yük",
+          cargo_type_id: Number(form.cargo_type_id),
+          from_country_id: Number(form.from_country_id),
+          from_location_id: Number(form.from_location_id) || null,
+          to_country_id: Number(form.to_country_id),
+          to_location_id: Number(form.to_location_id) || null,
+          pickup_from: form.date_mode === "ready" ? today() : form.pickup_from,
+          weight_kg: Number(form.weight_ton) * 1000,
+          volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
+          quantity: Number(form.count),
+          load_vehicle_type_id: Number(form.load_vehicle_type_id),
+          notes: form.notes.trim() || null,
+          price: form.price_mode === "fixed" && form.price
+            ? Number(form.price)
+            : null,
+          currency: form.price_mode === "fixed" && form.price
+            ? form.currency
+            : null,
+          price_negotiable: form.price_mode === "negotiable",
+          publish: true,
+          needs_refrigeration: 0
         };
         mutation.mutate(p);
     }
