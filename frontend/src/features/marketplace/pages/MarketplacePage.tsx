@@ -27,10 +27,26 @@ import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 import { useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
+    if (!value) return "";
+    const datePart = value.includes("T") ? value.split("T")[0] : value;
+    const match = datePart.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);
+    if (!match) return value;
+    const [, year, month, day] = match;
+    return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
+}
+
+function formatLoadDateTime(value: string): string {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
     return new Intl.DateTimeFormat("az-AZ", {
         day: "2-digit",
-        month: "short",
-    }).format(new Date(value));
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+    }).format(date);
 }
 
 export default function MarketplacePage() {
@@ -60,14 +76,16 @@ export default function MarketplacePage() {
 
                 return "Saytdan";
             })(),
-            date: formatLoadDate(load.created_at),
-            pickupDate: formatLoadDate(load.pickup_from),
+            date: formatLoadDateTime(load.created_at),
+            isReadyForLoading: Boolean(load.is_ready_for_loading),
+            needsRefrigeration: Boolean(load.needs_refrigeration),
+            pickupDate: load.is_ready_for_loading ? null : formatLoadDate(load.pickup_from),
             pickupTo: load.pickup_to ? formatLoadDate(load.pickup_to) : null,
             deliveryBy: load.delivery_by ? formatLoadDate(load.delivery_by) : null,
             volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
             quantity: load.quantity ?? null,
             pallets: load.pallets ?? null,
-            needs_refrigeration: null,
+            needs_refrigeration: load.needs_refrigeration,
             source: "Sayt",
             kind: "load",
         }),
