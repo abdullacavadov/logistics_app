@@ -29,7 +29,7 @@ import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
     if (!value) return "";
     const datePart = value.includes("T") ? value.split("T")[0] : value;
-    const match = datePart.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);
+    const match = datePart.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (!match) return value;
     const [, year, month, day] = match;
     return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
