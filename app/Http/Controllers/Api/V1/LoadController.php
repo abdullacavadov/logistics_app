@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'needs_refrigeration'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'needs_refrigeration'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -95,7 +95,7 @@ class LoadController extends Controller
         foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
             $oldValue = $load->{$field} ?? null;
             $newValue = $d[$field];
-            $same = in_array($field, ['needs_refrigeration', 'is_hazardous'], true)
+            $same = in_array($field, ['needs_refrigeration', 'is_hazardous', 'is_ready_for_loading'], true)
                 ? (bool) $oldValue === (bool) $newValue
                 : (($oldValue === null || $newValue === null)
                     ? $oldValue === $newValue
@@ -249,6 +249,7 @@ class LoadController extends Controller
             'to_lat' => 'nullable|numeric|between:-90,90',
             'to_lng' => 'nullable|numeric|between:-180,180',
             'pickup_from' => $s . 'required|date|after_or_equal:today',
+            'is_ready_for_loading' => 'boolean',
             'pickup_to' => 'nullable|date|after_or_equal:pickup_from',
             'delivery_by' => 'nullable|date|after_or_equal:pickup_from',
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
@@ -305,6 +306,7 @@ class LoadController extends Controller
             'to_country_id',
             'to_location_id',
             'pickup_from',
+            'is_ready_for_loading',
             'pickup_to',
             'delivery_by',
             'weight_kg',
