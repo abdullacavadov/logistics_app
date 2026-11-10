@@ -27,10 +27,18 @@ import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 import { useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
-    return new Intl.DateTimeFormat("az-AZ", {
-        day: "2-digit",
-        month: "short",
-    }).format(new Date(value));
+    const [year, month, day] = value.slice(0, 10).split("-");
+    return `${day}.${month}.${year}`;
+}
+
+function formatLoadDateTime(value: string): string {
+    const date = new Date(value);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 export default function MarketplacePage() {
@@ -53,8 +61,10 @@ export default function MarketplacePage() {
                     : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
             application:
                 load.applications === "whatsapp" ? "WhatsApp-dan" : "Saytdan",
-            date: formatLoadDate(load.created_at),
-            pickupDate: formatLoadDate(load.pickup_from),
+            date: formatLoadDateTime(load.created_at),
+            isReadyForLoading: Boolean(load.is_ready_for_loading),
+            needsRefrigeration: Boolean(load.needs_refrigeration),
+            pickupDate: load.is_ready_for_loading ? null : formatLoadDate(load.pickup_from),
             pickupTo: load.pickup_to ? formatLoadDate(load.pickup_to) : null,
             deliveryBy: load.delivery_by ? formatLoadDate(load.delivery_by) : null,
             volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
