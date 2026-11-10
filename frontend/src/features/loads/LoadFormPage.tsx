@@ -50,6 +50,7 @@ type State = {
     load_vehicle_type_id: string;
     date_mode: "ready" | "choose";
     pickup_from: string;
+    needs_refrigeration: boolean;
     notes: string;
     price_mode: "negotiable" | "fixed";
     price: string;
@@ -127,6 +128,7 @@ const initial: State = {
     load_vehicle_type_id: "",
     date_mode: "ready",
     pickup_from: today(),
+    needs_refrigeration: false,
     notes: "",
     price_mode: "negotiable",
     price: "",
@@ -235,8 +237,9 @@ export default function LoadFormPage() {
             volume_m3: String(l.volume_m3 ?? ""),
             count: String(l.quantity ?? l.pallets ?? ""),
             load_vehicle_type_id: String(l.load_vehicle_type_id ?? ""),
-            date_mode: "choose",
+            date_mode: l.is_ready_for_loading ? "ready" : "choose",
             pickup_from: l.pickup_from ?? today(),
+            needs_refrigeration: Boolean(l.needs_refrigeration),
             notes: l.notes ?? "",
             price_mode: l.price_negotiable ? "negotiable" : "fixed",
             price: String(l.price ?? ""),
@@ -314,6 +317,8 @@ export default function LoadFormPage() {
             to_location_id: Number(form.to_location_id) || null,
             pickup_from:
                 form.date_mode === "ready" ? today() : form.pickup_from,
+            is_ready_for_loading: form.date_mode === "ready",
+            needs_refrigeration: form.needs_refrigeration,
             weight_kg: Number(form.weight_ton) * 1000,
             volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
             quantity: Number(form.count),
@@ -587,6 +592,17 @@ export default function LoadFormPage() {
                                             />
                                         </label>
                                     )}
+                                </section>
+                                <section className="data-form-section">
+                                    <h3>Temperatur tələbi</h3>
+                                    <label className="load-choice">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.needs_refrigeration}
+                                            onChange={(e) => set("needs_refrigeration", e.target.checked)}
+                                        />
+                                        Soyuduculu nəqliyyat tələb olunur
+                                    </label>
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Əlavə məlumat</h3>
