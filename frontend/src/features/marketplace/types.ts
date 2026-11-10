@@ -10,7 +10,9 @@ export type Listing = {
     price: string;
     application: string;
     date: string;
-    pickupDate?: string;
+    pickupDate?: string | null;
+    isReadyForLoading?: boolean;
+    needsRefrigeration?: boolean;
     pickupTo?: string | null;
     deliveryBy?: string | null;
     volume?: string | null;
