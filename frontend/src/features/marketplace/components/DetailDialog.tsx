@@ -44,7 +44,8 @@ export function DetailDialog({
                     <div><small>Həcm</small><strong>{item.volume ?? "Göstərilməyib"}</strong></div>
                     <div><small>Yük sayı</small><strong>{item.quantity ?? "Göstərilməyib"}</strong></div>
                     <div><small>Palet sayı</small><strong>{item.pallets ?? "Göstərilməyib"}</strong></div>
-                    <div><small>Yükləmə tarixi</small><strong>{item.pickupDate ?? "Göstərilməyib"}{item.pickupTo ? ` – ${item.pickupTo}` : ""}</strong></div>
+                    <div><small>Yükləmə tarixi</small><strong>{item.isReadyForLoading ? "Yükləməyə hazır" : (item.pickupDate ?? "Göstərilməyib")}{item.pickupTo ? ` – ${item.pickupTo}` : ""}</strong></div>
+                    <div><small>Soyuduculu nəqliyyat</small><strong>{item.needsRefrigeration ? "Tələb olunur" : "Tələb olunmur"}</strong></div>
                     <div><small>Son çatdırılma tarixi</small><strong>{item.deliveryBy ?? "Göstərilməyib"}</strong></div>
                     <div><small>Elan tarixi</small><strong>{item.date}</strong></div>
                     <div><small>Elan kanalı</small><strong>{item.application}</strong></div>
