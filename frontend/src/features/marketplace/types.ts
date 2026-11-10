@@ -1,5 +1,5 @@
 export type Listing = {
-    needs_refrigeration: null;
+    needs_refrigeration: number | boolean | null;
     id: string;
     from: string;
     to: string;
@@ -11,7 +11,9 @@ export type Listing = {
     price: string;
     application: string;
     date: string;
-    pickupDate?: string;
+    pickupDate?: string | null;
+    isReadyForLoading?: boolean;
+    needsRefrigeration?: boolean;
     pickupTo?: string | null;
     deliveryBy?: string | null;
     volume?: string | null;
