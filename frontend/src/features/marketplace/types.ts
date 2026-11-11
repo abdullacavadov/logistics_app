@@ -14,8 +14,7 @@ export type Listing = {
     pickupDate?: string | null;
     isReadyForLoading?: boolean;
     needsRefrigeration?: boolean;
-    pickupTo?: string | null;
-    deliveryBy?: string | null;
+    isHazardous?: boolean;
     volume?: string | null;
     quantity?: number | null;
     pallets?: number | null;
