@@ -56,6 +56,7 @@ export default function MarketplacePage() {
     const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map(
         (load) => ({
             id: `LA-${load.id}`,
+            title: load.title,
             from: load.from_name ?? load.from_country_name ?? "—",
             to: load.to_name ?? load.to_country_name ?? "—",
             fromFlag: load.from_country_iso2 ?? "",
