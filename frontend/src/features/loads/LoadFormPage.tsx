@@ -273,6 +273,7 @@ export default function LoadFormPage() {
             await Promise.all([
                 qc.invalidateQueries({ queryKey: loadsQueryKey }),
                 qc.invalidateQueries({ queryKey: myLoadsQueryKey }),
+                ...(editing ? [qc.invalidateQueries({ queryKey: [...loadsQueryKey, "detail", loadId] })] : []),
             ]);
             navigate("/my/loads", { replace: true });
         },
@@ -335,7 +336,9 @@ export default function LoadFormPage() {
           from_location_id: Number(form.from_location_id) || null,
           to_country_id: Number(form.to_country_id),
           to_location_id: Number(form.to_location_id) || null,
-          pickup_from: form.date_mode === "ready" ? today() : form.pickup_from,
+          pickup_from: form.date_mode === "ready"
+            ? (editing && loadQuery.data?.data.is_ready_for_loading ? loadQuery.data.data.pickup_from : today())
+            : form.pickup_from,
           is_ready_for_loading: form.date_mode === "ready",
           pickup_to: form.pickup_to || null,
           delivery_by: form.delivery_by || null,
@@ -616,11 +619,11 @@ export default function LoadFormPage() {
                                     <div className="data-form-grid">
                                         <label className="data-field">
                                             <span>Yükləmənin son tarixi</span>
-                                            <input type="date" min={form.date_mode === "choose" ? form.pickup_from : today()} value={form.pickup_to} onChange={(e) => set("pickup_to", e.target.value)} />
+                                            <input type="date" min={editing ? undefined : (form.date_mode === "choose" ? form.pickup_from : today())} value={form.pickup_to} onChange={(e) => set("pickup_to", e.target.value)} />
                                         </label>
                                         <label className="data-field">
                                             <span>Çatdırılma tarixi</span>
-                                            <input type="date" min={form.date_mode === "choose" ? form.pickup_from : today()} value={form.delivery_by} onChange={(e) => set("delivery_by", e.target.value)} />
+                                            <input type="date" min={editing ? undefined : (form.date_mode === "choose" ? form.pickup_from : today())} value={form.delivery_by} onChange={(e) => set("delivery_by", e.target.value)} />
                                         </label>
                                     </div>
                                 </section>
