@@ -49,9 +49,11 @@ export interface Load {
   created_at: string
   from_country_name?: string
   from_country_iso2?: string
+  from_country_iso3?: string
   from_name?: string
   to_country_name?: string
   to_country_iso2?: string
+  to_country_iso3?: string
   to_name?: string
   cargo_type_name?: string | null
   vehicle_type_name?: string | null
