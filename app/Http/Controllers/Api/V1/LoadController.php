@@ -62,8 +62,12 @@ class LoadController extends Controller
         return response()->json($q->orderByDesc('l.id')
             ->select(
                 'l.*',
-                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
-                DB::raw('COALESCE(tl.name, tc.name) as to_name')
+                'fc.name as from_country_name',
+                'fc.iso2 as from_country_iso2',
+                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
+                'tc.name as to_country_name',
+                'tc.iso2 as to_country_iso2',
+                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name')
             )
             ->paginate($r->integer('per_page', 15)));
     }
