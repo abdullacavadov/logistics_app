@@ -831,13 +831,21 @@ select:focus-visible {
 .listing-specs .refrigeration-tag svg {
     color: var(--primary);
 }
+.my-listing-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 13px;
+    flex-direction: column;
+}
+
 .listing-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-top: 13px;
 }
-.listing-footer small {
+.listing-footer small, .my-listing-footer small  {
     display: block;
     font-size: 9px;
     color: var(--muted);
@@ -2161,6 +2169,12 @@ select:focus-visible {
     color: var(--danger);
     border-color: color-mix(in srgb, var(--danger) 30%, var(--line));
     background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.outline-action.is-archive {
+    color: var(--text-soft);
+    border-color: color-mix(in srgb, var(--text-soft) 30%, var(--line));
+    background: color-mix(in srgb, var(--muted) 7%, var(--surface));
 }
 .my-load-archive {
     border: 1px solid var(--line);

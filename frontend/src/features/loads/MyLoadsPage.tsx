@@ -8,6 +8,8 @@ import {
     FilePlus2,
     Package,
     RefreshCw,
+    BadgeX,
+    SquarePen,
 } from "lucide-react";
 import {
     useMyLoads,
@@ -231,18 +233,19 @@ export default function MyLoadsPage() {
                                         onSelect={() => navigate(`/loads/${load.id}/edit`)}
                                         status={getOwnerStatus(load.status)}
                                         footerAction={
-                                            <div className="my-load-actions">
+                                        
+                                            <div className="my-load-actions" style={{ display: "inline-flex", gap: "0.5rem", flexWrap: "nowrap" }}>
                                                 <button className="outline-action" onClick={() => navigate(`/loads/${load.id}/edit`)}>
-                                                    Redaktə et
+                                                    <SquarePen size={17} /> Redaktə et
                                                 </button>
                                                 {["draft", "pending_moderation", "published", "has_applications", "agreed"].includes(load.status) && (
                                                     <button className="outline-action is-danger" disabled={cancel.isPending} onClick={() => cancel.mutate(load.id)}>
-                                                        Ləğv et
+                                                        <BadgeX size={17} /> Ləğv et
                                                     </button>
                                                 )}
                                                 {["draft", "pending_moderation", "rejected", "published", "has_applications", "completed", "cancelled"].includes(load.status) && (
-                                                    <button className="icon-button my-load-archive" title="Arxivlə" aria-label="Arxivlə" disabled={archive.isPending} onClick={() => archive.mutate(load.id)}>
-                                                        <ArrowDownToLine size={17} />
+                                                    <button className="outline-action is-archive" title="Arxivlə" aria-label="Arxivlə" disabled={archive.isPending} onClick={() => archive.mutate(load.id)}>
+                                                        <ArrowDownToLine size={17} /> Arxivlə
                                                     </button>
                                                 )}
                                             </div>

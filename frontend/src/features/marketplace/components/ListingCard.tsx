@@ -20,12 +20,26 @@ import { CountryFlag, getCountryIso3 } from "./CountryFlag";
 function formatDate(date: string) {
     if (!date) return "";
 
-    const normalized = date.includes("T") ? date.split("T")[0] : date;
-    const match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    const normalized = date
+        .trim()
+        .replace("T", " ")
+        .replace(/\.\d+Z?$/, "")
+        .replace(/Z$/, "");
+
+    const match = normalized.match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/
+    );
+
     if (!match) return date;
 
-    const [, year, month, day] = match;
-    return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
+    const [, year, month, day, hour, minute] = match;
+    const formattedDate = `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
+
+    if (hour && minute) {
+        return `${formattedDate} ${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+    }
+
+    return formattedDate;
 }
 
 export function ListingCard({
@@ -146,7 +160,14 @@ export function ListingCard({
                     </span>
                 </div>
             )}
-            <div className="listing-footer">
+            <div
+                className={
+                    typeof window !== "undefined" &&
+                    window.location.pathname.replace(/\/$/, "") === "/my/loads"
+                        ? "my-listing-footer"
+                        : "listing-footer"
+                }
+            >
                 <div>
                     <small><b>Təklif olunan qiymət</b></small>
                     <strong className="price">{item.price}</strong>
