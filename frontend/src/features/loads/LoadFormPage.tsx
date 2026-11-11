@@ -331,7 +331,6 @@ export default function LoadFormPage() {
           volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
           quantity: Number(form.count),
           load_vehicle_type_id: Number(form.load_vehicle_type_id),
-          notes: form.notes.trim() || null,
           price: form.price_mode === "fixed" && form.price
             ? Number(form.price)
             : null,
