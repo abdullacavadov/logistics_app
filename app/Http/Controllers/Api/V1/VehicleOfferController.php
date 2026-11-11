@@ -128,7 +128,7 @@ class VehicleOfferController extends Controller
         if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         $rows = DB::table('matches as m')->join('loads as l', 'l.id', '=', 'm.load_id')->where('m.vehicle_offer_id', $id)->orderByDesc('m.score')
-            ->select('m.score', 'm.reasons', 'l.id as load_id', 'l.title', 'l.from_country_id', 'l.to_country_id', 'l.pickup_from', 'l.pickup_to', 'l.weight_kg', 'l.price', 'l.currency')->get()
+            ->select('m.score', 'm.reasons', 'l.id as load_id', 'l.title', 'l.from_country_id', 'l.to_country_id', 'l.pickup_from', 'l.weight_kg', 'l.price', 'l.currency')->get()
             ->map(fn ($x) => tap($x, fn ($y) => $y->reasons = json_decode($y->reasons)));
         return response()->json(['data' => $rows]);
     }
