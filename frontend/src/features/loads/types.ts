@@ -115,7 +115,6 @@ export interface CreateLoadPayload {
   required_vehicle_type_id?: number | null
   load_vehicle_type_id: number
   is_hazardous?: boolean
-  notes?: string | null
   price?: number | null
   currency?: string | null
   price_negotiable?: boolean
