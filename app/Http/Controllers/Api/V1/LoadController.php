@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'is_hazardous'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)

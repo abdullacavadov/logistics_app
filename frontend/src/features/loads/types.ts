@@ -121,7 +121,6 @@ export interface CreateLoadPayload {
   quantity: number
   required_vehicle_type_id?: number | null
   load_vehicle_type_id: number
-  needs_refrigeration: number | boolean
   temp_min?: number | null
   temp_max?: number | null
   is_hazardous?: boolean
