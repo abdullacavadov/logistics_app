@@ -8,7 +8,6 @@ import {
     FilePlus2,
     Package,
     RefreshCw,
-    Truck,
 } from "lucide-react";
 import {
     useMyLoads,
@@ -168,15 +167,15 @@ export default function MyLoadsPage() {
 
                     <section className="my-loads-stats" aria-label="Elan statistikası">
                         <article>
-                            <span className="my-load-stat-icon"><Package size={18} /></span>
+                            <span className="my-loads-stat-icon"><Package size={18} /></span>
                             <div><small>Ümumi elan</small><strong>{loads.isLoading ? "—" : rows.length}</strong></div>
                         </article>
                         <article>
-                            <span className="my-load-stat-icon is-active"><Clock3 size={18} /></span>
+                            <span className="my-loads-stat-icon is-active"><Clock3 size={18} /></span>
                             <div><small>Aktiv elan</small><strong>{rows.filter((load) => ["published", "has_applications", "agreed", "in_transit"].includes(load.status)).length}</strong></div>
                         </article>
                         <article>
-                            <span className="my-load-stat-icon is-archived"><Archive size={18} /></span>
+                            <span className="my-loads-stat-icon is-archived"><Archive size={18} /></span>
                             <div><small>Arxiv / tamamlanan</small><strong>{rows.filter((load) => ["archived", "completed"].includes(load.status)).length}</strong></div>
                         </article>
                     </section>
