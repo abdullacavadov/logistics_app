@@ -50,13 +50,8 @@ type State = {
     load_vehicle_type_id: string;
     date_mode: "ready" | "choose";
     pickup_from: string;
-    pickup_to: string;
-    delivery_by: string;
     description: string;
-    temp_min: string;
-    temp_max: string;
     is_hazardous: boolean;
-    notes: string;
     price_mode: "negotiable" | "fixed";
     price: string;
     currency: string;
@@ -133,13 +128,8 @@ const initial: State = {
     load_vehicle_type_id: "",
     date_mode: "ready",
     pickup_from: today(),
-    pickup_to: "",
-    delivery_by: "",
     description: "",
-    temp_min: "",
-    temp_max: "",
     is_hazardous: false,
-    notes: "",
     price_mode: "negotiable",
     price: "",
     currency: "USD",
@@ -254,13 +244,8 @@ export default function LoadFormPage() {
             load_vehicle_type_id: String(l.load_vehicle_type_id ?? ""),
             date_mode: l.is_ready_for_loading ? "ready" : "choose",
             pickup_from: l.pickup_from ?? today(),
-            pickup_to: l.pickup_to ?? "",
-            delivery_by: l.delivery_by ?? "",
             description: l.description ?? "",
-            temp_min: l.temp_min == null ? "" : String(l.temp_min),
-            temp_max: l.temp_max == null ? "" : String(l.temp_max),
             is_hazardous: Boolean(l.is_hazardous),
-            notes: l.notes ?? "",
             price_mode: l.price_negotiable ? "negotiable" : "fixed",
             price: String(l.price ?? ""),
             currency: l.currency ?? "USD",
@@ -340,11 +325,7 @@ export default function LoadFormPage() {
             ? (editing && loadQuery.data?.data.is_ready_for_loading ? loadQuery.data.data.pickup_from : today())
             : form.pickup_from,
           is_ready_for_loading: form.date_mode === "ready",
-          pickup_to: form.pickup_to || null,
-          delivery_by: form.delivery_by || null,
           description: form.description.trim() || null,
-          temp_min: form.temp_min === "" ? null : Number(form.temp_min),
-          temp_max: form.temp_max === "" ? null : Number(form.temp_max),
           is_hazardous: form.is_hazardous,
           weight_kg: Number(form.weight_ton) * 1000,
           volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
@@ -616,16 +597,6 @@ export default function LoadFormPage() {
                                             />
                                         </label>
                                     )}
-                                    <div className="data-form-grid">
-                                        <label className="data-field">
-                                            <span>Yükləmənin son tarixi</span>
-                                            <input type="date" min={editing ? undefined : (form.date_mode === "choose" ? form.pickup_from : today())} value={form.pickup_to} onChange={(e) => set("pickup_to", e.target.value)} />
-                                        </label>
-                                        <label className="data-field">
-                                            <span>Çatdırılma tarixi</span>
-                                            <input type="date" min={editing ? undefined : (form.date_mode === "choose" ? form.pickup_from : today())} value={form.delivery_by} onChange={(e) => set("delivery_by", e.target.value)} />
-                                        </label>
-                                    </div>
                                 </section>
                                 
                                 <section className="data-form-section">
@@ -634,28 +605,6 @@ export default function LoadFormPage() {
                                         <span>Təsvir</span>
                                         <textarea rows={3} maxLength={5000} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Yük haqqında təsvir…" />
                                     </label>
-                                    <label className="data-field data-field-wide">
-                                        <span>Qeydlər</span>
-                                        <textarea
-                                            rows={4}
-                                            maxLength={3000}
-                                            value={form.notes}
-                                            onChange={(e) =>
-                                                set("notes", e.target.value)
-                                            }
-                                            placeholder="Əlavə məlumat…"
-                                        />
-                                    </label>
-                                    <div className="data-form-grid">
-                                        <label className="data-field">
-                                            <span>Temperatur minimum (°C)</span>
-                                            <input type="number" step="0.1" value={form.temp_min} onChange={(e) => set("temp_min", e.target.value)} />
-                                        </label>
-                                        <label className="data-field">
-                                            <span>Temperatur maksimum (°C)</span>
-                                            <input type="number" step="0.1" min={form.temp_min || undefined} value={form.temp_max} onChange={(e) => set("temp_max", e.target.value)} />
-                                        </label>
-                                    </div>
                                     <label className="load-choice">
                                         <input type="checkbox" checked={form.is_hazardous} onChange={(e) => set("is_hazardous", e.target.checked)} />
                                         Təhlükəli yükdür
