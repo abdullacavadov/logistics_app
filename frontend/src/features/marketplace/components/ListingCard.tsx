@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWhatsapp, faTelegram } from "@fortawesome/free-brands-svg-icons";
 import {
@@ -14,7 +15,7 @@ import {
     Boxes,
 } from "lucide-react";
 import type { Listing } from "../types";
-import { CountryFlag } from "./CountryFlag";
+import { CountryFlag, getCountryIso3 } from "./CountryFlag";
 
 function formatDate(date: string) {
     if (!date) return "";
@@ -32,11 +33,15 @@ export function ListingCard({
     onSelect,
     saved,
     onSave,
+    status,
+    footerAction,
 }: {
     item: Listing;
     onSelect: () => void;
     saved: boolean;
     onSave: () => void;
+    status?: { label: string; tone: "pending" | "published" | "rejected" };
+    footerAction?: ReactNode;
 }) {
     return (
         <article className="listing-card">
@@ -44,6 +49,14 @@ export function ListingCard({
                 <h3>
                     <strong>{item.cargo}</strong>
                 </h3>
+                {item.title && item.title !== item.cargo && (
+                    <small className="listing-title">{item.title}</small>
+                )}
+                {status && (
+                    <span className={`listing-status is-${status.tone}`}>
+                        {status.label}
+                    </span>
+                )}
 
                 <button
                     className={"icon-button save " + (saved ? "is-saved" : "")}
@@ -64,6 +77,7 @@ export function ListingCard({
                     />
                     <span>
                         <strong>{item.from}</strong>
+                        <small>{getCountryIso3(item.fromFlag)}</small>
                     </span>
                 </div>
                 <div className="route-track">
@@ -73,6 +87,7 @@ export function ListingCard({
                     <CountryFlag flag={item.toFlag} className="country-flag" />
                     <span>
                         <strong>{item.to}</strong>
+                        <small>{getCountryIso3(item.toFlag)}</small>
                     </span>
                 </div>
             </button>
@@ -130,9 +145,11 @@ export function ListingCard({
                     <small><b>Təklif olunan qiymət</b></small>
                     <strong className="price">{item.price}</strong>
                 </div>
-                <button className="outline-action" onClick={onSelect}>
-                    <Map size={15} /> Xəritədə bax 
-                </button>
+                {footerAction ?? (
+                    <button className="outline-action" onClick={onSelect}>
+                        <Map size={15} /> Xəritədə bax
+                    </button>
+                )}
             </div>
             <div className="listing-meta">
                 <span>
