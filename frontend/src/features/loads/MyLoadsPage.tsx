@@ -27,9 +27,13 @@ import {
 } from "../marketplace/config/navigation";
 import { useAuth, useLogout } from "../auth/hooks/useAuth";
 
-type OwnerStatus = "pending" | "published" | "rejected";
+type OwnerStatus = "pending" | "published" | "rejected" | "archived";
 
 function getOwnerStatus(status: LoadStatus): { label: string; tone: OwnerStatus } {
+    if (status === "archived") {
+        return { label: "Arxivləndi", tone: "archived" };
+    }
+
     if (status === "rejected") {
         return { label: "Rədd edildi", tone: "rejected" };
     }
@@ -222,6 +226,7 @@ export default function MyLoadsPage() {
                                         item={toListing(load)}
                                         saved={false}
                                         showSave={false}
+                                        showApplication={false}
                                         onSave={() => undefined}
                                         onSelect={() => navigate(`/loads/${load.id}/edit`)}
                                         status={getOwnerStatus(load.status)}

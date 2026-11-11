@@ -2866,3 +2866,13 @@ select:focus-visible {
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+
+.listing-status.is-archived {
+    background: #eeeeef;
+    color: #62666d;
+}
+.app-shell[data-theme="dark"] .listing-status.is-archived {
+    background: #383a3f;
+    color: #c4c7cc;
+}
