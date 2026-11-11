@@ -2795,3 +2795,74 @@ select:focus-visible {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* My Loads uses the same marketplace card grid and visual language. */
+.my-loads-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+}
+.listing-title {
+    display: block;
+    min-width: 0;
+    margin-right: auto;
+    color: var(--text-soft);
+    font-size: 10px;
+    line-height: 1.4;
+}
+.listing-status {
+    flex: none;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.listing-status.is-pending {
+    background: #fff2df;
+    color: #c46a08;
+}
+.listing-status.is-published {
+    background: #e5f7ef;
+    color: #087b50;
+}
+.listing-status.is-rejected {
+    background: #fdeaea;
+    color: #c53333;
+}
+.app-shell[data-theme="dark"] .listing-status.is-pending {
+    background: #4b3219;
+    color: #ffbd70;
+}
+.app-shell[data-theme="dark"] .listing-status.is-published {
+    background: #123c30;
+    color: #69dfaa;
+}
+.app-shell[data-theme="dark"] .listing-status.is-rejected {
+    background: #4a2529;
+    color: #ff9292;
+}
+.my-load-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.my-load-actions .outline-action {
+    min-height: 32px;
+    padding: 0 9px;
+}
+.my-load-actions .my-load-archive {
+    width: 32px;
+    height: 32px;
+}
+@media (max-width: 1100px) {
+    .my-loads-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 680px) {
+    .my-loads-card-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
