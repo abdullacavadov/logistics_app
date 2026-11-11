@@ -1,5 +1,6 @@
 export type Listing = {
     id: string;
+    title?: string;
     from: string;
     to: string;
     fromFlag: string;
