@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'pickup_to', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'is_hazardous'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'is_hazardous'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -20,12 +20,12 @@ class LoadController extends Controller
         $r->validate(['per_page' => 'nullable|integer|min:1|max:50', 'min_weight' => 'nullable|numeric|min:0', 'max_weight' => 'nullable|numeric|min:0']);
         $q = $this->publicQuery()
             ->whereIn('l.status', self::PUBLIC_STATUSES)
-            ->where(fn($w) => $w->whereNull('l.pickup_to')->where('l.pickup_from', '>=', now()->toDateString())->orWhere('l.pickup_to', '>=', now()->toDateString()));
+            ->where('l.pickup_from', '>=', now()->toDateString());
         foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'required_vehicle_type_id', 'currency'] as $f)
             if ($r->filled($f)) $q->where("l.$f", $r->input($f));
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
         if ($r->filled('max_weight')) $q->where('l.weight_kg', '<=', $r->max_weight);
-        if ($r->filled('pickup_date')) $q->where('l.pickup_from', '<=', $r->pickup_date)->whereRaw('COALESCE(l.pickup_to, l.pickup_from) >= ?', [$r->pickup_date]);
+        if ($r->filled('pickup_date')) $q->whereDate('l.pickup_from', $r->pickup_date);
         if ($r->filled('min_price')) $q->where('l.price', '>=', $r->min_price);
         if ($r->filled('max_price')) $q->where('l.price', '<=', $r->max_price);
         return response()->json($q->orderByDesc('l.id')->paginate($r->integer('per_page', 15)));
@@ -254,18 +254,13 @@ class LoadController extends Controller
             'to_location_id' => 'nullable|exists:locations,id',
             'pickup_from' => $s . 'required|date|after_or_equal:today',
             'is_ready_for_loading' => 'boolean',
-            'pickup_to' => 'nullable|date|after_or_equal:pickup_from',
-            'delivery_by' => 'nullable|date|after_or_equal:pickup_from',
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
             'volume_m3' => 'nullable|numeric|gt:0',
             'quantity' => $s . 'required|integer|min:1',
             'pallets' => 'nullable|integer|min:1',
             'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
             'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
-            'temp_min' => 'nullable|numeric',
-            'temp_max' => 'nullable|numeric|gte:temp_min',
             'is_hazardous' => 'boolean',
-            'notes' => 'nullable|string|max:3000',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
             'price_negotiable' => 'boolean',
@@ -310,16 +305,12 @@ class LoadController extends Controller
             'to_location_id',
             'pickup_from',
             'is_ready_for_loading',
-            'pickup_to',
-            'delivery_by',
             'weight_kg',
             'volume_m3',
             'pallets',
             'quantity',
             'required_vehicle_type_id',
             'load_vehicle_type_id',
-            'temp_min',
-            'temp_max',
             'is_hazardous',
             'price',
             'applications',
