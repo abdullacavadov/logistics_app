@@ -221,6 +221,7 @@ export default function MyLoadsPage() {
                                         key={load.id}
                                         item={toListing(load)}
                                         saved={false}
+                                        showSave={false}
                                         onSave={() => undefined}
                                         onSelect={() => navigate(`/loads/${load.id}/edit`)}
                                         status={getOwnerStatus(load.status)}
