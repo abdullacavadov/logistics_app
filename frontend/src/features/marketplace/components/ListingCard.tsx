@@ -155,7 +155,7 @@ export function ListingCard({
                 <div className="listing-meta">
                     <span>
                         <CalendarDays size={14} />
-                        <b>Yükləmə:</b> {item.isReadyForLoading ? "Yükləməyə hazır" : formatDate(item.pickupDate ?? "")}
+                        <b>Yükləmə:</b> {item.isReadyForLoading ? <span className="ready-loading">Hazır</span> : formatDate(item.pickupDate ?? "")}
                         {!item.isReadyForLoading && item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
                     </span>
                 </div>

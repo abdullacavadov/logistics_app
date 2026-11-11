@@ -44,6 +44,7 @@ select:focus-visible {
     --primary-soft: #eaf1ff;
     --secondary: #0aa6b8;
     --green: #0b9d70;
+    --soft-green: #a2f0cf;
     --danger: #d85a5a;
     --shadow: 0 8px 28px rgba(27, 48, 78, 0.06);
     background: var(--bg);
@@ -869,6 +870,17 @@ select:focus-visible {
     font-size: 10px;
     font-weight: 700;
 }
+
+.ready-loading {
+    padding: 0 11px;
+    border: 1px solid color-mix(in srgb, var(--green) 85%, var(--line));
+    border-radius: 9px;
+    background: var(--soft-green);
+    color: var(--green);
+    display: flex;
+    align-items: center;
+}
+
 .listing-meta {
     display: flex;
     align-items: center;
