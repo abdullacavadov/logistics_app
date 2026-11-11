@@ -35,6 +35,7 @@ export function ListingCard({
     onSave,
     status,
     footerAction,
+    showSave = true,
 }: {
     item: Listing;
     onSelect: () => void;
@@ -42,6 +43,7 @@ export function ListingCard({
     onSave: () => void;
     status?: { label: string; tone: "pending" | "published" | "rejected" };
     footerAction?: ReactNode;
+    showSave?: boolean;
 }) {
     return (
         <article className="listing-card">
@@ -58,16 +60,18 @@ export function ListingCard({
                     </span>
                 )}
 
-                <button
-                    className={"icon-button save " + (saved ? "is-saved" : "")}
-                    onClick={onSave}
-                    aria-label="Yadda saxla"
-                >
-                    <Bookmark
-                        size={17}
-                        fill={saved ? "currentColor" : "none"}
-                    />
-                </button>
+                {showSave && (
+                    <button
+                        className={"icon-button save " + (saved ? "is-saved" : "")}
+                        onClick={onSave}
+                        aria-label="Yadda saxla"
+                    >
+                        <Bookmark
+                            size={17}
+                            fill={saved ? "currentColor" : "none"}
+                        />
+                    </button>
+                )}
             </div>
             <button className="route-row" onClick={onSelect}>
                 <div className="route-end">
