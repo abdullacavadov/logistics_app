@@ -56,7 +56,7 @@ export function ListingCard({
     onSelect: () => void;
     saved: boolean;
     onSave: () => void;
-    status?: { label: string; tone: "pending" | "published" | "rejected" };
+    status?: { label: string; tone: "pending" | "published" | "rejected" | "archived" };
     footerAction?: ReactNode;
     showSave?: boolean;
     showApplication?: boolean;
@@ -181,7 +181,7 @@ export function ListingCard({
             <div className="listing-meta">
                 <span>
                     <Clock3 size={14} />
-                    {item.date}
+                    {formatDate(item.date)}
                 </span>
                 {showApplication && (item.application === "WhatsApp-dan" ? (
                     <span style={{ color: "#1db053" }}>
