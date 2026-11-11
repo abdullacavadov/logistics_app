@@ -20,8 +20,7 @@ class MatchingService
         if ($load['weight_kg'] > $vehicle['capacity_kg']) return null;
         if (!empty($load['volume_m3']) && !empty($vehicle['capacity_m3']) && $load['volume_m3'] > $vehicle['capacity_m3']) return null;
         if (!empty($load['required_vehicle_type_id']) && $load['required_vehicle_type_id'] != $vehicle['vehicle_type_id']) return null;
-        $pEnd = $load['pickup_to'] ?? $load['pickup_from'];
-        if ($load['pickup_from'] > $offer['available_to'] || $pEnd < $offer['available_from']) return null;
+        if ($load['pickup_from'] < $offer['available_from'] || $load['pickup_from'] > $offer['available_to']) return null;
 
         $r = $this->route($load, $offer);
         if ($r === 0.0) return null;
@@ -56,8 +55,7 @@ class MatchingService
 
     private function date(array $l, array $o): float
     {
-        $pEnd = $l['pickup_to'] ?? $l['pickup_from'];
-        return ($l['pickup_from'] >= $o['available_from'] && $pEnd <= $o['available_to']) ? 1.0 : 0.6;
+        return ($l['pickup_from'] >= $o['available_from'] && $l['pickup_from'] <= $o['available_to']) ? 1.0 : 0.6;
     }
 
     /** Valyuta fərqli olarsa avtomatik konvertasiya YOXDUR — neytral bal. */
