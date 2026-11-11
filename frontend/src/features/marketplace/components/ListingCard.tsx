@@ -36,6 +36,7 @@ export function ListingCard({
     status,
     footerAction,
     showSave = true,
+    showApplication = true,
 }: {
     item: Listing;
     onSelect: () => void;
@@ -44,6 +45,7 @@ export function ListingCard({
     status?: { label: string; tone: "pending" | "published" | "rejected" };
     footerAction?: ReactNode;
     showSave?: boolean;
+    showApplication?: boolean;
 }) {
     return (
         <article className="listing-card">
@@ -160,7 +162,7 @@ export function ListingCard({
                     <Clock3 size={14} />
                     {item.date}
                 </span>
-                {item.application === "WhatsApp-dan" ? (
+                {showApplication && (item.application === "WhatsApp-dan" ? (
                     <span style={{ color: "#1db053" }}>
                         <FontAwesomeIcon icon={faWhatsapp} />
                         {item.application}
@@ -175,7 +177,7 @@ export function ListingCard({
                         <Monitor size={14} />
                         {item.application}
                     </span>
-                )}
+                ))}
             </div>
         </article>
     );
