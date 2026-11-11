@@ -13,6 +13,7 @@ import {
     Monitor,
     CalendarDays,
     Boxes,
+    TriangleAlert,
 } from "lucide-react";
 import type { Listing } from "../types";
 import { CountryFlag, getCountryIso3 } from "./CountryFlag";
@@ -66,6 +67,15 @@ export function ListingCard({
             <div className="listing-top">
                 <h3>
                     <strong>{item.cargo}</strong>
+                    {item.isHazardous && (
+                        <TriangleAlert
+                            size={17}
+                            color="#eab308"
+                            aria-label="Təhlükəli yük"
+                            title="Təhlükəli yük"
+                            style={{ marginLeft: 8, verticalAlign: "middle" }}
+                        />
+                    )}
                 </h3>
                 {item.title && item.title !== item.cargo && (
                     <small className="listing-title">{item.title}</small>
@@ -156,7 +166,6 @@ export function ListingCard({
                     <span>
                         <CalendarDays size={14} />
                         <b>Yükləmə:</b> {item.isReadyForLoading ? <span className="ready-loading">Hazır</span> : formatDate(item.pickupDate ?? "")}
-                        {!item.isReadyForLoading && item.pickupTo ? ` – ${formatDate(item.pickupTo)}` : ""}
                     </span>
                 </div>
             )}

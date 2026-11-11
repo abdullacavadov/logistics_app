@@ -250,18 +250,13 @@ CREATE TABLE `loads` (
   `to_lng` decimal(9,6) DEFAULT NULL,
   `pickup_from` date NOT NULL,
   `is_ready_for_loading` tinyint(1) NOT NULL DEFAULT 0,
-  `pickup_to` date DEFAULT NULL,
-  `delivery_by` date DEFAULT NULL,
   `weight_kg` decimal(10,2) NOT NULL,
   `volume_m3` decimal(8,2) DEFAULT NULL,
   `pallets` int(10) UNSIGNED DEFAULT NULL,
   `quantity` int(10) UNSIGNED DEFAULT NULL,
   `required_vehicle_type_id` bigint(20) UNSIGNED DEFAULT NULL,
   `load_vehicle_type_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `temp_min` decimal(5,1) DEFAULT NULL,
-  `temp_max` decimal(5,1) DEFAULT NULL,
   `is_hazardous` tinyint(1) NOT NULL DEFAULT 0,
-  `notes` text DEFAULT NULL,
   `price` decimal(12,2) DEFAULT NULL,
   `currency` char(3) DEFAULT NULL,
   `applications` enum('web','whatsapp') NOT NULL,
@@ -275,8 +270,8 @@ CREATE TABLE `loads` (
 -- Дамп данных таблицы `loads`
 --
 
-INSERT INTO `loads` (`id`, `user_id`, `title`, `description`, `cargo_type_id`, `from_country_id`, `from_location_id`, `from_address`, `from_lat`, `from_lng`, `to_country_id`, `to_location_id`, `to_address`, `to_lat`, `to_lng`, `pickup_from`, `pickup_to`, `delivery_by`, `weight_kg`, `volume_m3`, `pallets`, `required_vehicle_type_id`, `temp_min`, `temp_max`, `is_hazardous`, `notes`, `price`, `currency`, `applications`, `price_negotiable`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Baki-Tbilisi 10 ton', NULL, NULL, 1, NULL, NULL, NULL, NULL, 3, NULL, NULL, NULL, NULL, '2026-11-20', NULL, NULL, 10000.00, NULL, NULL, NULL, 0, NULL, NULL, 0, NULL, 1500.00, 'EUR', 'web', 1, 'published', '2026-10-30 04:43:19', '2026-11-01 05:53:26');
+INSERT INTO `loads` (`id`, `user_id`, `title`, `description`, `cargo_type_id`, `from_country_id`, `from_location_id`, `from_address`, `from_lat`, `from_lng`, `to_country_id`, `to_location_id`, `to_address`, `to_lat`, `to_lng`, `pickup_from`, `weight_kg`, `volume_m3`, `pallets`, `required_vehicle_type_id`, `is_hazardous`, `price`, `currency`, `applications`, `price_negotiable`, `status`, `created_at`, `updated_at`) VALUES
+(1, 2, 'Baki-Tbilisi 10 ton', NULL, NULL, 1, NULL, NULL, NULL, NULL, 3, NULL, NULL, NULL, NULL, '2026-11-20', 10000.00, NULL, NULL, NULL, 0, 1500.00, 'EUR', 'web', 1, 'published', '2026-10-30 04:43:19', '2026-11-01 05:53:26');
 
 -- --------------------------------------------------------
 

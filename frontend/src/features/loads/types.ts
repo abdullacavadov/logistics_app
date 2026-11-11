@@ -29,18 +29,13 @@ export interface Load {
   to_lng?: number | string | null
   pickup_from: string
   is_ready_for_loading: boolean
-  pickup_to: string | null
-  delivery_by: string | null
   weight_kg: number | string
   volume_m3: number | string | null
   pallets: number | null
   quantity?: number | null
   required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
-  temp_min: number | string | null
-  temp_max: number | string | null
   is_hazardous: boolean
-  notes?: string | null
   price: number | string | null
   applications: 'web' | 'whatsapp';
   currency: string | null
@@ -113,18 +108,13 @@ export interface CreateLoadPayload {
   to_lng?: number | null
   pickup_from: string
   is_ready_for_loading?: boolean
-  pickup_to?: string | null
-  delivery_by?: string | null
   weight_kg: number
   volume_m3?: number | null
   pallets?: number | null
   quantity: number
   required_vehicle_type_id?: number | null
   load_vehicle_type_id: number
-  temp_min?: number | null
-  temp_max?: number | null
   is_hazardous?: boolean
-  notes?: string | null
   price?: number | null
   currency?: string | null
   price_negotiable?: boolean
