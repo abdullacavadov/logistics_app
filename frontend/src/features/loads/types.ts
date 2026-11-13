@@ -18,7 +18,6 @@ export interface Load {
   from_country_id: number
   from_location_id: number | null
   from_location_name?: string | null
-  from_address?: string | null
   from_country_name?: string | null
   from_country_iso2?: string | null
   from_name?: string | null
@@ -27,7 +26,6 @@ export interface Load {
   to_country_id: number
   to_location_id: number | null
   to_location_name?: string | null
-  to_address?: string | null
   to_country_name?: string | null
   to_country_iso2?: string | null
   to_name?: string | null
@@ -37,9 +35,7 @@ export interface Load {
   is_ready_for_loading: boolean
   weight_kg: number | string
   volume_m3: number | string | null
-  pallets: number | null
   quantity?: number | null
-  required_vehicle_type_id: number | null
   load_vehicle_type_id?: number | null
   is_hazardous: boolean
   price: number | string | null
@@ -83,7 +79,6 @@ export interface LoadFilters {
   to_country_id?: number
   to_location_id?: number
   cargo_type_id?: number
-  required_vehicle_type_id?: number
   min_weight?: number
   max_weight?: number
   pickup_date?: string
@@ -99,21 +94,17 @@ export interface CreateLoadPayload {
   cargo_type_id: number
   from_country_id: number
   from_location_id?: number | null
-  from_address?: string | null
   from_lat?: number | null
   from_lng?: number | null
   to_country_id: number
   to_location_id?: number | null
-  to_address?: string | null
   to_lat?: number | null
   to_lng?: number | null
   pickup_from: string
   is_ready_for_loading?: boolean
   weight_kg: number
   volume_m3?: number | null
-  pallets?: number | null
   quantity: number
-  required_vehicle_type_id?: number | null
   load_vehicle_type_id: number
   is_hazardous?: boolean
   price?: number | null
