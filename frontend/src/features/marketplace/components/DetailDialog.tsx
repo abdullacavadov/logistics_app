@@ -131,14 +131,12 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                             {load.from_country_iso2 && <CountryFlag flag={load.from_country_iso2} className="dialog-flag" />}
                             {hasValue(fromPlace) && <strong>{fromPlace}</strong>}
                             {hasValue(fromCountry) && <small>{fromCountry}</small>}
-                            {hasValue(load.from_address) && <small>{load.from_address}</small>}
                         </div>
                         <ArrowRight aria-hidden="true" />
                         <div className="dialog-route-point" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             {load.to_country_iso2 && <CountryFlag flag={load.to_country_iso2} className="dialog-flag"   />}
                             {hasValue(toPlace) && <strong>{toPlace}</strong>}
                             {hasValue(toCountry) && <small>{toCountry}</small>}
-                            {hasValue(load.to_address) && <small>{load.to_address}</small>}
                         </div>
                     </div>
 
@@ -176,7 +174,8 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                     <section className="dialog-section">
                         <h3><Truck size={16} /> Daşıma şərtləri</h3>
                         <div className="dialog-grid">
-                            {hasValue(load.load_vehicle_type_name) && <DetailField label="Tələb olunan nəqliyyat vasitəsi">{load.load_vehicle_type_name}</DetailField>}
+                            {hasValue(load.load_vehicle_type_name) && <DetailField label="Yük yeri növü">{load.load_vehicle_type_name}</DetailField>}
+                            {load.needs_refrigeration && <DetailField label="Temperatur rejimi">Soyuduculu daşınma</DetailField>}
                             {pickupDate && <DetailField label="Yükləmə tarixi">{pickupDate}</DetailField>}
                             {load.is_ready_for_loading && <DetailField label="Yükləmə">Yükləməyə hazırdır</DetailField>}
                             
