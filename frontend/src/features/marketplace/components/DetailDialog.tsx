@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { ArrowRight, CalendarDays, MapPin, Package, Truck, X } from 'lucide-react'
-import type { Load } from '../../../loads/types'
+import type { Load } from '../../loads/types'
 import { CountryFlag } from './CountryFlag'
 
 const statusLabels: Record<string, string> = {
@@ -77,8 +77,8 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                     </div>
                     {mapUrl && <a className="dialog-map-link" href={mapUrl} target="_blank" rel="noreferrer"><MapPin size={16} /> Marşrutu xəritədə aç</a>}
                     <div className="dialog-price">
-                        <small>Elanın qiyməti</small><strong>{price}</strong>
-                        {<span>Qiymət razılaşdırıla bilər: {load.price_negotiable ? 'Bəli' : 'Xeyr'}</span>}
+                        <strong>{load.price_negotiable ? 'Qiymət: Razışma yolu ilə' : 'Qiymət: '}{price}</strong>
+                        
                     </div>
                     {load.description && <section className="dialog-section"><h3>Yük haqqında məlumat</h3><p className="dialog-description">{load.description}</p></section>}
                     <section className="dialog-section">
@@ -89,7 +89,6 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                             <DetailField label="Çəki">{formatWeight(load.weight_kg)}</DetailField>
                             <DetailField label="Həcm">{load.volume_m3 == null ? 'Göstərilməyib' : `${Number(load.volume_m3).toLocaleString('az-AZ')} m³`}</DetailField>
                             <DetailField label="Miqdar">{valueOrDash(load.quantity)}</DetailField>
-                            <DetailField label="Palet sayı">{valueOrDash(load.pallets)}</DetailField>
                             <DetailField label="Təhlükəli yük">{load.is_hazardous ? 'Bəli' : 'Xeyr'}</DetailField>
                         </div>
                     </section>
@@ -99,13 +98,13 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                             <DetailField label="Tələb olunan nəqliyyat vasitəsi">{valueOrDash(load.vehicle_type_name)}</DetailField>
                             <DetailField label="Yükləmə tarixi">{formatDate(load.pickup_from)}</DetailField>
                             <DetailField label="Yükləməyə hazır statusu">{load.is_ready_for_loading ? 'Bəli' : 'Xeyr'}</DetailField>
-                            <DetailField label="Müraciət kanalı">{load.applications === 'whatsapp' ? 'WhatsApp' : 'Veb-sayt'}</DetailField>
+                            <DetailField label="Elanın kanalı">{load.applications === 'whatsapp' ? 'WhatsApp' : 'Veb-sayt'}</DetailField>
                         </div>
                     </section>
                     <section className="dialog-section">
                         <h3><CalendarDays size={16} /> Elan məlumatları</h3>
                         <div className="dialog-grid">
-                            <DetailField label="Elan ID-si">#{load.id}</DetailField>
+                            <DetailField label="Elan ID-si">#YD-{load.id}</DetailField>
                             <DetailField label="Status">{statusLabels[load.status] ?? load.status}</DetailField>
                             <DetailField label="Paylaşılma tarixi">{formatDateTime(load.created_at)}</DetailField>
                             <DetailField label="Elanı yerləşdirən">{valueOrDash(load.shipper_name)}</DetailField>
