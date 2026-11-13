@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
-import { AlertTriangle, ArrowRight, CalendarDays, MapPin, Package, Truck, X } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Copy, CalendarDays, MapPin, Package, Truck, X } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTelegram, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import type { Load } from '../../loads/types'
 import { CountryFlag } from './CountryFlag'
+import logoLight from '../../../assets/img/logo-light.png'
+
+
 
 const statusLabels: Record<string, string> = {
     draft: 'Qaralama',
@@ -16,10 +21,26 @@ const statusLabels: Record<string, string> = {
     archived: 'Arxivləşdirilib',
 }
 
-const channelLabels: Record<Load['applications'], string> = {
-    web: 'Sayt',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
+const channelLabels: Record<string, ReactNode> = {
+    web: (
+        <span className="inline-flex items-center gap-1.5 text-orange-500">
+            <img style={{ height: '12px' }}
+                            className="brand-logo"
+                            src={logoLight}
+                            alt="Yoldaş"
+                        />
+        </span>
+    ),
+    whatsapp: (
+        <span className="inline-flex items-center gap-1.5 text-[#25D366]">
+            <FontAwesomeIcon icon={faWhatsapp} size="1x" /> WhatsApp
+        </span>
+    ),
+    telegram: (
+        <span className="inline-flex items-center gap-1.5 text-[#229ED9]">
+            <FontAwesomeIcon icon={faTelegram} size="1x" /> Telegram
+        </span>
+    ),
 }
 
 function hasValue(value: unknown): boolean {
@@ -43,7 +64,7 @@ function formatDateTime(value: string | null | undefined): string {
     if (!value) return ''
     const parsed = new Date(value)
     if (Number.isNaN(parsed.getTime())) return formatDate(value)
-    return new Intl.DateTimeFormat('az-AZ', {
+    return new Intl.DateTimeFormat('ru-RU', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -113,8 +134,8 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                             {hasValue(load.from_address) && <small>{load.from_address}</small>}
                         </div>
                         <ArrowRight aria-hidden="true" />
-                        <div className="dialog-route-point">
-                            {load.to_country_iso2 && <CountryFlag flag={load.to_country_iso2} className="dialog-flag" />}
+                        <div className="dialog-route-point" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            {load.to_country_iso2 && <CountryFlag flag={load.to_country_iso2} className="dialog-flag"   />}
                             {hasValue(toPlace) && <strong>{toPlace}</strong>}
                             {hasValue(toCountry) && <small>{toCountry}</small>}
                             {hasValue(load.to_address) && <small>{load.to_address}</small>}
@@ -140,11 +161,9 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                         <h3><Package size={16} /> Yük parametrləri</h3>
                         <div className="dialog-grid">
                             {hasValue(load.cargo_type_name) && <DetailField label="Yükün növü">{load.cargo_type_name}</DetailField>}
-                            {hasValue(load.load_vehicle_type_name) && <DetailField label="Yük yeri növü">{load.load_vehicle_type_name}</DetailField>}
                             {formatWeight(load.weight_kg) && <DetailField label="Çəki">{formatWeight(load.weight_kg)}</DetailField>}
                             {load.volume_m3 != null && Number(load.volume_m3) > 0 && <DetailField label="Həcm">{Number(load.volume_m3).toLocaleString('az-AZ')} m³</DetailField>}
                             {load.quantity != null && <DetailField label="Miqdar">{Number(load.quantity).toLocaleString('az-AZ')}</DetailField>}
-                            {load.pallets != null && <DetailField label="Palet sayı">{Number(load.pallets).toLocaleString('az-AZ')}</DetailField>}
                             {load.is_hazardous && (
                                 <div className="dialog-hazard" role="note" aria-label="ADR təhlükəli yük">
                                     <AlertTriangle size={18} />
@@ -157,19 +176,24 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                     <section className="dialog-section">
                         <h3><Truck size={16} /> Daşıma şərtləri</h3>
                         <div className="dialog-grid">
-                            {hasValue(load.vehicle_type_name) && <DetailField label="Tələb olunan nəqliyyat vasitəsi">{load.vehicle_type_name}</DetailField>}
+                            {hasValue(load.load_vehicle_type_name) && <DetailField label="Tələb olunan nəqliyyat vasitəsi">{load.load_vehicle_type_name}</DetailField>}
                             {pickupDate && <DetailField label="Yükləmə tarixi">{pickupDate}</DetailField>}
                             {load.is_ready_for_loading && <DetailField label="Yükləmə">Yükləməyə hazırdır</DetailField>}
-                            {channel && <DetailField label="Elanın kanalı">{channel}</DetailField>}
+                            
                         </div>
                     </section>
 
                     <section className="dialog-section">
                         <h3><CalendarDays size={16} /> Elan məlumatları</h3>
                         <div className="dialog-grid">
-                            <DetailField label="Elan ID-si">YD-{load.id}</DetailField>
+                            <DetailField label="Elan ID-si" >
+                                <span style={{ display: 'flex', gap: '0.5rem', cursor: 'pointer' }} title="Kopyala">
+                                    #YD-{load.id} <Copy size={16} />
+                                </span>
+                            </DetailField>
                             {publishedAt && <DetailField label="Paylaşılma tarixi">{publishedAt}</DetailField>}
-                            {hasValue(load.shipper_name) && <DetailField label="Elanı yerləşdirən">{load.shipper_name}</DetailField>}
+                            {hasValue(load.shipper_name) && <DetailField label="Yük sahibi">{load.shipper_name}</DetailField>}
+                            {channel && <DetailField label="Elanın kanalı">{channel}</DetailField>}
                         </div>
                     </section>
                 </>}
