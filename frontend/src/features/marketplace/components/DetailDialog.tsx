@@ -85,7 +85,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                         <h3><Package size={16} /> Yük parametrləri</h3>
                         <div className="dialog-grid">
                             <DetailField label="Yükün növü">{valueOrDash(load.cargo_type_name)}</DetailField>
-                            <DetailField label="Yükün forması / yeri">{valueOrDash(load.load_vehicle_type_name)}</DetailField>
+                            <DetailField label="Yük yeri növü">{valueOrDash(load.load_vehicle_type_name)}</DetailField>
                             <DetailField label="Çəki">{formatWeight(load.weight_kg)}</DetailField>
                             <DetailField label="Həcm">{load.volume_m3 == null ? 'Göstərilməyib' : `${Number(load.volume_m3).toLocaleString('az-AZ')} m³`}</DetailField>
                             <DetailField label="Miqdar">{valueOrDash(load.quantity)}</DetailField>
