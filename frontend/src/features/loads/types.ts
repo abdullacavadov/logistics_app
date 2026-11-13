@@ -119,5 +119,6 @@ export interface CreateLoadPayload {
   price?: number | null
   currency?: string | null
   price_negotiable?: boolean
+  applications?: 'web' | 'whatsapp' | 'telegram'
   publish?: boolean
 }
