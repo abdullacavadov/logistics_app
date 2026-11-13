@@ -95,8 +95,8 @@ class LoadController extends Controller
         $d = $r->validate($this->rules());
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         $d['status'] = 'pending_moderation';
-        // Required by the canonical loads schema; the channel is selected server-side.
-        $d['applications'] = 'web';
+        // Website-created ads default to the website channel; integrations may provide another supported source.
+        $d['applications'] = $d['applications'] ?? 'web';
         $id = DB::table('loads')->insertGetId($d + ['user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         $this->audit($r, 'load.create', $id, null, $d);
         return response()->json(['data' => DB::table('loads')->find($id)], 201);
@@ -274,6 +274,7 @@ class LoadController extends Controller
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
             'price_negotiable' => 'boolean',
+            'applications' => 'sometimes|required|in:web,whatsapp,telegram',
         ];
     }
 
