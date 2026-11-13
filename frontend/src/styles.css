@@ -3053,3 +3053,21 @@ select:focus-visible {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+
+.dialog-hazard {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--danger) 9%, transparent);
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 750;
+}
+.dialog-hazard svg {
+    flex: 0 0 auto;
+}
