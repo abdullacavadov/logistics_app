@@ -24,7 +24,7 @@ import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
-import { useLoads } from "../../loads/hooks/useLoads";
+import { useLoad, useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
     if (!value) return "";
@@ -51,6 +51,8 @@ function formatLoadDateTime(value: string): string {
 
 export default function MarketplacePage() {
     const loadsQuery = useLoads({ per_page: 50 });
+    const [selectedLoadId, setSelectedLoadId] = useState<number | null>(null);
+    const selectedLoadQuery = useLoad(selectedLoadId);
     const auth = useAuth();
     const logout = useLogout();
     const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map(
@@ -103,7 +105,6 @@ export default function MarketplacePage() {
     const [filterOpen, setFilterOpen] = useState(false);
     const [sort, setSort] = useState("Əvvəlcə yenilər");
     const [country, setCountry] = useState("🇦🇿 Azərbaycan");
-    const [selected, setSelected] = useState<Listing | null>(null);
     const [saved, setSaved] = useState<string[]>([]);
     const [showNotices, setShowNotices] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -394,7 +395,7 @@ export default function MarketplacePage() {
                                         <ListingCard
                                             key={item.id}
                                             item={item}
-                                            onSelect={() => setSelected(item)}
+                                            onSelect={() => setSelectedLoadId(Number(item.id.replace(/^LA-/, "")))}
                                             saved={saved.includes(item.id)}
                                             onSave={() => toggleSaved(item.id)}
                                         />
@@ -493,7 +494,7 @@ export default function MarketplacePage() {
             <button className="mobile-create" aria-label="Elan yerləşdir">
                 <Plus size={21} />
             </button>
-            <DetailDialog item={selected} onClose={() => setSelected(null)} />
+            <DetailDialog load={selectedLoadQuery.data?.data ?? null} loading={selectedLoadQuery.isLoading} error={selectedLoadQuery.isError} open={selectedLoadId !== null} onClose={() => setSelectedLoadId(null)} />
         </div>
     );
 }

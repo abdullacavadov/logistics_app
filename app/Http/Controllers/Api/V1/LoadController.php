@@ -35,19 +35,29 @@ class LoadController extends Controller
     {
         $load = DB::table('loads')->where('id', $id)->first();
         $uid = auth('sanctum')->id();
-        if (!$load || (!in_array($load->status, self::PUBLIC_STATUSES) && $load->user_id !== $uid)) return $this->err('not_found', 'Elan tapılmadı', 404);
-        if ($load->user_id === $uid) {
-            $load->from_location_name = $load->from_location_id
-                ? DB::table('locations')->where('id', $load->from_location_id)->value('name')
-                : null;
-            $load->to_location_name = $load->to_location_id
-                ? DB::table('locations')->where('id', $load->to_location_id)->value('name')
-                : null;
-            return response()->json(['data' => $load]);
+        if (!$load || (!in_array($load->status, self::PUBLIC_STATUSES) && (int) $load->user_id !== (int) $uid)) {
+            return $this->err('not_found', 'Elan tapılmadı', 404);
         }
 
-        $publicLoad = $this->publicQuery()->where('l.id', $id)->first();
-        return response()->json(['data' => $publicLoad]);
+        // Reuse the existing load detail endpoint; expose only the shipper's display name,
+        // never phone/email or other private account fields.
+        $detail = $this->publicQuery()
+            ->leftJoin('users as u', 'u.id', '=', 'l.user_id')
+            ->where('l.id', $id)
+            ->addSelect(
+                'fl.name as from_location_name',
+                'tl.name as to_location_name',
+                'l.from_address',
+                'l.from_lat',
+                'l.from_lng',
+                'l.to_address',
+                'l.to_lat',
+                'l.to_lng',
+                'u.name as shipper_name'
+            )
+            ->first();
+
+        return response()->json(['data' => $detail]);
     }
 
     public function mine(Request $r)
