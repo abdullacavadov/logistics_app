@@ -35,6 +35,7 @@ export interface Load {
   is_ready_for_loading: boolean
   weight_kg: number | string
   volume_m3: number | string | null
+  needs_refrigeration?: boolean | number
   quantity?: number | null
   load_vehicle_type_id?: number | null
   is_hazardous: boolean
@@ -47,7 +48,6 @@ export interface Load {
   from_country_iso3?: string
   to_country_iso3?: string
   cargo_type_name?: string | null
-  vehicle_type_name?: string | null
   load_vehicle_type_name?: string | null
   shipper_name?: string | null
 }
