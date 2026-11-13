@@ -24,8 +24,6 @@ export interface Load {
   from_name?: string | null
   from_lat?: number | string | null
   from_lng?: number | string | null
-  from_lat?: number | string | null
-  from_lng?: number | string | null
   to_country_id: number
   to_location_id: number | null
   to_location_name?: string | null
@@ -33,8 +31,6 @@ export interface Load {
   to_country_name?: string | null
   to_country_iso2?: string | null
   to_name?: string | null
-  to_lat?: number | string | null
-  to_lng?: number | string | null
   to_lat?: number | string | null
   to_lng?: number | string | null
   pickup_from: string
@@ -52,14 +48,8 @@ export interface Load {
   price_negotiable: boolean
   status: LoadStatus
   created_at: string
-  from_country_name?: string
-  from_country_iso2?: string
   from_country_iso3?: string
-  from_name?: string
-  to_country_name?: string
-  to_country_iso2?: string
   to_country_iso3?: string
-  to_name?: string
   cargo_type_name?: string | null
   vehicle_type_name?: string | null
   load_vehicle_type_name?: string | null
