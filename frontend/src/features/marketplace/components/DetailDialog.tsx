@@ -47,6 +47,10 @@ function hasValue(value: unknown): boolean {
     return value !== null && value !== undefined && value !== ''
 }
 
+function isEnabled(value: boolean | number | string | null | undefined): boolean {
+    return value === true || value === 1 || value === '1'
+}
+
 function formatDate(value: string | null | undefined): string {
     if (!value) return ''
     const match = value.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/)
@@ -108,7 +112,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
         ? (load?.price_negotiable ? 'Razılaşma ilə' : null)
         : `${Number(load.price).toLocaleString('az-AZ')}${load.currency ? ` ${load.currency}` : ''}`
     const channel = load?.applications && channelLabels[load.applications]
-    const pickupDate = load?.is_ready_for_loading ? null : formatDate(load?.pickup_from)
+    const pickupDate = isEnabled(load?.is_ready_for_loading) ? null : formatDate(load?.pickup_from)
     const publishedAt = formatDateTime(load?.created_at)
 
     return (
@@ -162,7 +166,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                             {formatWeight(load.weight_kg) && <DetailField label="Çəki">{formatWeight(load.weight_kg)}</DetailField>}
                             {load.volume_m3 != null && Number(load.volume_m3) > 0 && <DetailField label="Həcm">{Number(load.volume_m3).toLocaleString('az-AZ')} m³</DetailField>}
                             {load.quantity != null && <DetailField label="Miqdar">{Number(load.quantity).toLocaleString('az-AZ')}</DetailField>}
-                            {load.is_hazardous && (
+                            {isEnabled(load.is_hazardous) && (
                                 <div className="dialog-hazard" role="note" aria-label="ADR təhlükəli yük">
                                     <AlertTriangle size={18} />
                                     <strong>ADR</strong>
@@ -175,9 +179,9 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                         <h3><Truck size={16} /> Daşıma şərtləri</h3>
                         <div className="dialog-grid">
                             {hasValue(load.load_vehicle_type_name) && <DetailField label="Yük yeri növü">{load.load_vehicle_type_name}</DetailField>}
-                            {load.needs_refrigeration && <DetailField label="Temperatur rejimi">Soyuduculu daşınma</DetailField>}
+                            {isEnabled(load.needs_refrigeration) && <DetailField label="Temperatur rejimi">Soyuduculu daşınma</DetailField>}
                             {pickupDate && <DetailField label="Yükləmə tarixi">{pickupDate}</DetailField>}
-                            {load.is_ready_for_loading && <DetailField label="Yükləmə">Yükləməyə hazırdır</DetailField>}
+                            {isEnabled(load.is_ready_for_loading) && <DetailField label="Yükləmə">Yükləməyə hazırdır</DetailField>}
                             
                         </div>
                     </section>
