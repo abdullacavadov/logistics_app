@@ -42,8 +42,8 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
     if (!open) return null
     const fromCountry = load?.from_country_name ?? 'Yükləmə ölkəsi göstərilməyib'
     const toCountry = load?.to_country_name ?? 'Çatdırılma ölkəsi göstərilməyib'
-    const fromPlace = load?.from_location_name ?? load?.from_name ?? load?.from_address ?? fromCountry
-    const toPlace = load?.to_location_name ?? load?.to_name ?? load?.to_address ?? toCountry
+    const fromPlace = load?.from_location_name ?? 'Şəhər göstərilməyib'
+    const toPlace = load?.to_location_name ?? 'Şəhər göstərilməyib'
     const hasCoordinates = load?.from_lat != null && load?.from_lng != null && load?.to_lat != null && load?.to_lng != null
     const mapUrl = hasCoordinates ? `https://www.google.com/maps/dir/${load!.from_lat},${load!.from_lng}/${load!.to_lat},${load!.to_lng}` : null
     const price = load?.price == null ? 'Razılaşma ilə' : `${Number(load.price).toLocaleString('az-AZ')} ${load.currency ?? ''}`.trim()
