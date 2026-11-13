@@ -94,9 +94,9 @@ function toListing(load: Load): Listing {
         isReadyForLoading: Boolean(load.is_ready_for_loading),
         pickupDate: load.is_ready_for_loading ? null : formatDate(load.pickup_from),
         isHazardous: Boolean(load.is_hazardous),
+        needsRefrigeration: Boolean(load.needs_refrigeration),
         volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
         quantity: load.quantity ?? null,
-        pallets: load.pallets ?? null,
         source: "Sayt",
         kind: "load",
     };
