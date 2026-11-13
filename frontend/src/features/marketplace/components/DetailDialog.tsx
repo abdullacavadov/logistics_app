@@ -46,7 +46,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
     const toPlace = load?.to_location_name ?? 'Şəhər göstərilməyib'
     const hasCoordinates = load?.from_lat != null && load?.from_lng != null && load?.to_lat != null && load?.to_lng != null
     const mapUrl = hasCoordinates ? `https://www.google.com/maps/dir/${load!.from_lat},${load!.from_lng}/${load!.to_lat},${load!.to_lng}` : null
-    const price = load?.price == null ? 'Razılaşma ilə' : `${Number(load.price).toLocaleString('az-AZ')} ${load.currency ?? ''}`.trim()
+    const price = load?.price == null ? (load?.price_negotiable ? 'Razılaşma ilə' : 'Qiymət göstərilməyib') : `${Number(load.price).toLocaleString('az-AZ')} ${load.currency ?? ''}`.trim()
 
     return (
         <div className="dialog-backdrop" onClick={onClose}>
@@ -78,7 +78,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                     {mapUrl && <a className="dialog-map-link" href={mapUrl} target="_blank" rel="noreferrer"><MapPin size={16} /> Marşrutu xəritədə aç</a>}
                     <div className="dialog-price">
                         <small>Elanın qiyməti</small><strong>{price}</strong>
-                        {load.price_negotiable && load.price !== null && <span>Qiymət razılaşdırıla bilər</span>}
+                        {<span>Qiymət razılaşdırıla bilər: {load.price_negotiable ? 'Bəli' : 'Xeyr'}</span>}
                     </div>
                     {load.description && <section className="dialog-section"><h3>Yük haqqında məlumat</h3><p className="dialog-description">{load.description}</p></section>}
                     <section className="dialog-section">
@@ -97,7 +97,7 @@ export function DetailDialog({ load, loading = false, error = false, open, onClo
                         <h3><Truck size={16} /> Daşıma şərtləri</h3>
                         <div className="dialog-grid">
                             <DetailField label="Tələb olunan nəqliyyat vasitəsi">{valueOrDash(load.vehicle_type_name)}</DetailField>
-                            <DetailField label="Yükləmə tarixi">{load.is_ready_for_loading ? 'Yükləməyə hazırdır' : formatDate(load.pickup_from)}</DetailField>
+                            <DetailField label="Yükləmə tarixi">{formatDate(load.pickup_from)}</DetailField>
                             <DetailField label="Yükləməyə hazır statusu">{load.is_ready_for_loading ? 'Bəli' : 'Xeyr'}</DetailField>
                             <DetailField label="Müraciət kanalı">{load.applications === 'whatsapp' ? 'WhatsApp' : 'Veb-sayt'}</DetailField>
                         </div>
