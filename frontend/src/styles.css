@@ -803,7 +803,7 @@ select:focus-visible {
 
 .listing-specs {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
     padding: 12px 0;
     border-top: 1px solid var(--line);
@@ -813,7 +813,7 @@ select:focus-visible {
 .listing-meta span {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     color: var(--text);
     font-size: 10px;
 }

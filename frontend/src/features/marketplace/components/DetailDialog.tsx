@@ -61,7 +61,7 @@ function formatDate(value: string | null | undefined): string {
     const parsed = new Date(value)
     return Number.isNaN(parsed.getTime())
         ? ''
-        : new Intl.DateTimeFormat('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(parsed)
+        : new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(parsed)
 }
 
 function formatDateTime(value: string | null | undefined): string {
