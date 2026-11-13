@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ArrowRight, CalendarDays, MapPin, Package, Truck, X } from 'lucide-react'
 import type { Load } from '../../../loads/types'
 import { CountryFlag } from './CountryFlag'
@@ -31,7 +32,7 @@ function formatWeight(value: number | string): string {
     if (!Number.isFinite(kg)) return 'Göstərilməyib'
     return kg >= 1000 ? `${(kg / 1000).toLocaleString('az-AZ', { maximumFractionDigits: 2 })} ton (${kg.toLocaleString('az-AZ')} kq)` : `${kg.toLocaleString('az-AZ')} kq`
 }
-function DetailField({ label, children }: { label: string; children: React.ReactNode }) {
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
     return <div className="dialog-field"><small>{label}</small><strong>{children}</strong></div>
 }
 
