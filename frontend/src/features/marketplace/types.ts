@@ -17,7 +17,6 @@ export type Listing = {
     isHazardous?: boolean;
     volume?: string | null;
     quantity?: number | null;
-    pallets?: number | null;
     source: string;
     urgent?: boolean;
     kind: "load" | "vehicle";
