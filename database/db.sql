@@ -259,7 +259,7 @@ CREATE TABLE `loads` (
   `is_hazardous` tinyint(1) NOT NULL DEFAULT 0,
   `price` decimal(12,2) DEFAULT NULL,
   `currency` char(3) DEFAULT NULL,
-  `applications` enum('web','whatsapp') NOT NULL,
+  `applications` enum('web','whatsapp','telegram') NOT NULL DEFAULT 'web',
   `price_negotiable` tinyint(1) NOT NULL DEFAULT 1,
   `status` enum('draft','pending_moderation','rejected','published','has_applications','agreed','in_transit','completed','cancelled','archived') NOT NULL DEFAULT 'draft',
   `created_at` timestamp NULL DEFAULT NULL,
