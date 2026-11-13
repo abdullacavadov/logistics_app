@@ -24,15 +24,18 @@ const vehicleTypeImageUrls = import.meta.glob(
     { eager: true, import: "default", query: "?url" },
 ) as Record<string, string>;
 
-function getVehicleTypeImage(imagePath: string | null | undefined): string | undefined {
+function getVehicleTypeImage(
+    imagePath: string | null | undefined,
+): string | undefined {
     if (!imagePath) return undefined;
 
     // DB values may be filenames, relative paths, or legacy Windows/URL paths.
     const filename = imagePath.replace(/\\/g, "/").split("/").pop();
     if (!filename) return undefined;
 
-    const match = Object.entries(vehicleTypeImageUrls).find(([path]) =>
-        path.split("/").pop()?.toLowerCase() === filename.toLowerCase(),
+    const match = Object.entries(vehicleTypeImageUrls).find(
+        ([path]) =>
+            path.split("/").pop()?.toLowerCase() === filename.toLowerCase(),
     );
     return match?.[1];
 }
@@ -139,7 +142,10 @@ export default function LoadFormPage() {
     const { id } = useParams();
     const parsedLoadId = id === undefined ? null : Number(id);
     const editing = id !== undefined;
-    const validLoadId = parsedLoadId !== null && Number.isSafeInteger(parsedLoadId) && parsedLoadId > 0;
+    const validLoadId =
+        parsedLoadId !== null &&
+        Number.isSafeInteger(parsedLoadId) &&
+        parsedLoadId > 0;
     const loadId = validLoadId ? parsedLoadId : null;
     const navigate = useNavigate();
     const qc = useQueryClient();
@@ -258,7 +264,13 @@ export default function LoadFormPage() {
             await Promise.all([
                 qc.invalidateQueries({ queryKey: loadsQueryKey }),
                 qc.invalidateQueries({ queryKey: myLoadsQueryKey }),
-                ...(editing ? [qc.invalidateQueries({ queryKey: [...loadsQueryKey, "detail", loadId] })] : []),
+                ...(editing
+                    ? [
+                          qc.invalidateQueries({
+                              queryKey: [...loadsQueryKey, "detail", loadId],
+                          }),
+                      ]
+                    : []),
             ]);
             navigate("/my/loads", { replace: true });
         },
@@ -315,30 +327,35 @@ export default function LoadFormPage() {
     function submit(e: FormEvent) {
         e.preventDefault();
         const p: CreateLoadPayload = {
-          title: cargo?.name ?? "Yük",
-          cargo_type_id: Number(form.cargo_type_id),
-          from_country_id: Number(form.from_country_id),
-          from_location_id: Number(form.from_location_id) || null,
-          to_country_id: Number(form.to_country_id),
-          to_location_id: Number(form.to_location_id) || null,
-          pickup_from: form.date_mode === "ready"
-            ? (editing && loadQuery.data?.data.is_ready_for_loading ? loadQuery.data.data.pickup_from : today())
-            : form.pickup_from,
-          is_ready_for_loading: form.date_mode === "ready",
-          description: form.description.trim() || null,
-          is_hazardous: form.is_hazardous,
-          weight_kg: Number(form.weight_ton) * 1000,
-          volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
-          quantity: Number(form.count),
-          load_vehicle_type_id: Number(form.load_vehicle_type_id),
-          price: form.price_mode === "fixed" && form.price
-            ? Number(form.price)
-            : null,
-          currency: form.price_mode === "fixed" && form.price
-            ? form.currency
-            : null,
-          price_negotiable: form.price_mode === "negotiable",
-          publish: true,
+            title: cargo?.name ?? "Yük",
+            cargo_type_id: Number(form.cargo_type_id),
+            from_country_id: Number(form.from_country_id),
+            from_location_id: Number(form.from_location_id) || null,
+            to_country_id: Number(form.to_country_id),
+            to_location_id: Number(form.to_location_id) || null,
+            pickup_from:
+                form.date_mode === "ready"
+                    ? editing && loadQuery.data?.data.is_ready_for_loading
+                        ? loadQuery.data.data.pickup_from
+                        : today()
+                    : form.pickup_from,
+            is_ready_for_loading: form.date_mode === "ready",
+            description: form.description.trim() || null,
+            is_hazardous: form.is_hazardous,
+            weight_kg: Number(form.weight_ton) * 1000,
+            volume_m3: form.volume_m3 ? Number(form.volume_m3) : null,
+            quantity: Number(form.count),
+            load_vehicle_type_id: Number(form.load_vehicle_type_id),
+            price:
+                form.price_mode === "fixed" && form.price
+                    ? Number(form.price)
+                    : null,
+            currency:
+                form.price_mode === "fixed" && form.price
+                    ? form.currency
+                    : null,
+            price_negotiable: form.price_mode === "negotiable",
+            publish: true,
         };
         mutation.mutate(p);
     }
@@ -389,9 +406,15 @@ export default function LoadFormPage() {
                                 <span className="overline">
                                     LOAD MANAGEMENT
                                 </span>
-                                <h2>{editing ? "Elan məlumatlarını redaktə edin" : "Yeni yük elanı yaradın"}</h2>
+                                <h2>
+                                    {editing
+                                        ? "Elan məlumatlarını redaktə edin"
+                                        : "Yeni yük elanı yaradın"}
+                                </h2>
                                 <p>
-                                    {editing ? "Elanın məlumatlarını yeniləyin." : "Yük məlumatlarını daxil edin və moderasiyaya göndərin."}
+                                    {editing
+                                        ? "Elanın məlumatlarını yeniləyin."
+                                        : "Yük məlumatlarını daxil edin və moderasiyaya göndərin."}
                                 </p>
                             </div>
                             <Link to="/my/loads" className="outline-action">
@@ -400,8 +423,18 @@ export default function LoadFormPage() {
                         </div>
                         {editing && loadQuery.isError ? (
                             <div className="my-loads-state" role="alert">
-                                Elan məlumatlarını yükləmək mümkün olmadı. Elan mövcud olmaya bilər və ya redaktə icazəniz yoxdur.
-                                <button type="button" className="outline-action" onClick={() => navigate("/my/loads", { replace: true })}>Mənim elanlarıma qayıt</button>
+                                Elan məlumatlarını yükləmək mümkün olmadı. Elan
+                                mövcud olmaya bilər və ya redaktə icazəniz
+                                yoxdur.
+                                <button
+                                    type="button"
+                                    className="outline-action"
+                                    onClick={() =>
+                                        navigate("/my/loads", { replace: true })
+                                    }
+                                >
+                                    Mənim elanlarıma qayıt
+                                </button>
                             </div>
                         ) : busy ? (
                             <div className="my-loads-state">
@@ -436,6 +469,27 @@ export default function LoadFormPage() {
                                             ))}
                                         </select>
                                     </label>
+
+                                    <label
+                                        className="load-choice"
+                                        style={{
+                                            margin: "0.6rem 0",
+                                            border: "1px solid var(--brand-orange)",
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={form.is_hazardous}
+                                            onChange={(e) =>
+                                                set(
+                                                    "is_hazardous",
+                                                    e.target.checked,
+                                                )
+                                            }
+                                        />
+                                        ☣️ Təhlükəli yükdür
+                                    </label>
+
                                     <div className="data-form-grid">
                                         <div className="data-field">
                                             <span>Haradan *</span>
@@ -475,52 +529,64 @@ export default function LoadFormPage() {
                                                 <Search size={16} />
                                             </button>
                                         </div>
-                                        <label className="data-field">
-                                            <span>Çəki (ton) *</span>
-                                            <input
-                                                required
-                                                type="number"
-                                                min="0.01"
-                                                step="0.01"
-                                                value={form.weight_ton}
-                                                onChange={(e) =>
-                                                    set(
-                                                        "weight_ton",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                placeholder="Məs. 20"
-                                            />
-                                        </label>
-                                        <label className="data-field">
-                                            <span>Həcm (m³)</span>
-                                            <input
-                                                type="number"
-                                                min="0.01"
-                                                step="0.01"
-                                                value={form.volume_m3}
-                                                onChange={(e) =>
-                                                    set(
-                                                        "volume_m3",
-                                                        e.target.value,
-                                                    )
-                                                }
-                                            />
-                                        </label>
-                                        <label className="data-field">
-                                            <span>Say *</span>
-                                            <input
-                                                required
-                                                type="number"
-                                                min="1"
-                                                step="1"
-                                                value={form.count}
-                                                onChange={(e) =>
-                                                    set("count", e.target.value)
-                                                }
-                                            />
-                                        </label>
                                     </div>
+
+                                    <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            <label className="data-field">
+                                                <span>Çəki (ton) *</span>
+                                                <input
+                                                    required
+                                                    type="number"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    value={form.weight_ton}
+                                                    onChange={(e) =>
+                                                        set(
+                                                            "weight_ton",
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="Məs. 20"
+                                                />
+                                            </label>
+                                            <label className="data-field">
+                                                <span>Həcm (m³)</span>
+                                                <input
+                                                    type="number"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    value={form.volume_m3}
+                                                    onChange={(e) =>
+                                                        set(
+                                                            "volume_m3",
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                            <label className="data-field">
+                                                <span>Say *</span>
+                                                <input
+                                                    required
+                                                    type="number"
+                                                    min="1"
+                                                    step="1"
+                                                    value={form.count}
+                                                    onChange={(e) =>
+                                                        set(
+                                                            "count",
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                        </div>
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Yük yeri növü *</h3>
@@ -590,23 +656,38 @@ export default function LoadFormPage() {
                                             <input
                                                 required
                                                 type="date"
-                                                min={editing ? undefined : today()}
+                                                min={
+                                                    editing
+                                                        ? undefined
+                                                        : today()
+                                                }
                                                 value={form.pickup_from}
-                                                onChange={(e) => set("pickup_from", e.target.value)}
+                                                onChange={(e) =>
+                                                    set(
+                                                        "pickup_from",
+                                                        e.target.value,
+                                                    )
+                                                }
                                             />
                                         </label>
                                     )}
                                 </section>
-                                
+
                                 <section className="data-form-section">
                                     <h3>Əlavə məlumat</h3>
                                     <label className="data-field data-field-wide">
-                                        <span>Təsvir</span>
-                                        <textarea rows={3} maxLength={5000} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Yük haqqında təsvir…" />
-                                    </label>
-                                    <label className="load-choice">
-                                        <input type="checkbox" checked={form.is_hazardous} onChange={(e) => set("is_hazardous", e.target.checked)} />
-                                        Təhlükəli yükdür
+                                        <textarea
+                                            rows={3}
+                                            maxLength={5000}
+                                            value={form.description}
+                                            onChange={(e) =>
+                                                set(
+                                                    "description",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Yük haqqında təsvir…"
+                                        />
                                     </label>
                                 </section>
                                 <section className="data-form-section">
@@ -700,7 +781,9 @@ export default function LoadFormPage() {
                                     >
                                         {mutation.isPending
                                             ? "Göndərilir…"
-                                            : editing ? "Dəyişiklikləri yadda saxla" : "Moderasiyaya göndər"}
+                                            : editing
+                                              ? "Dəyişiklikləri yadda saxla"
+                                              : "Moderasiyaya göndər"}
                                     </button>
                                 </div>
                             </form>
@@ -867,9 +950,13 @@ export default function LoadFormPage() {
                                             setActiveBodyCategory(group.key)
                                         }
                                     >
-                                        {getVehicleTypeImage(group.imagePath) && (
+                                        {getVehicleTypeImage(
+                                            group.imagePath,
+                                        ) && (
                                             <img
-                                                src={getVehicleTypeImage(group.imagePath)}
+                                                src={getVehicleTypeImage(
+                                                    group.imagePath,
+                                                )}
                                                 alt={group.label}
                                             />
                                         )}

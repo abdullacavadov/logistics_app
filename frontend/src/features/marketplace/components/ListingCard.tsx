@@ -67,15 +67,6 @@ export function ListingCard({
             <div className="listing-top">
                 <h3>
                     <strong>{item.cargo}</strong>
-                    {item.isHazardous && (
-                        <TriangleAlert
-                            size={17}
-                            color="#eab308"
-                            aria-label="Təhlükəli yük"
-                            title="Təhlükəli yük"
-                            style={{ marginLeft: 8, verticalAlign: "middle" }}
-                        />
-                    )}
                 </h3>
                 {item.title && item.title !== item.cargo && (
                     <small className="listing-title">{item.title}</small>
@@ -122,6 +113,16 @@ export function ListingCard({
                 </div>
             </button>
             <div className="listing-specs">
+                {item.isHazardous && (
+                    <span>
+                        <TriangleAlert
+                            size={17}
+                            color="#ea0808"
+                            aria-label="Təhlükəli yük"
+                            style={{ marginLeft: 8, verticalAlign: "middle" }}
+                        /> ADR
+                    </span>
+                )}
                 <span>
                     <Weight size={15} />
                     {item.weight}
@@ -152,14 +153,8 @@ export function ListingCard({
                         Say: {item.quantity}
                     </span>
                 )}
-                {item.pallets !== null &&
-                    item.pallets !== undefined &&
-                    item.pallets > 0 && <span>Palet: {item.pallets}</span>}
-                {item.urgent && (
-                    <span>
-                        <span className="urgent-tag">Təcili yük</span>
-                    </span>
-                )}
+                
+                
             </div>
             {(item.isReadyForLoading || item.pickupDate) && (
                 <div className="listing-meta">
