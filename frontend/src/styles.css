@@ -2902,3 +2902,154 @@ select:focus-visible {
     background: #383a3f;
     color: #c4c7cc;
 }
+
+
+/* Full load detail modal */
+.detail-dialog {
+    width: min(720px, 100%);
+    max-height: min(90vh, 900px);
+    padding: 26px;
+}
+.detail-dialog .dialog-heading h2 {
+    max-width: 580px;
+    overflow-wrap: anywhere;
+    margin-bottom: 9px;
+}
+.dialog-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+.dialog-route {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+}
+.dialog-route-point {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+.dialog-route-point strong {
+    overflow-wrap: anywhere;
+}
+.dialog-route-point small {
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+}
+.dialog-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+}
+.dialog-map-link:hover {
+    text-decoration: underline;
+}
+.dialog-price {
+    margin-top: 14px;
+}
+.dialog-price span {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-soft);
+    font-size: 11px;
+}
+.dialog-section {
+    padding: 17px 0;
+    border-bottom: 1px solid var(--line);
+}
+.dialog-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 13px;
+    font-size: 13px;
+    font-weight: 750;
+}
+.dialog-section h3 svg {
+    color: var(--primary);
+}
+.dialog-section .dialog-grid {
+    padding: 0;
+    gap: 14px 20px;
+}
+.dialog-field {
+    min-width: 0;
+}
+.dialog-field strong {
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+}
+.dialog-description {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 12px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.dialog-state {
+    min-height: 150px;
+    display: grid;
+    place-items: center;
+    color: var(--text-soft);
+    font-size: 13px;
+    text-align: center;
+}
+.dialog-error {
+    color: var(--danger);
+}
+.dialog-close-action {
+    width: 100%;
+    justify-content: center;
+    margin-top: 17px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 650;
+}
+@media (max-width: 760px) {
+    .dialog-backdrop {
+        align-items: flex-end;
+        padding: 0;
+    }
+    .detail-dialog {
+        width: 100%;
+        max-height: 92vh;
+        max-height: 92dvh;
+        border-radius: 20px 20px 0 0;
+        padding: 20px 16px calc(18px + env(safe-area-inset-bottom));
+    }
+    .dialog-route {
+        padding: 13px;
+        gap: 7px;
+        grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+    }
+    .dialog-route-point strong {
+        font-size: 12px;
+    }
+    .dialog-route-point small {
+        font-size: 9px;
+    }
+    .dialog-grid {
+        gap: 13px 10px;
+    }
+    .dialog-section .dialog-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
