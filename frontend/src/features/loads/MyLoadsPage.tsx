@@ -81,7 +81,7 @@ function toListing(load: Load): Listing {
         toFlag: load.to_country_iso2 ?? "",
         cargo: load.cargo_type_name ?? "Digər yük",
         weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
-        vehicle: load.load_vehicle_type_name ?? load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
+        vehicle: load.load_vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
         price: load.price === null
             ? "Razılaşma ilə"
             : `${Number(load.price).toLocaleString("az-AZ")} ${load.currency ?? ""}`.trim(),
@@ -94,9 +94,9 @@ function toListing(load: Load): Listing {
         isReadyForLoading: Boolean(load.is_ready_for_loading),
         pickupDate: load.is_ready_for_loading ? null : formatDate(load.pickup_from),
         isHazardous: Boolean(load.is_hazardous),
+        needsRefrigeration: Boolean(load.needs_refrigeration),
         volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
         quantity: load.quantity ?? null,
-        pallets: load.pallets ?? null,
         source: "Sayt",
         kind: "load",
     };

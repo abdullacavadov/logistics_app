@@ -246,7 +246,7 @@ export default function LoadFormPage() {
             to_location_name: l.to_location_name ?? "",
             weight_ton: String(Number(l.weight_kg ?? 0) / 1000),
             volume_m3: String(l.volume_m3 ?? ""),
-            count: String(l.quantity ?? l.pallets ?? ""),
+            count: String(l.quantity ?? ""),
             load_vehicle_type_id: String(l.load_vehicle_type_id ?? ""),
             date_mode: l.is_ready_for_loading ? "ready" : "choose",
             pickup_from: l.pickup_from ?? today(),

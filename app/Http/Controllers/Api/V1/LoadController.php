@@ -12,7 +12,7 @@ class LoadController extends Controller
     public function __construct(private \App\Services\MatchRunner $matcher) {}
 
     private const PUBLIC_STATUSES = ['published', 'has_applications'];
-    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'required_vehicle_type_id', 'load_vehicle_type_id', 'is_hazardous'];
+    private const CRITICAL = ['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'pickup_from', 'is_ready_for_loading', 'weight_kg', 'volume_m3', 'quantity', 'load_vehicle_type_id', 'is_hazardous'];
 
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
@@ -21,7 +21,7 @@ class LoadController extends Controller
         $q = $this->publicQuery()
             ->whereIn('l.status', self::PUBLIC_STATUSES)
             ->where('l.pickup_from', '>=', now()->toDateString());
-        foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'required_vehicle_type_id', 'currency'] as $f)
+        foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'currency'] as $f)
             if ($r->filled($f)) $q->where("l.$f", $r->input($f));
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
         if ($r->filled('max_weight')) $q->where('l.weight_kg', '<=', $r->max_weight);
@@ -47,10 +47,8 @@ class LoadController extends Controller
             ->addSelect(
                 'fl.name as from_location_name',
                 'tl.name as to_location_name',
-                'l.from_address',
                 'l.from_lat',
                 'l.from_lng',
-                'l.to_address',
                 'l.to_lat',
                 'l.to_lng',
                 'u.name as shipper_name'
@@ -68,7 +66,6 @@ class LoadController extends Controller
             ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
             ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
             ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
-            ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
             ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'l.load_vehicle_type_id')
             ->where('l.user_id', $r->user()->id);
         if ($r->filled('status')) $q->where('l.status', $r->status);
@@ -77,12 +74,11 @@ class LoadController extends Controller
                 'l.*',
                 'fc.name as from_country_name',
                 'fc.iso2 as from_country_iso2',
-                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
                 'tc.name as to_country_name',
                 'tc.iso2 as to_country_iso2',
-                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'),
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'),
                 'ct.name as cargo_type_name',
-                'vt.name as vehicle_type_name',
                 'lvt.name as load_vehicle_type_name'
             )
             ->paginate($r->integer('per_page', 15)));
@@ -267,8 +263,6 @@ class LoadController extends Controller
             'weight_kg' => $s . 'required|numeric|gt:0|max:1000000',
             'volume_m3' => 'nullable|numeric|gt:0',
             'quantity' => $s . 'required|integer|min:1',
-            'pallets' => 'nullable|integer|min:1',
-            'required_vehicle_type_id' => 'nullable|exists:vehicle_types,id',
             'load_vehicle_type_id' => $s . 'required|exists:load_vehicle_types,id',
             'is_hazardous' => 'boolean',
             'price' => 'nullable|numeric|min:0',
@@ -287,18 +281,16 @@ class LoadController extends Controller
             ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
             ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
             ->leftJoin('cargo_types as ct', 'ct.id', '=', 'l.cargo_type_id')
-            ->leftJoin('vehicle_types as vt', 'vt.id', '=', 'l.required_vehicle_type_id')
             ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'l.load_vehicle_type_id')
             ->select(array_map(fn($column) => "l.$column", $this->publicColumns()))
             ->addSelect(
                 'fc.name as from_country_name',
                 'fc.iso2 as from_country_iso2',
-                DB::raw('COALESCE(fl.name, l.from_address, fc.name) as from_name'),
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
                 'tc.name as to_country_name',
                 'tc.iso2 as to_country_iso2',
-                DB::raw('COALESCE(tl.name, l.to_address, tc.name) as to_name'),
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'),
                 'ct.name as cargo_type_name',
-                'vt.name as vehicle_type_name',
                 'lvt.name as load_vehicle_type_name'
             );
     }
@@ -318,9 +310,8 @@ class LoadController extends Controller
             'is_ready_for_loading',
             'weight_kg',
             'volume_m3',
-            'pallets',
+            'needs_refrigeration',
             'quantity',
-            'required_vehicle_type_id',
             'load_vehicle_type_id',
             'is_hazardous',
             'price',
