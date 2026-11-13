@@ -43,7 +43,7 @@ export interface Load {
   load_vehicle_type_id?: number | null
   is_hazardous: boolean
   price: number | string | null
-  applications: 'web' | 'whatsapp';
+  applications: 'web' | 'whatsapp' | 'telegram';
   currency: string | null
   price_negotiable: boolean
   status: LoadStatus
