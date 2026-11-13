@@ -19,12 +19,22 @@ export interface Load {
   from_location_id: number | null
   from_location_name?: string | null
   from_address?: string | null
+  from_country_name?: string | null
+  from_country_iso2?: string | null
+  from_name?: string | null
+  from_lat?: number | string | null
+  from_lng?: number | string | null
   from_lat?: number | string | null
   from_lng?: number | string | null
   to_country_id: number
   to_location_id: number | null
   to_location_name?: string | null
   to_address?: string | null
+  to_country_name?: string | null
+  to_country_iso2?: string | null
+  to_name?: string | null
+  to_lat?: number | string | null
+  to_lng?: number | string | null
   to_lat?: number | string | null
   to_lng?: number | string | null
   pickup_from: string
@@ -53,6 +63,7 @@ export interface Load {
   cargo_type_name?: string | null
   vehicle_type_name?: string | null
   load_vehicle_type_name?: string | null
+  shipper_name?: string | null
 }
 
 export interface PaginatedResponse<T> {
