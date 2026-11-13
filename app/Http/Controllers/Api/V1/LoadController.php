@@ -45,6 +45,8 @@ class LoadController extends Controller
             ->leftJoin('users as u', 'u.id', '=', 'l.user_id')
             ->where('l.id', $id)
             ->addSelect(
+                'fl.name as from_location_name',
+                'tl.name as to_location_name',
                 'l.from_address',
                 'l.from_lat',
                 'l.from_lng',
