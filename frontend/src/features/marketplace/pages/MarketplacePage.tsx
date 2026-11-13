@@ -65,7 +65,7 @@ export default function MarketplacePage() {
             toFlag: load.to_country_iso2 ?? "",
             cargo: load.cargo_type_name ?? "Digər yük",
             weight: `${(Number(load.weight_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
-            vehicle: load.load_vehicle_type_name ?? load.vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
+            vehicle: load.load_vehicle_type_name ?? "Nəqliyyat növü göstərilməyib",
             price:
                 load.price === null
                     ? "Razılaşma ilə"
