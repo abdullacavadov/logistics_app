@@ -20,7 +20,10 @@ class LoadController extends Controller
         $r->validate(['per_page' => 'nullable|integer|min:1|max:50', 'min_weight' => 'nullable|numeric|min:0', 'max_weight' => 'nullable|numeric|min:0']);
         $q = $this->publicQuery()
             ->whereIn('l.status', self::PUBLIC_STATUSES)
-            ->where('l.pickup_from', '>=', now()->toDateString());
+            ->where(function ($query) {
+                $query->where('l.is_ready_for_loading', true)
+                    ->orWhere('l.pickup_from', '>=', now()->toDateString());
+            });
         foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'currency'] as $f)
             if ($r->filled($f)) $q->where("l.$f", $r->input($f));
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
@@ -36,7 +39,10 @@ class LoadController extends Controller
     {
         $activeLoads = DB::table('loads')
             ->whereIn('status', self::PUBLIC_STATUSES)
-            ->where('pickup_from', '>=', now()->toDateString());
+            ->where(function ($query) {
+                $query->where('is_ready_for_loading', true)
+                    ->orWhere('pickup_from', '>=', now()->toDateString());
+            });
 
         $activeOffers = DB::table('vehicle_offers')
             ->where('status', 'active')
