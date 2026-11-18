@@ -29,7 +29,7 @@ class LoadController extends Controller
             'to_location_id' => 'nullable|integer|exists:locations,id',
             'cargo_type_id' => 'nullable|integer|exists:cargo_types,id',
             'load_vehicle_type_id' => 'nullable|integer|exists:load_vehicle_types,id',
-            'currency' => 'nullable|string|size:3',
+            'currency' => 'required_with:min_price,max_price|nullable|string|size:3',
             'applications' => 'nullable|in:web,whatsapp,telegram',
             'status' => 'nullable|in:published,has_applications',
             'date_from' => 'nullable|date',
