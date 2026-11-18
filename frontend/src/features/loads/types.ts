@@ -82,6 +82,12 @@ export interface LoadFilters {
   min_weight?: number
   max_weight?: number
   pickup_date?: string
+  date_from?: string
+  date_to?: string
+  load_vehicle_type_id?: number
+  applications?: 'web' | 'whatsapp' | 'telegram'
+  search?: string
+  sort?: 'newest' | 'oldest'
   min_price?: number
   max_price?: number
   currency?: string
