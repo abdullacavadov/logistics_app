@@ -9,6 +9,8 @@ import {
     Package,
     Truck,
     Plus,
+    Monitor,
+    Layers,
     ChevronDown,
     Flag,
     ListFilter,
@@ -161,8 +163,8 @@ export default function MarketplacePage() {
         }),
     ];
     const sourceOptions: DropdownOption[] = [
-        { value: "", label: "Bütün mənbələr", leading: <Globe2 size={16} /> },
-        { value: "web", label: "Sayt", leading: <Globe2 size={16} /> },
+        { value: "", label: "Mənbələr", leading: <Layers size={16} /> },
+        { value: "web", label: "Sayt", leading: <Monitor size={16} /> },
         { value: "whatsapp", label: "WhatsApp", leading: <span className="dropdown-whatsapp-icon"><FontAwesomeIcon icon={faWhatsapp} /></span> },
         { value: "telegram", label: "Telegram", leading: <span className="dropdown-telegram-icon"><FontAwesomeIcon icon={faTelegram} /></span> },
     ];
