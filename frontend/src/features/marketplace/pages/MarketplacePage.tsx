@@ -330,6 +330,7 @@ export default function MarketplacePage() {
                                     <div>
                                         <strong>Ətraflı filtrlər</strong>
                                         <small>Nəticələr serverdə filtrlənir. Tarix aralığı bu günü əhatə edərsə, hazır yüklər də göstərilir.</small>
+                                        <small>Qiymət aralığı tətbiq etmək üçün valyuta seçin.</small>
                                     </div>
                                     <label>
                                         <span>Yükləmə şəhəri</span>
