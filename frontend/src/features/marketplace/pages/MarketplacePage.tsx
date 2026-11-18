@@ -134,7 +134,7 @@ export default function MarketplacePage() {
         value: String(item.id),
         label: item.name,
         description: item.iso2,
-        leading: <CountryFlag flag={item.iso2} className="dropdown-country-flag" />,
+        leading: <CountryFlag flag={item.iso2 ?? ""} className="dropdown-country-flag" />,
     }));
     const fromCityOptions = (fromCitiesQuery.data ?? []).map((item) => ({
         value: String(item.id), label: item.name, leading: <MapPin size={16} />,
