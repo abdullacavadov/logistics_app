@@ -17,21 +17,83 @@ class LoadController extends Controller
     /** Ictimai axtarış (qonaq da görə bilər) — §5.3, səhifələnmiş. */
     public function index(Request $r)
     {
-        $r->validate(['per_page' => 'nullable|integer|min:1|max:50', 'min_weight' => 'nullable|numeric|min:0', 'max_weight' => 'nullable|numeric|min:0']);
-        $q = $this->publicQuery()
-            ->whereIn('l.status', self::PUBLIC_STATUSES)
-            ->where(function ($query) {
-                $query->where('l.is_ready_for_loading', true)
+        $r->validate([
+            'per_page' => 'nullable|integer|min:1|max:50',
+            'min_weight' => 'nullable|numeric|min:0',
+            'max_weight' => 'nullable|numeric|min:0|gte:min_weight',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'from_country_id' => 'nullable|integer|exists:countries,id',
+            'from_location_id' => 'nullable|integer|exists:locations,id',
+            'to_country_id' => 'nullable|integer|exists:countries,id',
+            'to_location_id' => 'nullable|integer|exists:locations,id',
+            'cargo_type_id' => 'nullable|integer|exists:cargo_types,id',
+            'load_vehicle_type_id' => 'nullable|integer|exists:load_vehicle_types,id',
+            'currency' => 'nullable|string|size:3',
+            'applications' => 'nullable|in:web,whatsapp,telegram',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'pickup_date' => 'nullable|date',
+            'search' => 'nullable|string|max:200',
+            'sort' => 'nullable|in:newest,oldest',
+        ]);
+
+        $q = $this->publicQuery()->whereIn('l.status', self::PUBLIC_STATUSES);
+        $dateFrom = $r->input('date_from', $r->input('pickup_date'));
+        $dateTo = $r->input('date_to', $r->input('pickup_date'));
+
+        if ($dateFrom || $dateTo) {
+            $today = now()->toDateString();
+            $todayIsInRange = (!$dateFrom || $dateFrom <= $today)
+                && (!$dateTo || $dateTo >= $today);
+
+            $q->where(function ($dateQuery) use ($dateFrom, $dateTo, $todayIsInRange) {
+                $dateQuery->where(function ($scheduled) use ($dateFrom, $dateTo) {
+                    if ($dateFrom) $scheduled->whereDate('l.pickup_from', '>=', $dateFrom);
+                    if ($dateTo) $scheduled->whereDate('l.pickup_from', '<=', $dateTo);
+                });
+
+                if ($todayIsInRange) {
+                    $dateQuery->orWhere('l.is_ready_for_loading', true);
+                }
+            });
+        } else {
+            // Default marketplace: future-dated loads and ready-for-loading loads.
+            $q->where(function ($dateQuery) {
+                $dateQuery->where('l.is_ready_for_loading', true)
                     ->orWhere('l.pickup_from', '>=', now()->toDateString());
             });
-        foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'currency'] as $f)
-            if ($r->filled($f)) $q->where("l.$f", $r->input($f));
+        }
+
+        foreach (([
+            'from_country_id', 'from_location_id', 'to_country_id',
+            'to_location_id', 'cargo_type_id', 'load_vehicle_type_id', 'currency',
+            'applications',
+        ]) as $field) {
+            if ($r->filled($field)) $q->where("l.$field", $r->input($field));
+        }
+
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
         if ($r->filled('max_weight')) $q->where('l.weight_kg', '<=', $r->max_weight);
-        if ($r->filled('pickup_date')) $q->whereDate('l.pickup_from', $r->pickup_date);
         if ($r->filled('min_price')) $q->where('l.price', '>=', $r->min_price);
         if ($r->filled('max_price')) $q->where('l.price', '<=', $r->max_price);
-        return response()->json($q->orderByDesc('l.id')->paginate($r->integer('per_page', 15)));
+
+        if ($r->filled('search')) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $r->input('search'));
+            $q->where(function ($searchQuery) use ($search) {
+                $searchQuery->where('l.title', 'like', "%{$search}%")
+                    ->orWhere('l.description', 'like', "%{$search}%")
+                    ->orWhere('fl.name', 'like', "%{$search}%")
+                    ->orWhere('fc.name', 'like', "%{$search}%")
+                    ->orWhere('tl.name', 'like', "%{$search}%")
+                    ->orWhere('tc.name', 'like', "%{$search}%")
+                    ->orWhere('ct.name', 'like', "%{$search}%")
+                    ->orWhere('lvt.name', 'like', "%{$search}%");
+            });
+        }
+
+        $direction = $r->input('sort') === 'oldest' ? 'asc' : 'desc';
+        return response()->json($q->orderBy('l.id', $direction)->paginate($r->integer('per_page', 15)));
     }
 
     /** Public marketplace counters; definitions match the public loads/offers endpoints. */
