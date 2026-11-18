@@ -20,9 +20,9 @@ class LoadController extends Controller
         $r->validate([
             'per_page' => 'nullable|integer|min:1|max:50',
             'min_weight' => 'nullable|numeric|min:0',
-            'max_weight' => 'nullable|numeric|min:0|gte:min_weight',
+            'max_weight' => 'nullable|numeric|min:0',
             'min_price' => 'nullable|numeric|min:0',
-            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'max_price' => 'nullable|numeric|min:0',
             'from_country_id' => 'nullable|integer|exists:countries,id',
             'from_location_id' => 'nullable|integer|exists:locations,id',
             'to_country_id' => 'nullable|integer|exists:countries,id',
@@ -32,11 +32,24 @@ class LoadController extends Controller
             'currency' => 'nullable|string|size:3',
             'applications' => 'nullable|in:web,whatsapp,telegram',
             'date_from' => 'nullable|date',
-            'date_to' => 'nullable|date|after_or_equal:date_from',
+            'date_to' => 'nullable|date',
             'pickup_date' => 'nullable|date',
             'search' => 'nullable|string|max:200',
             'sort' => 'nullable|in:newest,oldest',
         ]);
+
+        foreach ([
+            ['min_weight', 'max_weight', 'Çəkinin maksimumu minimumdan az ola bilməz'],
+            ['min_price', 'max_price', 'Qiymətin maksimumu minimumdan az ola bilməz'],
+            ['date_from', 'date_to', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'],
+        ] as [$minimum, $maximum, $message]) {
+            if ($r->filled($minimum) && $r->filled($maximum) && $r->input($maximum) < $r->input($minimum)) {
+                return response()->json([
+                    'message' => $message,
+                    'errors' => [$maximum => [$message]],
+                ], 422);
+            }
+        }
 
         $q = $this->publicQuery()->whereIn('l.status', self::PUBLIC_STATUSES);
         $dateFrom = $r->input('date_from', $r->input('pickup_date'));
