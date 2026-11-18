@@ -43,7 +43,15 @@ class LoadController extends Controller
             ['min_price', 'max_price', 'Qiymətin maksimumu minimumdan az ola bilməz'],
             ['date_from', 'date_to', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'],
         ] as [$minimum, $maximum, $message]) {
-            if ($r->filled($minimum) && $r->filled($maximum) && $r->input($maximum) < $r->input($minimum)) {
+            $rangeIsInvalid = false;
+            if ($r->filled($minimum) && $r->filled($maximum)) {
+                $minValue = $r->input($minimum);
+                $maxValue = $r->input($maximum);
+                $rangeIsInvalid = is_numeric($minValue) && is_numeric($maxValue)
+                    ? (float) $maxValue < (float) $minValue
+                    : $maxValue < $minValue;
+            }
+            if ($rangeIsInvalid) {
                 return response()->json([
                     'message' => $message,
                     'errors' => [$maximum => [$message]],
