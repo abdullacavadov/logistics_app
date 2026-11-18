@@ -22,6 +22,8 @@ import {
 import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
 import { listings } from "../data/listings";
 import type { Listing } from "../types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTelegram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CountryFlag } from "../components/CountryFlag";
 import { Dropdown, type DropdownOption } from "../components/Dropdown";
 import { ListingCard } from "../components/ListingCard";
@@ -162,8 +164,8 @@ export default function MarketplacePage() {
     const sourceOptions: DropdownOption[] = [
         { value: "", label: "Bütün mənbələr", leading: <Globe2 size={16} /> },
         { value: "web", label: "Sayt", leading: <Globe2 size={16} /> },
-        { value: "whatsapp", label: "WhatsApp", leading: <MessageCircle size={16} className="dropdown-whatsapp-icon" /> },
-        { value: "telegram", label: "Telegram", leading: <Send size={16} className="dropdown-telegram-icon" /> },
+        { value: "whatsapp", label: "WhatsApp", leading: <span className="dropdown-whatsapp-icon"><FontAwesomeIcon icon={faWhatsapp} /></span> },
+        { value: "telegram", label: "Telegram", leading: <span className="dropdown-telegram-icon"><FontAwesomeIcon icon={faTelegram} /></span> },
     ];
     const statusOptions: DropdownOption[] = [
         { value: "", label: "Bütün aktiv elanlar", leading: <BadgeCheck size={16} /> },
