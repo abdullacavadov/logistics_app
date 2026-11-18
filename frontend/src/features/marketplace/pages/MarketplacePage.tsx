@@ -16,7 +16,6 @@ import {
     ArrowRight,
     Globe2,
     MessageCircle,
-    Send,
     BadgeCheck,
 } from "lucide-react";
 import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
