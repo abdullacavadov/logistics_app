@@ -66,7 +66,73 @@ export default function MarketplacePage() {
         refetchInterval: 60_000,
         staleTime: 30_000,
     });
-    const loadsQuery = useLoads({ per_page: 50 });
+    const [query, setQuery] = useState("");
+    const [fromCountry, setFromCountry] = useState("");
+    const [fromCity, setFromCity] = useState("");
+    const [toCountry, setToCountry] = useState("");
+    const [toCity, setToCity] = useState("");
+    const [source, setSource] = useState("");
+    const [minWeight, setMinWeight] = useState("");
+    const [maxWeight, setMaxWeight] = useState("");
+    const [cargoType, setCargoType] = useState("");
+    const [vehicleType, setVehicleType] = useState("");
+    const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [currency, setCurrency] = useState("");
+    const [pageNumber, setPageNumber] = useState(1);
+
+    type CatalogOption = { id: number; name: string; iso2?: string; default_currency?: string };
+    const countriesQuery = useQuery({
+        queryKey: ["catalog", "countries"],
+        queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/countries")).data.data,
+        staleTime: 300_000,
+    });
+    const cargoTypesQuery = useQuery({
+        queryKey: ["catalog", "cargo-types"],
+        queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/cargo-types")).data.data,
+        staleTime: 300_000,
+    });
+    const vehicleTypesQuery = useQuery({
+        queryKey: ["catalog", "load-vehicle-types"],
+        queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/load-vehicle-types")).data.data,
+        staleTime: 300_000,
+    });
+    const fromCitiesQuery = useQuery({
+        queryKey: ["catalog", "locations", fromCountry],
+        queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/locations", { params: { country_id: fromCountry, per_page: 100 } })).data.data,
+        enabled: Boolean(fromCountry),
+        staleTime: 300_000,
+    });
+    const toCitiesQuery = useQuery({
+        queryKey: ["catalog", "locations", toCountry],
+        queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/locations", { params: { country_id: toCountry, per_page: 100 } })).data.data,
+        enabled: Boolean(toCountry),
+        staleTime: 300_000,
+    });
+
+    const loadFilters = {
+        per_page: 12,
+        page: pageNumber,
+        search: query || undefined,
+        from_country_id: fromCountry ? Number(fromCountry) : undefined,
+        from_location_id: fromCity ? Number(fromCity) : undefined,
+        to_country_id: toCountry ? Number(toCountry) : undefined,
+        to_location_id: toCity ? Number(toCity) : undefined,
+        cargo_type_id: cargoType ? Number(cargoType) : undefined,
+        load_vehicle_type_id: vehicleType ? Number(vehicleType) : undefined,
+        applications: source ? source as "web" | "whatsapp" | "telegram" : undefined,
+        min_weight: minWeight ? Number(minWeight) * 1000 : undefined,
+        max_weight: maxWeight ? Number(maxWeight) * 1000 : undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+        min_price: minPrice ? Number(minPrice) : undefined,
+        max_price: maxPrice ? Number(maxPrice) : undefined,
+        currency: currency || undefined,
+        sort: sort === "Əvvəlcə köhnələr" ? "oldest" as const : "newest" as const,
+    };
+    const loadsQuery = useLoads(loadFilters);
     const [selectedLoadId, setSelectedLoadId] = useState<number | null>(null);
     const selectedLoadQuery = useLoad(selectedLoadId);
     const auth = useAuth();
@@ -102,7 +168,7 @@ export default function MarketplacePage() {
             needsRefrigeration: Boolean(load.needs_refrigeration),
             volume: load.volume_m3 === null ? null : `${Number(load.volume_m3).toLocaleString("az-AZ")} m³`,
             quantity: load.quantity ?? null,
-            source: "Sayt",
+            source: load.applications === "whatsapp" ? "WhatsApp-dan" : load.applications === "telegram" ? "Telegram-dan" : "Saytdan",
             kind: "load",
         }),
     );
@@ -115,9 +181,6 @@ export default function MarketplacePage() {
         )?.[0] ?? "Bütün elanlar";
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [kind, setKind] = useState<"load" | "vehicle">("load");
-    const [query, setQuery] = useState("");
-    const [origin, setOrigin] = useState("");
-    const [destination, setDestination] = useState("");
     const [filterOpen, setFilterOpen] = useState(false);
     const [sort, setSort] = useState("Əvvəlcə yenilər");
     const [country, setCountry] = useState("🇦🇿 Azərbaycan");
@@ -125,24 +188,11 @@ export default function MarketplacePage() {
     const [showNotices, setShowNotices] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const filtered = useMemo(
-        () =>
-            (kind === "load" ? apiListings : listings).filter(
-                (x) =>
-                    x.kind === kind &&
-                    [x.from, x.to, x.cargo, x.source, x.vehicle]
-                        .join(" ")
-                        .toLocaleLowerCase("az")
-                        .includes(query.toLocaleLowerCase("az")) &&
-                    (!origin ||
-                        x.from
-                            .toLocaleLowerCase("az")
-                            .includes(origin.toLocaleLowerCase("az"))) &&
-                    (!destination ||
-                        x.to
-                            .toLocaleLowerCase("az")
-                            .includes(destination.toLocaleLowerCase("az"))),
-            ),
-        [kind, query, origin, destination, apiListings],
+        () => kind === "load"
+            ? apiListings
+            : listings.filter((item) => item.kind === kind
+                && [item.from, item.to, item.cargo, item.source, item.vehicle].join(" ").toLocaleLowerCase("az").includes(query.toLocaleLowerCase("az"))),
+        [kind, query, apiListings],
     );
     const changePage = (label: string) => {
         navigate(pagePaths[label] ?? "/");
@@ -222,9 +272,9 @@ export default function MarketplacePage() {
                             </div>
                             <section className="search-tools">
                                 <label className="search-field">
-                                    <Truck size={18} />
+                                    <Search size={18} />
                                     <input
-                                        placeholder="Nəqliyyat növünü seçin"
+                                        placeholder="Açar söz, marşrut və ya yük adı"
                                         value={query}
                                         onChange={(e) =>
                                             setQuery(e.target.value)
@@ -233,23 +283,17 @@ export default function MarketplacePage() {
                                 </label>
                                 <label className="search-field">
                                     <MapPin size={18} />
-                                    <input
-                                        placeholder="Haradan"
-                                        value={origin}
-                                        onChange={(e) =>
-                                            setOrigin(e.target.value)
-                                        }
-                                    />
+                                    <select value={fromCountry} onChange={(e) => { setFromCountry(e.target.value); setFromCity(""); setPageNumber(1); }}>
+                                        <option value="">Yükləmə ölkəsi</option>
+                                        {(countriesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                                    </select>
                                 </label>
                                 <label className="search-field">
                                     <Flag size={18} />
-                                    <input
-                                        placeholder="Haraya"
-                                        value={destination}
-                                        onChange={(e) =>
-                                            setDestination(e.target.value)
-                                        }
-                                    />
+                                    <select value={toCountry} onChange={(e) => { setToCountry(e.target.value); setToCity(""); setPageNumber(1); }}>
+                                        <option value="">Çatdırılma ölkəsi</option>
+                                        {(countriesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                                    </select>
                                 </label>
                                 <button
                                     className={
@@ -261,11 +305,15 @@ export default function MarketplacePage() {
                                     <SlidersHorizontal size={17} /> Daha çox{" "}
                                     <ChevronDown size={15} />
                                 </button>
-                                <button className="filter-button channel-filter">
-                                    <MessageSquare size={16} />{" "}
-                                    <Check size={15} />
-                                    <span>WhatsApp-dan</span>
-                                </button>
+                                <label className="filter-button channel-filter">
+                                    <MessageSquare size={16} />
+                                    <select value={source} onChange={(e) => { setSource(e.target.value); setPageNumber(1); }}>
+                                        <option value="">Bütün mənbələr</option>
+                                        <option value="web">Sayt</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="telegram">Telegram</option>
+                                    </select>
+                                </label>
                                 <label className="sort-select">
                                     <ListFilter size={16} />
                                     <select
@@ -283,35 +331,78 @@ export default function MarketplacePage() {
                             {filterOpen && (
                                 <section className="expanded-filters">
                                     <div>
-                                        <strong>Elan filtrləri</strong>
-                                        <small>Nəticələri dəqiqləşdirin</small>
+                                        <strong>Ətraflı filtrlər</strong>
+                                        <small>Nəticələr serverdə filtrlənir</small>
                                     </div>
                                     <label>
-                                        <span>Minimum çəki</span>
-                                        <input placeholder="ton" />
-                                    </label>
-                                    <label>
-                                        <span>Maksimum çəki</span>
-                                        <input placeholder="ton" />
-                                    </label>
-                                    <label>
-                                        <span>Yük növü</span>
-                                        <select>
-                                            <option>Bütün növlər</option>
-                                            <option>Qida</option>
-                                            <option>
-                                                Tikinti materialları
-                                            </option>
+                                        <span>Yükləmə şəhəri</span>
+                                        <select value={fromCity} disabled={!fromCountry} onChange={(e) => { setFromCity(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün şəhərlər</option>
+                                            {(fromCitiesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                                         </select>
                                     </label>
-                                    <button
-                                        className="text-action"
-                                        onClick={() => {
-                                            setOrigin("");
-                                            setDestination("");
-                                            setQuery("");
-                                        }}
-                                    >
+                                    <label>
+                                        <span>Çatdırılma şəhəri</span>
+                                        <select value={toCity} disabled={!toCountry} onChange={(e) => { setToCity(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün şəhərlər</option>
+                                            {(toCitiesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Yük kateqoriyası</span>
+                                        <select value={cargoType} onChange={(e) => { setCargoType(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün kateqoriyalar</option>
+                                            {(cargoTypesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Nəqliyyat növü</span>
+                                        <select value={vehicleType} onChange={(e) => { setVehicleType(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün növlər</option>
+                                            {(vehicleTypesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Minimum çəki (ton)</span>
+                                        <input type="number" min="0" step="0.1" value={minWeight} onChange={(e) => { setMinWeight(e.target.value); setPageNumber(1); }} placeholder="0" />
+                                    </label>
+                                    <label>
+                                        <span>Maksimum çəki (ton)</span>
+                                        <input type="number" min="0" step="0.1" value={maxWeight} onChange={(e) => { setMaxWeight(e.target.value); setPageNumber(1); }} placeholder="—" />
+                                    </label>
+                                    <label>
+                                        <span>Yükləmə tarixindən</span>
+                                        <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPageNumber(1); }} />
+                                    </label>
+                                    <label>
+                                        <span>Yükləmə tarixinədək</span>
+                                        <input type="date" value={dateTo} min={dateFrom || undefined} onChange={(e) => { setDateTo(e.target.value); setPageNumber(1); }} />
+                                    </label>
+                                    <label>
+                                        <span>Minimum qiymət</span>
+                                        <input type="number" min="0" value={minPrice} onChange={(e) => { setMinPrice(e.target.value); setPageNumber(1); }} placeholder="0" />
+                                    </label>
+                                    <label>
+                                        <span>Maksimum qiymət</span>
+                                        <input type="number" min="0" value={maxPrice} onChange={(e) => { setMaxPrice(e.target.value); setPageNumber(1); }} placeholder="—" />
+                                    </label>
+                                    <label>
+                                        <span>Valyuta</span>
+                                        <select value={currency} onChange={(e) => { setCurrency(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün valyutalar</option>
+                                            <option value="AZN">AZN</option>
+                                            <option value="USD">USD</option>
+                                            <option value="EUR">EUR</option>
+                                            <option value="TRY">TRY</option>
+                                            <option value="RUB">RUB</option>
+                                        </select>
+                                    </label>
+                                    <button className="text-action" onClick={() => {
+                                        setQuery(""); setFromCountry(""); setFromCity(""); setToCountry(""); setToCity("");
+                                        setSource(""); setMinWeight(""); setMaxWeight(""); setCargoType(""); setVehicleType("");
+                                        setDateFrom(""); setDateTo(""); setMinPrice(""); setMaxPrice(""); setCurrency("");
+                                        setSort("Əvvəlcə yenilər"); setPageNumber(1);
+                                    }}>
                                         Filtrləri sıfırla
                                     </button>
                                 </section>
@@ -382,7 +473,7 @@ export default function MarketplacePage() {
                                             ? "Bütün yük elanları"
                                             : "Boş nəqliyyat vasitələri"}{" "}
                                         <span className="span-round">
-                                            {filtered.length}
+                                            {kind === "load" ? (loadsQuery.data?.meta.total ?? 0) : filtered.length}
                                         </span>
                                     </h2>
                                 </div>
@@ -431,6 +522,13 @@ export default function MarketplacePage() {
                                     </div>
                                 )}
                             </div>
+                            {kind === "load" && loadsQuery.data?.meta && loadsQuery.data.meta.last_page > 1 && (
+                                <div className="pagination-controls">
+                                    <button disabled={pageNumber <= 1 || loadsQuery.isFetching} onClick={() => setPageNumber((value) => Math.max(1, value - 1))}>Əvvəlki</button>
+                                    <span>{loadsQuery.data.meta.current_page} / {loadsQuery.data.meta.last_page}</span>
+                                    <button disabled={pageNumber >= loadsQuery.data.meta.last_page || loadsQuery.isFetching} onClick={() => setPageNumber((value) => Math.min(loadsQuery.data!.meta.last_page, value + 1))}>Növbəti</button>
+                                </div>
+                            )}
                         </>
                     ) : page === "Yük xəritəsi" ? (
                         <section className="map-page">
