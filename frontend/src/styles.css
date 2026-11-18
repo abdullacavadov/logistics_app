@@ -734,6 +734,11 @@ select:focus-visible {
     right: 0;
     left: auto;
 }
+.sort-select .custom-dropdown-chevron {
+    position: static;
+    margin-left: auto;
+    pointer-events: none;
+}
 .expanded-filters .custom-dropdown {
     width: 160px;
     max-width: 100%;
