@@ -72,6 +72,7 @@ export default function MarketplacePage() {
     const [toCountry, setToCountry] = useState("");
     const [toCity, setToCity] = useState("");
     const [source, setSource] = useState("");
+    const [status, setStatus] = useState("");
     const [minWeight, setMinWeight] = useState("");
     const [maxWeight, setMaxWeight] = useState("");
     const [cargoType, setCargoType] = useState("");
@@ -124,6 +125,7 @@ export default function MarketplacePage() {
         cargo_type_id: cargoType ? Number(cargoType) : undefined,
         load_vehicle_type_id: vehicleType ? Number(vehicleType) : undefined,
         applications: source ? source as "web" | "whatsapp" | "telegram" : undefined,
+        status: status ? status as "published" | "has_applications" : undefined,
         min_weight: minWeight ? Number(minWeight) * 1000 : undefined,
         max_weight: maxWeight ? Number(maxWeight) * 1000 : undefined,
         date_from: dateFrom || undefined,
@@ -328,7 +330,7 @@ export default function MarketplacePage() {
                                 <section className="expanded-filters">
                                     <div>
                                         <strong>Ətraflı filtrlər</strong>
-                                        <small>Nəticələr serverdə filtrlənir</small>
+                                        <small>Nəticələr serverdə filtrlənir. Tarix aralığı bu günü əhatə edərsə, hazır yüklər də göstərilir.</small>
                                     </div>
                                     <label>
                                         <span>Yükləmə şəhəri</span>
@@ -386,16 +388,20 @@ export default function MarketplacePage() {
                                         <span>Valyuta</span>
                                         <select value={currency} onChange={(e) => { setCurrency(e.target.value); setPageNumber(1); }}>
                                             <option value="">Bütün valyutalar</option>
-                                            <option value="AZN">AZN</option>
-                                            <option value="USD">USD</option>
-                                            <option value="EUR">EUR</option>
-                                            <option value="TRY">TRY</option>
-                                            <option value="RUB">RUB</option>
+                                            {[...new Set((countriesQuery.data ?? []).map((item) => item.default_currency).filter((value): value is string => Boolean(value)))].sort().map((value) => <option key={value} value={value}>{value}</option>)}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Elan statusu</span>
+                                        <select value={status} onChange={(e) => { setStatus(e.target.value); setPageNumber(1); }}>
+                                            <option value="">Bütün aktiv elanlar</option>
+                                            <option value="published">Dərc edilib</option>
+                                            <option value="has_applications">Müraciətlər var</option>
                                         </select>
                                     </label>
                                     <button className="text-action" onClick={() => {
                                         setQuery(""); setFromCountry(""); setFromCity(""); setToCountry(""); setToCity("");
-                                        setSource(""); setMinWeight(""); setMaxWeight(""); setCargoType(""); setVehicleType("");
+                                        setSource(""); setStatus(""); setMinWeight(""); setMaxWeight(""); setCargoType(""); setVehicleType("");
                                         setDateFrom(""); setDateTo(""); setMinPrice(""); setMaxPrice(""); setCurrency("");
                                         setSort("Əvvəlcə yenilər"); setPageNumber(1);
                                     }}>
