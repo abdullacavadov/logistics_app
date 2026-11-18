@@ -11,7 +11,6 @@ import {
     MessageSquare,
     Plus,
     ChevronDown,
-    Check,
     Flag,
     LayoutGrid,
     ListFilter,
