@@ -404,6 +404,15 @@ select:focus-visible {
 .search-field input::placeholder {
     color: var(--muted);
 }
+.search-field select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 12px;
+}
 .filter-button {
     height: 48px;
     border: 1px solid var(--line);
@@ -429,6 +438,15 @@ select:focus-visible {
 .channel-filter span {
     font-size: 11px;
 }
+.channel-filter select {
+    min-width: 0;
+    max-width: 118px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 11px;
+}
 .sort-select {
     position: relative;
     white-space: nowrap;
@@ -449,6 +467,7 @@ select:focus-visible {
 }
 .expanded-filters {
     display: flex;
+    flex-wrap: wrap;
     align-items: end;
     gap: 14px;
     background: var(--surface);
@@ -458,7 +477,8 @@ select:focus-visible {
     margin-bottom: 16px;
 }
 .expanded-filters > div {
-    margin-right: auto;
+    flex: 1 0 100%;
+    margin-right: 0;
 }
 .expanded-filters strong,
 .expanded-filters small {
@@ -482,12 +502,34 @@ select:focus-visible {
 .expanded-filters input,
 .expanded-filters select {
     height: 36px;
-    width: 120px;
+    width: 160px;
+    max-width: 100%;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface-soft);
     color: var(--text);
     padding: 0 9px;
+}
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px 0 28px;
+    color: var(--text-soft);
+    font-size: 12px;
+}
+.pagination-controls button {
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    padding: 8px 14px;
+    cursor: pointer;
+}
+.pagination-controls button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 .text-action {
     border: 0;
@@ -1293,7 +1335,9 @@ select:focus-visible {
         font-size: 10px;
     }
     .channel-filter {
-        display: none;
+        display: flex;
+        min-width: 0;
+        padding: 0 8px;
     }
     .sort-select select {
         width: 105px;
