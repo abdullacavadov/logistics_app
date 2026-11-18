@@ -10,6 +10,8 @@ import {
     Truck,
     Plus,
     ChevronDown,
+    Flag,
+    ListFilter,
     LayoutGrid,
     ArrowRight,
     Globe2,
@@ -121,7 +123,7 @@ export default function MarketplacePage() {
     ) as Record<string, string>;
     const getVehicleTypeImage = (imagePath?: string | null) => {
         if (!imagePath) return undefined;
-        const filename = imagePath.replace(/\\\\/g, "/").split("/").pop();
+        const filename = imagePath.replace(/\\/g, "/").split("/").pop();
         if (!filename) return undefined;
         return Object.entries(vehicleTypeImageUrls).find(
             ([path]) => path.split("/").pop()?.toLowerCase() === filename.toLowerCase(),
