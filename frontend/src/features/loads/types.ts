@@ -86,6 +86,7 @@ export interface LoadFilters {
   date_to?: string
   load_vehicle_type_id?: number
   applications?: 'web' | 'whatsapp' | 'telegram'
+  status?: 'published' | 'has_applications'
   search?: string
   sort?: 'newest' | 'oldest'
   min_price?: number
