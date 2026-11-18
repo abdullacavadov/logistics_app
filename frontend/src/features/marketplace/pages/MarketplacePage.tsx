@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../../lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
     Search,
@@ -49,7 +51,21 @@ function formatLoadDateTime(value: string): string {
     }).format(date);
 }
 
+type MarketplaceStats = {
+    loads: { active: number; last_hour: number };
+    vehicles: { active: number; last_hour: number };
+};
+
 export default function MarketplacePage() {
+    const statsQuery = useQuery({
+        queryKey: ["marketplace-stats"],
+        queryFn: async () => {
+            const { data } = await api.get<MarketplaceStats>("/marketplace/stats");
+            return data;
+        },
+        refetchInterval: 60_000,
+        staleTime: 30_000,
+    });
     const loadsQuery = useLoads({ per_page: 50 });
     const [selectedLoadId, setSelectedLoadId] = useState<number | null>(null);
     const selectedLoadQuery = useLoad(selectedLoadId);
@@ -193,7 +209,7 @@ export default function MarketplacePage() {
                                     className={kind === "load" ? "active" : ""}
                                     onClick={() => setKind("load")}
                                 >
-                                    <Package size={18} /> Yüklər <b>7 156</b>
+                                    <Package size={18} /> Yüklər <b>{statsQuery.data?.loads.active.toLocaleString("az-AZ") ?? "—"}</b>
                                 </button>
                                 <button
                                     className={
@@ -201,7 +217,7 @@ export default function MarketplacePage() {
                                     }
                                     onClick={() => setKind("vehicle")}
                                 >
-                                    <Truck size={18} /> Maşınlar <b>606</b>
+                                    <Truck size={18} /> Maşınlar <b>{statsQuery.data?.vehicles.active.toLocaleString("az-AZ") ?? "—"}</b>
                                 </button>
                             </div>
                             <section className="search-tools">
@@ -315,15 +331,19 @@ export default function MarketplacePage() {
                                     <div className="banner-stats">
                                         <span>
                                             <strong>
-                                                {kind === "load"
-                                                    ? "7 156"
-                                                    : "606"}
+                                                {statsQuery.data
+                                                    ? statsQuery.data[kind === "load" ? "loads" : "vehicles"].active.toLocaleString("az-AZ")
+                                                    : "—"}
                                             </strong>{" "}
                                             aktiv elan
                                         </span>
                                         <i />
                                         <span>
-                                            <strong>+238</strong> son 1 saatda
+                                            <strong>
+                                                {statsQuery.data
+                                                    ? `+${statsQuery.data[kind === "load" ? "loads" : "vehicles"].last_hour.toLocaleString("az-AZ")}`
+                                                    : "—"}
+                                            </strong> son 1 saatda
                                         </span>
                                     </div>
                                 </div>
