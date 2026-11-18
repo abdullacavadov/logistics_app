@@ -8,18 +8,23 @@ import {
     MapPin,
     Package,
     Truck,
-    MessageSquare,
     Plus,
     ChevronDown,
     Flag,
-    LayoutGrid,
     ListFilter,
+    LayoutGrid,
     ArrowRight,
+    Globe2,
+    MessageCircle,
+    BadgeCheck,
 } from "lucide-react";
 import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
 import { listings } from "../data/listings";
 import type { Listing } from "../types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTelegram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CountryFlag } from "../components/CountryFlag";
+import { Dropdown, type DropdownOption } from "../components/Dropdown";
 import { ListingCard } from "../components/ListingCard";
 import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
@@ -84,7 +89,7 @@ export default function MarketplacePage() {
     const [pageNumber, setPageNumber] = useState(1);
     const [sort, setSort] = useState("Əvvəlcə yenilər");
 
-    type CatalogOption = { id: number; name: string; iso2?: string; default_currency?: string };
+    type CatalogOption = { id: number; name: string; iso2?: string; default_currency?: string; image_path?: string | null };
     const countriesQuery = useQuery({
         queryKey: ["catalog", "countries"],
         queryFn: async () => (await api.get<{ data: CatalogOption[] }>("/catalog/countries")).data.data,
@@ -112,6 +117,70 @@ export default function MarketplacePage() {
         enabled: Boolean(toCountry),
         staleTime: 300_000,
     });
+
+    const vehicleTypeImageUrls = import.meta.glob(
+        "../../../assets/img/vehicle-types/*",
+        { eager: true, import: "default", query: "?url" },
+    ) as Record<string, string>;
+    const getVehicleTypeImage = (imagePath?: string | null) => {
+        if (!imagePath) return undefined;
+        const filename = imagePath.replace(/\\/g, "/").split("/").pop();
+        if (!filename) return undefined;
+        return Object.entries(vehicleTypeImageUrls).find(
+            ([path]) => path.split("/").pop()?.toLowerCase() === filename.toLowerCase(),
+        )?.[1];
+    };
+
+    const countryOptions = (countriesQuery.data ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+        description: item.iso2,
+        leading: <CountryFlag flag={item.iso2 ?? ""} className="dropdown-country-flag" />,
+    }));
+    const fromCityOptions = (fromCitiesQuery.data ?? []).map((item) => ({
+        value: String(item.id), label: item.name, leading: <MapPin size={16} />,
+    }));
+    const toCityOptions = (toCitiesQuery.data ?? []).map((item) => ({
+        value: String(item.id), label: item.name, leading: <MapPin size={16} />,
+    }));
+    const cargoTypeOptions: DropdownOption[] = [
+        { value: "", label: "Bütün kateqoriyalar", leading: <Package size={16} /> },
+        ...(cargoTypesQuery.data ?? []).map((item) => ({
+            value: String(item.id), label: item.name, leading: <Package size={16} />,
+        })),
+    ];
+    const vehicleTypeOptions: DropdownOption[] = [
+        { value: "", label: "Bütün növlər", leading: <Truck size={16} /> },
+        ...(vehicleTypesQuery.data ?? []).map((item) => {
+            const image = getVehicleTypeImage(item.image_path);
+            return {
+                value: String(item.id),
+                label: item.name,
+                leading: image ? <img src={image} alt="" className="dropdown-vehicle-image" /> : <Truck size={17} />,
+            };
+        }),
+    ];
+    const sourceOptions: DropdownOption[] = [
+        { value: "", label: "Bütün mənbələr", leading: <Globe2 size={16} /> },
+        { value: "web", label: "Sayt", leading: <Globe2 size={16} /> },
+        { value: "whatsapp", label: "WhatsApp", leading: <span className="dropdown-whatsapp-icon"><FontAwesomeIcon icon={faWhatsapp} /></span> },
+        { value: "telegram", label: "Telegram", leading: <span className="dropdown-telegram-icon"><FontAwesomeIcon icon={faTelegram} /></span> },
+    ];
+    const statusOptions: DropdownOption[] = [
+        { value: "", label: "Bütün aktiv elanlar", leading: <BadgeCheck size={16} /> },
+        { value: "published", label: "Dərc edilib", leading: <BadgeCheck size={16} /> },
+        { value: "has_applications", label: "Müraciətlər var", leading: <MessageCircle size={16} /> },
+    ];
+    const currencyOptions: DropdownOption[] = [
+        { value: "", label: "Bütün valyutalar", leading: <span className="dropdown-currency-symbol">¤</span> },
+        ...[...new Set((countriesQuery.data ?? []).map((item) => item.default_currency).filter((value): value is string => Boolean(value)))].sort().map((value) => ({
+            value, label: value, leading: <span className="dropdown-currency-symbol">{value.slice(0, 1)}</span>,
+        })),
+    ];
+    const sortOptions: DropdownOption[] = [
+        { value: "Əvvəlcə yenilər", label: "Əvvəlcə yenilər", leading: <span className="dropdown-sort-mark">↓</span> },
+        { value: "Əvvəlcə köhnələr", label: "Əvvəlcə köhnələr", leading: <span className="dropdown-sort-mark">↑</span> },
+    ];
 
     const loadFilters = {
         per_page: 12,
@@ -282,48 +351,51 @@ export default function MarketplacePage() {
                                 </label>
                                 <label className="search-field">
                                     <MapPin size={18} />
-                                    <select value={fromCountry} onChange={(e) => { setFromCountry(e.target.value); setFromCity(""); setPageNumber(1); }}>
-                                        <option value="">Yükləmə ölkəsi</option>
-                                        {(countriesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                    </select>
+                                    <Dropdown
+                                        value={fromCountry}
+                                        options={countryOptions}
+                                        onChange={(value) => { setFromCountry(value); setFromCity(""); setPageNumber(1); }}
+                                        placeholder="Yükləmə ölkəsi"
+                                        ariaLabel="Yükləmə ölkəsi"
+                                        searchable
+                                        searchPlaceholder="Ölkə axtar…"
+                                    />
                                 </label>
                                 <label className="search-field">
                                     <Flag size={18} />
-                                    <select value={toCountry} onChange={(e) => { setToCountry(e.target.value); setToCity(""); setPageNumber(1); }}>
-                                        <option value="">Çatdırılma ölkəsi</option>
-                                        {(countriesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                    </select>
+                                    <Dropdown
+                                        value={toCountry}
+                                        options={countryOptions}
+                                        onChange={(value) => { setToCountry(value); setToCity(""); setPageNumber(1); }}
+                                        placeholder="Çatdırılma ölkəsi"
+                                        ariaLabel="Çatdırılma ölkəsi"
+                                        searchable
+                                        searchPlaceholder="Ölkə axtar…"
+                                    />
                                 </label>
                                 <button
-                                    className={
-                                        "filter-button " +
-                                        (filterOpen ? "filter-on" : "")
-                                    }
+                                    className={"filter-button " + (filterOpen ? "filter-on" : "")}
                                     onClick={() => setFilterOpen(!filterOpen)}
                                 >
-                                    <SlidersHorizontal size={17} /> Daha çox{" "}
-                                    <ChevronDown size={15} />
+                                    <SlidersHorizontal size={17} /> Daha çox <ChevronDown size={15} />
                                 </button>
-                                <label className="filter-button channel-filter">
-                                    <MessageSquare size={16} />
-                                    <select value={source} onChange={(e) => { setSource(e.target.value); setPageNumber(1); }}>
-                                        <option value="">Bütün mənbələr</option>
-                                        <option value="web">Sayt</option>
-                                        <option value="whatsapp">WhatsApp</option>
-                                        <option value="telegram">Telegram</option>
-                                    </select>
-                                </label>
-                                <label className="sort-select">
+                                <Dropdown
+                                    className="marketplace-source-dropdown"
+                                    value={source}
+                                    options={sourceOptions}
+                                    onChange={(value) => { setSource(value); setPageNumber(1); }}
+                                    ariaLabel="Elan mənbəyi"
+                                />
+                                <div className="sort-select">
                                     <ListFilter size={16} />
-                                    <select
+                                    <Dropdown
+                                        className="marketplace-sort-dropdown"
                                         value={sort}
-                                        onChange={(e) => { setSort(e.target.value); setPageNumber(1); }}
-                                    >
-                                        <option>Əvvəlcə yenilər</option>
-                                        <option>Əvvəlcə köhnələr</option>
-                                    </select>
-                                    <ChevronDown size={14} />
-                                </label>
+                                        options={sortOptions}
+                                        onChange={(value) => { setSort(value); setPageNumber(1); }}
+                                        ariaLabel="Sıralama"
+                                    />
+                                </div>
                             </section>
                             {filterOpen && (
                                 <section className="expanded-filters">
@@ -334,31 +406,19 @@ export default function MarketplacePage() {
                                     </div>
                                     <label>
                                         <span>Yükləmə şəhəri</span>
-                                        <select value={fromCity} disabled={!fromCountry} onChange={(e) => { setFromCity(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün şəhərlər</option>
-                                            {(fromCitiesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                        </select>
+                                        <Dropdown value={fromCity} options={[{ value: "", label: "Bütün şəhərlər" }, ...fromCityOptions]} onChange={(value) => { setFromCity(value); setPageNumber(1); }} placeholder="Bütün şəhərlər" ariaLabel="Yükləmə şəhəri" searchable disabled={!fromCountry} />
                                     </label>
                                     <label>
                                         <span>Çatdırılma şəhəri</span>
-                                        <select value={toCity} disabled={!toCountry} onChange={(e) => { setToCity(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün şəhərlər</option>
-                                            {(toCitiesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                        </select>
+                                        <Dropdown value={toCity} options={[{ value: "", label: "Bütün şəhərlər" }, ...toCityOptions]} onChange={(value) => { setToCity(value); setPageNumber(1); }} placeholder="Bütün şəhərlər" ariaLabel="Çatdırılma şəhəri" searchable disabled={!toCountry} />
                                     </label>
                                     <label>
                                         <span>Yük kateqoriyası</span>
-                                        <select value={cargoType} onChange={(e) => { setCargoType(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün kateqoriyalar</option>
-                                            {(cargoTypesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                        </select>
+                                        <Dropdown value={cargoType} options={cargoTypeOptions} onChange={(value) => { setCargoType(value); setPageNumber(1); }} ariaLabel="Yük kateqoriyası" searchable />
                                     </label>
                                     <label>
                                         <span>Nəqliyyat növü</span>
-                                        <select value={vehicleType} onChange={(e) => { setVehicleType(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün növlər</option>
-                                            {(vehicleTypesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                                        </select>
+                                        <Dropdown value={vehicleType} options={vehicleTypeOptions} onChange={(value) => { setVehicleType(value); setPageNumber(1); }} ariaLabel="Nəqliyyat növü" searchable />
                                     </label>
                                     <label>
                                         <span>Minimum çəki (ton)</span>
@@ -386,18 +446,11 @@ export default function MarketplacePage() {
                                     </label>
                                     <label>
                                         <span>Valyuta</span>
-                                        <select value={currency} onChange={(e) => { setCurrency(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün valyutalar</option>
-                                            {[...new Set((countriesQuery.data ?? []).map((item) => item.default_currency).filter((value): value is string => Boolean(value)))].sort().map((value) => <option key={value} value={value}>{value}</option>)}
-                                        </select>
+                                        <Dropdown value={currency} options={currencyOptions} onChange={(value) => { setCurrency(value); setPageNumber(1); }} ariaLabel="Valyuta" searchable />
                                     </label>
                                     <label>
                                         <span>Elan statusu</span>
-                                        <select value={status} onChange={(e) => { setStatus(e.target.value); setPageNumber(1); }}>
-                                            <option value="">Bütün aktiv elanlar</option>
-                                            <option value="published">Dərc edilib</option>
-                                            <option value="has_applications">Müraciətlər var</option>
-                                        </select>
+                                        <Dropdown value={status} options={statusOptions} onChange={(value) => { setStatus(value); setPageNumber(1); }} ariaLabel="Elan statusu" />
                                     </label>
                                     <button className="text-action" onClick={() => {
                                         setQuery(""); setFromCountry(""); setFromCity(""); setToCountry(""); setToCity("");
