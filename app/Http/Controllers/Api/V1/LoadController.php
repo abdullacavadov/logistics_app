@@ -115,7 +115,28 @@ class LoadController extends Controller
         }
 
         $direction = $r->input('sort') === 'oldest' ? 'asc' : 'desc';
-        return response()->json($q->orderBy('l.created_at', $direction)->orderBy('l.id', $direction)->paginate($r->integer('per_page', 15)));
+        $loads = $q->orderBy('l.created_at', $direction)
+            ->orderBy('l.id', $direction)
+            ->paginate($r->integer('per_page', 15));
+
+        return response()->json([
+            'data' => $loads->items(),
+            'links' => [
+                'first' => $loads->url(1),
+                'last' => $loads->url($loads->lastPage()),
+                'prev' => $loads->previousPageUrl(),
+                'next' => $loads->nextPageUrl(),
+            ],
+            'meta' => [
+                'current_page' => $loads->currentPage(),
+                'from' => $loads->firstItem(),
+                'last_page' => $loads->lastPage(),
+                'path' => $loads->path(),
+                'per_page' => $loads->perPage(),
+                'to' => $loads->lastItem(),
+                'total' => $loads->total(),
+            ],
+        ]);
     }
 
     /** Public marketplace counters; definitions match the public loads/offers endpoints. */
