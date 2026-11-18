@@ -31,6 +31,7 @@ class LoadController extends Controller
             'load_vehicle_type_id' => 'nullable|integer|exists:load_vehicle_types,id',
             'currency' => 'nullable|string|size:3',
             'applications' => 'nullable|in:web,whatsapp,telegram',
+            'status' => 'nullable|in:published,has_applications',
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date',
             'pickup_date' => 'nullable|date',
@@ -89,7 +90,7 @@ class LoadController extends Controller
         foreach (([
             'from_country_id', 'from_location_id', 'to_country_id',
             'to_location_id', 'cargo_type_id', 'load_vehicle_type_id', 'currency',
-            'applications',
+            'applications', 'status',
         ]) as $field) {
             if ($r->filled($field)) $q->where("l.$field", $r->input($field));
         }
@@ -114,7 +115,7 @@ class LoadController extends Controller
         }
 
         $direction = $r->input('sort') === 'oldest' ? 'asc' : 'desc';
-        return response()->json($q->orderBy('l.id', $direction)->paginate($r->integer('per_page', 15)));
+        return response()->json($q->orderBy('l.created_at', $direction)->orderBy('l.id', $direction)->paginate($r->integer('per_page', 15)));
     }
 
     /** Public marketplace counters; definitions match the public loads/offers endpoints. */
