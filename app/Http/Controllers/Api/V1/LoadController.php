@@ -31,6 +31,33 @@ class LoadController extends Controller
         return response()->json($q->orderByDesc('l.id')->paginate($r->integer('per_page', 15)));
     }
 
+    /** Public marketplace counters; definitions match the public loads/offers endpoints. */
+    public function stats()
+    {
+        $activeLoads = DB::table('loads')
+            ->whereIn('status', self::PUBLIC_STATUSES)
+            ->where('pickup_from', '>=', now()->toDateString());
+
+        $activeOffers = DB::table('vehicle_offers')
+            ->where('status', 'active')
+            ->where('available_to', '>=', now()->toDateString());
+
+        return response()->json([
+            'loads' => [
+                'active' => (clone $activeLoads)->count(),
+                'last_hour' => (clone $activeLoads)
+                    ->where('created_at', '>=', now()->subHour())
+                    ->count(),
+            ],
+            'vehicles' => [
+                'active' => (clone $activeOffers)->count(),
+                'last_hour' => (clone $activeOffers)
+                    ->where('created_at', '>=', now()->subHour())
+                    ->count(),
+            ],
+        ]);
+    }
+
     public function show(Request $r, int $id)
     {
         $load = DB::table('loads')->where('id', $id)->first();
