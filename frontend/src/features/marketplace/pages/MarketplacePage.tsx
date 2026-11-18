@@ -82,6 +82,7 @@ export default function MarketplacePage() {
     const [maxPrice, setMaxPrice] = useState("");
     const [currency, setCurrency] = useState("");
     const [pageNumber, setPageNumber] = useState(1);
+    const [sort, setSort] = useState("Əvvəlcə yenilər");
 
     type CatalogOption = { id: number; name: string; iso2?: string; default_currency?: string };
     const countriesQuery = useQuery({
@@ -182,7 +183,6 @@ export default function MarketplacePage() {
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [kind, setKind] = useState<"load" | "vehicle">("load");
     const [filterOpen, setFilterOpen] = useState(false);
-    const [sort, setSort] = useState("Əvvəlcə yenilər");
     const [country, setCountry] = useState("🇦🇿 Azərbaycan");
     const [saved, setSaved] = useState<string[]>([]);
     const [showNotices, setShowNotices] = useState(false);
@@ -276,9 +276,7 @@ export default function MarketplacePage() {
                                     <input
                                         placeholder="Açar söz, marşrut və ya yük adı"
                                         value={query}
-                                        onChange={(e) =>
-                                            setQuery(e.target.value)
-                                        }
+                                        onChange={(e) => { setQuery(e.target.value); setPageNumber(1); }}
                                     />
                                 </label>
                                 <label className="search-field">
@@ -318,9 +316,7 @@ export default function MarketplacePage() {
                                     <ListFilter size={16} />
                                     <select
                                         value={sort}
-                                        onChange={(e) =>
-                                            setSort(e.target.value)
-                                        }
+                                        onChange={(e) => { setSort(e.target.value); setPageNumber(1); }}
                                     >
                                         <option>Əvvəlcə yenilər</option>
                                         <option>Əvvəlcə köhnələr</option>
