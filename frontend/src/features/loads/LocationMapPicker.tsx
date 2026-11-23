@@ -38,9 +38,10 @@ type Props = {
     selected?: Coordinates | null;
     onSelect: (coordinates: Coordinates) => void;
     onClear: () => void;
+    hint?: string;
 };
 
-export default function LocationMapPicker({ label, focus, selected, onSelect, onClear }: Props) {
+export default function LocationMapPicker({ label, focus, selected, onSelect, onClear, hint }: Props) {
     const mapElement = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const markerRef = useRef<LeafletMarker | null>(null);
@@ -73,8 +74,8 @@ export default function LocationMapPicker({ label, focus, selected, onSelect, on
     useEffect(() => {
         const map = mapRef.current;
         if (!map) return;
-        if (focus && Number.isFinite(focus.lat) && Number.isFinite(focus.lng)) {
-            map.setView([focus.lat, focus.lng], selected ? 13 : 11);
+        if (!selected && focus && Number.isFinite(focus.lat) && Number.isFinite(focus.lng)) {
+            map.setView([focus.lat, focus.lng], 11);
         }
     }, [focus?.lat, focus?.lng]);
 
@@ -103,6 +104,7 @@ export default function LocationMapPicker({ label, focus, selected, onSelect, on
             </div>
             <div className="location-map-canvas" ref={mapElement} role="application" aria-label={label + " xəritəsi"} />
             {mapError ? <p className="location-map-error">Xəritə yüklənmədi. İnternet bağlantınızı yoxlayın.</p> : null}
+            {hint ? <p className="location-map-error">{hint}</p> : null}
             <div className="location-map-footer">
                 {selected ? <span>Seçilən nöqtə: {selected.lat.toFixed(6)}, {selected.lng.toFixed(6)}</span> : <span>Koordinat seçmək üçün xəritəyə toxunun (istəyə bağlı)</span>}
             </div>
