@@ -60,6 +60,41 @@ class CatalogController extends Controller
             ->paginate($data['per_page'] ?? 50, ['l.id', 'l.country_id', DB::raw('COALESCE(tr.name, tr_az.name, l.name) as name'), 'l.lat', 'l.lng']));
     }
 
+    public function nearestLocation(Request $request)
+    {
+        $data = $request->validate([
+            'country_id' => 'required|integer|exists:countries,id',
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
+        ]);
+
+        $locale = $this->locale($request);
+        $lat = (float) $data['lat'];
+        $lng = (float) $data['lng'];
+        $distanceSql = '6371 * 2 * asin(sqrt(pow(sin(radians(l.lat - ?) / 2), 2) + cos(radians(?)) * cos(radians(l.lat)) * pow(sin(radians(l.lng - ?) / 2), 2)))';
+        $location = DB::table('locations as l')
+            ->leftJoin('location_translations as tr', function ($join) use ($locale) {
+                $join->on('tr.location_id', '=', 'l.id')->where('tr.locale', '=', $locale);
+            })
+            ->leftJoin('location_translations as tr_az', function ($join) {
+                $join->on('tr_az.location_id', '=', 'l.id')->where('tr_az.locale', '=', 'az');
+            })
+            ->where('l.country_id', $data['country_id'])
+            ->where('l.is_active', 1)
+            ->whereNotNull('l.lat')
+            ->whereNotNull('l.lng')
+            ->select('l.id', 'l.country_id', DB::raw('COALESCE(tr.name, tr_az.name, l.name) as name'), 'l.lat', 'l.lng')
+            ->selectRaw($distanceSql . ' as distance_km', [$lat, $lat, $lng])
+            ->orderBy('distance_km')
+            ->first();
+
+        if (!$location) {
+            return response()->json(['message' => 'Bu ölkə üzrə koordinatlı şəhər tapılmadı.'], 404);
+        }
+
+        return response()->json(['data' => $location]);
+    }
+
     public function cargoTypes()
     {
         return response()->json([
