@@ -188,6 +188,7 @@ export default function LoadFormPage() {
         queryFn: catalogApi.loadVehicleTypes,
     });
     const [form, setForm] = useState<State>(initial);
+    const [mapSyncHint, setMapSyncHint] = useState<{ from: string; to: string }>({ from: "", to: "" });
     const [target, setTarget] = useState<Target | null>(null);
     const [step, setStep] = useState<"country" | "city">("country");
     const [country, setCountry] = useState<Country | null>(null);
@@ -326,6 +327,7 @@ export default function LoadFormPage() {
     }
     function pickCity(city: Location | null) {
         if (!target || !country) return;
+        setMapSyncHint((h) => ({ ...h, [target]: "" }));
         setForm((v) =>
             target === "from"
                 ? {
@@ -333,15 +335,39 @@ export default function LoadFormPage() {
                       from_country_id: String(country.id),
                       from_location_id: city ? String(city.id) : "",
                       from_location_name: city?.name ?? "",
+                      from_lat: "",
+                      from_lng: "",
                   }
                 : {
                       ...v,
                       to_country_id: String(country.id),
                       to_location_id: city ? String(city.id) : "",
                       to_location_name: city?.name ?? "",
+                      to_lat: "",
+                      to_lng: "",
                   },
         );
         setTarget(null);
+    }
+    async function selectMapPoint(t: Target, point: { lat: number; lng: number }) {
+        const countryId = Number(t === "from" ? form.from_country_id : form.to_country_id);
+        if (!countryId) {
+            setMapSyncHint((h) => ({ ...h, [t]: "Əvvəlcə ölkə və şəhər seçin." }));
+            return;
+        }
+        setMapSyncHint((h) => ({ ...h, [t]: "" }));
+        try {
+            const nearest = await catalogApi.nearestLocation(countryId, point.lat, point.lng);
+            if (nearest.distance_km > 75) {
+                setMapSyncHint((h) => ({ ...h, [t]: "Seçilən nöqtə ən yaxın şəhərdən 75 km-dən uzaqdır. Daha yaxın nöqtə seçin." }));
+                return;
+            }
+            setForm((v) => t === "from"
+                ? { ...v, from_location_id: String(nearest.id), from_location_name: nearest.name, from_lat: String(point.lat), from_lng: String(point.lng) }
+                : { ...v, to_location_id: String(nearest.id), to_location_name: nearest.name, to_lat: String(point.lat), to_lng: String(point.lng) });
+        } catch {
+            setMapSyncHint((h) => ({ ...h, [t]: "Şəhəri koordinata görə tapmaq mümkün olmadı. Nöqtə seçilmədi." }));
+        }
     }
     const countriesFiltered = useMemo(
         () =>
@@ -553,8 +579,9 @@ export default function LoadFormPage() {
                                                 label="Yükləmə nöqtəsini xəritədə seçin"
                                                 focus={cityCoordinates(fromMapCityQ.data, form.from_location_name)}
                                                 selected={form.from_lat !== "" && form.from_lng !== "" ? { lat: Number(form.from_lat), lng: Number(form.from_lng) } : null}
-                                                onSelect={(point) => setForm((v) => ({ ...v, from_lat: String(point.lat), from_lng: String(point.lng) }))}
-                                                onClear={() => setForm((v) => ({ ...v, from_lat: "", from_lng: "" }))}
+                                                onSelect={(point) => void selectMapPoint("from", point)}
+                                                onClear={() => { setForm((v) => ({ ...v, from_lat: "", from_lng: "" })); setMapSyncHint((h) => ({ ...h, from: "" })); }}
+                                                hint={mapSyncHint.from}
                                             />
                                         </div>
                                         <div className="data-field">
@@ -578,8 +605,9 @@ export default function LoadFormPage() {
                                                 label="Çatdırılma nöqtəsini xəritədə seçin"
                                                 focus={cityCoordinates(toMapCityQ.data, form.to_location_name)}
                                                 selected={form.to_lat !== "" && form.to_lng !== "" ? { lat: Number(form.to_lat), lng: Number(form.to_lng) } : null}
-                                                onSelect={(point) => setForm((v) => ({ ...v, to_lat: String(point.lat), to_lng: String(point.lng) }))}
-                                                onClear={() => setForm((v) => ({ ...v, to_lat: "", to_lng: "" }))}
+                                                onSelect={(point) => void selectMapPoint("to", point)}
+                                                onClear={() => { setForm((v) => ({ ...v, to_lat: "", to_lng: "" })); setMapSyncHint((h) => ({ ...h, to: "" })); }}
+                                                hint={mapSyncHint.to}
                                             />
                                         </div>
                                     </div>
