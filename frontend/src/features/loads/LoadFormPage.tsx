@@ -265,6 +265,33 @@ export default function LoadFormPage() {
     const cargo = (cargoQ.data ?? []).find(
         (x) => String(x.id) === form.cargo_type_id,
     );
+    const selectedLoadVehicle = bodies.find((item) => String(item.id) === form.load_vehicle_type_id) ?? null;
+    const vehicleValidationError = useMemo(() => {
+        if (!selectedLoadVehicle) return null;
+        const weightTon = Number(form.weight_ton);
+        if (!form.weight_ton || !Number.isFinite(weightTon) || weightTon <= 0) return "Çəki düzgün daxil edilməlidir.";
+        const weightLimit = selectedLoadVehicle.category === "low_loader"
+            ? 60
+            : selectedLoadVehicle.category === "car_carrier"
+              ? 20
+              : 24;
+        if (weightTon > weightLimit) return `Bu maşın üçün maksimum yük ${weightLimit} ton olmalıdır.`;
+        const volume = form.volume_m3.trim() === "" ? null : Number(form.volume_m3);
+        if (volume !== null && (!Number.isFinite(volume) || volume <= 0)) return "Həcm müsbət rəqəm olmalıdır.";
+        if (volume !== null && selectedLoadVehicle.capacity_m3 !== null && volume > selectedLoadVehicle.capacity_m3) {
+            return `Bu maşının tutumu ${selectedLoadVehicle.capacity_m3} m³-dür. Həcm daha böyük ola bilməz.`;
+        }
+        const cargoName = (cargo?.name ?? "").toLocaleLowerCase();
+        if (!cargoName) return null;
+        const isContainerCargo = cargoName.includes("konteyner") || cargoName.includes("container");
+        if (isContainerCargo && selectedLoadVehicle.category !== "container_carrier") {
+            return "Konteyner yükü üçün konteyner daşıyıcı seçilməlidir.";
+        }
+        if (!isContainerCargo && selectedLoadVehicle.category === "container_carrier") {
+            return "Konteyner daşıyıcı yalnız konteyner yükü üçün seçilə bilər.";
+        }
+        return null;
+    }, [selectedLoadVehicle, form.weight_ton, form.volume_m3, cargo]);
     useEffect(() => {
         const l = loadQuery.data?.data;
         if (!l) return;
@@ -387,6 +414,7 @@ export default function LoadFormPage() {
         countries.find((x) => String(x.id) === id)?.name ?? "Ölkə seçin";
     function submit(e: FormEvent) {
         e.preventDefault();
+        if (vehicleValidationError) return;
         const p: CreateLoadPayload = {
             title: cargo?.name ?? "Yük",
             cargo_type_id: Number(form.cargo_type_id),
@@ -691,6 +719,7 @@ export default function LoadFormPage() {
                                         </span>
                                         <Search size={16} />
                                     </button>
+                                    {vehicleValidationError && <p className="load-vehicle-validation" role="alert">{vehicleValidationError}</p>}
                                 </section>
                                 <section className="data-form-section">
                                     <h3>Yükləmə tarixi</h3>
@@ -858,7 +887,8 @@ export default function LoadFormPage() {
                                             !form.cargo_type_id ||
                                             !form.from_country_id ||
                                             !form.to_country_id ||
-                                            !form.load_vehicle_type_id
+                                            !form.load_vehicle_type_id ||
+                                            Boolean(vehicleValidationError)
                                         }
                                     >
                                         {mutation.isPending
