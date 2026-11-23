@@ -550,7 +550,7 @@ export default function LoadFormPage() {
                                                 <Search size={16} />
                                             </button>
                                             <LocationMapPicker
-                                                label="Yükləmə nöqtəsi"
+                                                label="Yükləmə nöqtəsini xəritədə seçin"
                                                 focus={cityCoordinates(fromMapCityQ.data, form.from_location_name)}
                                                 selected={form.from_lat !== "" && form.from_lng !== "" ? { lat: Number(form.from_lat), lng: Number(form.from_lng) } : null}
                                                 onSelect={(point) => setForm((v) => ({ ...v, from_lat: String(point.lat), from_lng: String(point.lng) }))}
@@ -575,7 +575,7 @@ export default function LoadFormPage() {
                                                 <Search size={16} />
                                             </button>
                                             <LocationMapPicker
-                                                label="Çatdırılma nöqtəsi"
+                                                label="Çatdırılma nöqtəsini xəritədə seçin"
                                                 focus={cityCoordinates(toMapCityQ.data, form.to_location_name)}
                                                 selected={form.to_lat !== "" && form.to_lng !== "" ? { lat: Number(form.to_lat), lng: Number(form.to_lng) } : null}
                                                 onSelect={(point) => setForm((v) => ({ ...v, to_lat: String(point.lat), to_lng: String(point.lng) }))}
@@ -589,6 +589,7 @@ export default function LoadFormPage() {
                                                 display: "flex",
                                                 justifyContent: "space-between",
                                                 flexWrap: "wrap",
+                                                marginTop: "0.7rem",
                                             }}
                                         >
                                             <label className="data-field">

@@ -104,7 +104,7 @@ export default function LocationMapPicker({ label, focus, selected, onSelect, on
             <div className="location-map-canvas" ref={mapElement} role="application" aria-label={label + " xəritəsi"} />
             {mapError ? <p className="location-map-error">Xəritə yüklənmədi. İnternet bağlantınızı yoxlayın.</p> : null}
             <div className="location-map-footer">
-                {selected ? <span>Seçilən nöqtə: {selected.lat.toFixed(6)}, {selected.lng.toFixed(6)}</span> : <span>Koordinat seçmək üçün xəritəyə toxunun (optional)</span>}
+                {selected ? <span>Seçilən nöqtə: {selected.lat.toFixed(6)}, {selected.lng.toFixed(6)}</span> : <span>Koordinat seçmək üçün xəritəyə toxunun (istəyə bağlı)</span>}
             </div>
         </div>
     );
