@@ -1,0 +1,10 @@
+.location-map-picker{width:100%;margin-top:.55rem;grid-column:1/-1;border:1px solid var(--border-color,#e5e7eb);border-radius:12px;overflow:hidden;background:#fff}
+.location-map-picker-heading{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.65rem .8rem;font-size:.82rem;font-weight:600;color:#334155}
+.location-map-picker-heading span{display:flex;align-items:center;gap:.4rem}
+.location-map-clear{display:inline-flex;align-items:center;gap:.35rem;border:0;background:transparent;color:#64748b;font-size:.75rem;cursor:pointer;padding:.3rem .45rem;border-radius:6px}
+.location-map-clear:hover{background:#f1f5f9;color:#334155}
+.location-map-canvas{width:100%;height:270px;background:#eef2f7;z-index:0}
+.location-map-canvas .leaflet-control-attribution{font-size:9px}
+.location-map-footer{padding:.55rem .8rem;color:#64748b;font-size:.73rem;line-height:1.45}
+.location-map-error{padding:.6rem .8rem;margin:0;color:#b91c1c;font-size:.78rem}
+.location-map-picker .leaflet-container{font:inherit}
