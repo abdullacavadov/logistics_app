@@ -228,6 +228,7 @@ class LoadController extends Controller
             return $this->err('not_shipper', 'Yük elanı yaratmaq üçün yük sahibi hüququ lazımdır', 403); // ödəniş tələb olunmur (§2.2)
         $d = $r->validate($this->rules());
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
+        if ($compatibilityError = $this->loadVehicleCompatibilityError($d)) return $this->err('load_vehicle_mismatch', $compatibilityError, 422);
         $d['status'] = 'pending_moderation';
         // Website-created ads default to the website channel; integrations may provide another supported source.
         $d['applications'] = $d['applications'] ?? 'web';
@@ -244,6 +245,7 @@ class LoadController extends Controller
         $d = $r->validate($this->rules(true));
         if ($load->status === 'rejected') $d['status'] = 'pending_moderation';
         if (!$this->validLocationSelection($d, $load)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
+        if ($compatibilityError = $this->loadVehicleCompatibilityError($d, (array) $load)) return $this->err('load_vehicle_mismatch', $compatibilityError, 422);
         // Müraciət/razılaşmadan sonra kritik sahələr dəyişdirilə bilməz (TS §5.4, açıq sual №6)
         $changedCritical = [];
         foreach (array_intersect(array_keys($d), self::CRITICAL) as $field) {
@@ -383,6 +385,43 @@ class LoadController extends Controller
         }
 
         return true;
+    }
+
+    /**
+     * Cargo/body validation uses current catalog data. Payload limits are provisional
+     * defaults until the catalog stores per-body maximum tonnage.
+     */
+    private function loadVehicleCompatibilityError(array $data, ?array $existing = null): ?string
+    {
+        $values = array_merge($existing ?? [], $data);
+        $vehicleId = $values['load_vehicle_type_id'] ?? null;
+        $cargoId = $values['cargo_type_id'] ?? null;
+        if (!$vehicleId || !$cargoId) return null;
+
+        $body = DB::table('load_vehicle_types')->where('id', $vehicleId)->where('is_active', 1)->first();
+        if (!$body) return 'Seçilmiş yük yeri növü mövcud deyil.';
+
+        $cargoName = strtolower((string) DB::table('cargo_types')->where('id', $cargoId)->value('name'));
+        $isContainerCargo = str_contains($cargoName, 'konteyner') || str_contains($cargoName, 'container');
+        if ($isContainerCargo && $body->category !== 'container_carrier') {
+            return 'Konteyner yükü üçün konteyner daşıyıcı seçilməlidir.';
+        }
+        if (!$isContainerCargo && $body->category === 'container_carrier') {
+            return 'Konteyner daşıyıcı yalnız konteyner yükü üçün seçilə bilər.';
+        }
+
+        $weightTon = ((float) ($values['weight_kg'] ?? 0)) / 1000;
+        $maxWeightTon = $body->category === 'low_loader' ? 60 : ($body->category === 'car_carrier' ? 20 : 24);
+        if ($weightTon > $maxWeightTon) {
+            return 'Bu maşın üçün maksimum yük ' . $maxWeightTon . ' ton olmalıdır.';
+        }
+
+        $volume = $values['volume_m3'] ?? null;
+        if ($volume !== null && $volume !== '' && $body->capacity_m3 !== null && (float) $volume > (float) $body->capacity_m3) {
+            return 'Bu maşının tutumu ' . $body->capacity_m3 . ' m³-dür. Həcm daha böyük ola bilməz.';
+        }
+
+        return null;
     }
 
     private function rules(bool $partial = false): array
