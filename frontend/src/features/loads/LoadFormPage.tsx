@@ -15,6 +15,7 @@ import { loadsApi } from "./api/loadsApi";
 import { useLoad, myLoadsQueryKey, loadsQueryKey } from "./hooks/useLoads";
 import type { CreateLoadPayload } from "./types";
 import logoLight from "../../assets/img/logo-light.png";
+import LocationMapPicker from "./LocationMapPicker";
 
 type Target = "from" | "to";
 
@@ -44,9 +45,13 @@ type State = {
     from_country_id: string;
     from_location_id: string;
     from_location_name: string;
+    from_lat: string;
+    from_lng: string;
     to_country_id: string;
     to_location_id: string;
     to_location_name: string;
+    to_lat: string;
+    to_lng: string;
     weight_ton: string;
     volume_m3: string;
     count: string;
@@ -122,9 +127,13 @@ const initial: State = {
     from_country_id: "",
     from_location_id: "",
     from_location_name: "",
+    from_lat: "",
+    from_lng: "",
     to_country_id: "",
     to_location_id: "",
     to_location_name: "",
+    to_lat: "",
+    to_lng: "",
     weight_ton: "",
     volume_m3: "",
     count: "",
@@ -188,6 +197,16 @@ export default function LoadFormPage() {
         queryFn: () => catalogApi.locations(country!.id, search),
         enabled: !!country && step === "city",
     });
+    const fromMapCityQ = useQuery({
+        queryKey: ["catalog", "map-city", form.from_country_id, form.from_location_name],
+        queryFn: () => catalogApi.locations(Number(form.from_country_id), form.from_location_name),
+        enabled: Boolean(form.from_country_id && form.from_location_name),
+    });
+    const toMapCityQ = useQuery({
+        queryKey: ["catalog", "map-city", form.to_country_id, form.to_location_name],
+        queryFn: () => catalogApi.locations(Number(form.to_country_id), form.to_location_name),
+        enabled: Boolean(form.to_country_id && form.to_location_name),
+    });
     const countries = countriesQ.data ?? [];
     const bodies = bodiesQ.data ?? [];
     const bodyGroups = useMemo(() => {
@@ -241,9 +260,13 @@ export default function LoadFormPage() {
             from_country_id: String(l.from_country_id),
             from_location_id: String(l.from_location_id ?? ""),
             from_location_name: l.from_location_name ?? "",
+            from_lat: l.from_lat == null ? "" : String(l.from_lat),
+            from_lng: l.from_lng == null ? "" : String(l.from_lng),
             to_country_id: String(l.to_country_id),
             to_location_id: String(l.to_location_id ?? ""),
             to_location_name: l.to_location_name ?? "",
+            to_lat: l.to_lat == null ? "" : String(l.to_lat),
+            to_lng: l.to_lng == null ? "" : String(l.to_lng),
             weight_ton: String(Number(l.weight_kg ?? 0) / 1000),
             volume_m3: String(l.volume_m3 ?? ""),
             count: String(l.quantity ?? ""),
@@ -331,8 +354,12 @@ export default function LoadFormPage() {
             cargo_type_id: Number(form.cargo_type_id),
             from_country_id: Number(form.from_country_id),
             from_location_id: Number(form.from_location_id) || null,
+            from_lat: form.from_lat !== "" ? Number(form.from_lat) : null,
+            from_lng: form.from_lng !== "" ? Number(form.from_lng) : null,
             to_country_id: Number(form.to_country_id),
             to_location_id: Number(form.to_location_id) || null,
+            to_lat: form.to_lat !== "" ? Number(form.to_lat) : null,
+            to_lng: form.to_lng !== "" ? Number(form.to_lng) : null,
             pickup_from:
                 form.date_mode === "ready"
                     ? editing && loadQuery.data?.data.is_ready_for_loading
@@ -510,6 +537,15 @@ export default function LoadFormPage() {
                                                     : ""}
                                                 <Search size={16} />
                                             </button>
+                                            <LocationMapPicker
+                                                label="Yükləmə nöqtəsi"
+                                                focus={(fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())?.lat != null
+                                                    ? { lat: Number((fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())!.lat), lng: Number((fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())!.lng) }
+                                                    : null}
+                                                selected={form.from_lat !== "" && form.from_lng !== "" ? { lat: Number(form.from_lat), lng: Number(form.from_lng) } : null}
+                                                onSelect={(point) => setForm((v) => ({ ...v, from_lat: String(point.lat), from_lng: String(point.lng) }))}
+                                                onClear={() => setForm((v) => ({ ...v, from_lat: "", from_lng: "" }))}
+                                            />
                                         </div>
                                         <div className="data-field">
                                             <span>Haraya *</span>
@@ -528,6 +564,15 @@ export default function LoadFormPage() {
                                                     : ""}
                                                 <Search size={16} />
                                             </button>
+                                            <LocationMapPicker
+                                                label="Çatdırılma nöqtəsi"
+                                                focus={(toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())?.lat != null
+                                                    ? { lat: Number((toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())!.lat), lng: Number((toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())!.lng) }
+                                                    : null}
+                                                selected={form.to_lat !== "" && form.to_lng !== "" ? { lat: Number(form.to_lat), lng: Number(form.to_lng) } : null}
+                                                onSelect={(point) => setForm((v) => ({ ...v, to_lat: String(point.lat), to_lng: String(point.lng) }))}
+                                                onClear={() => setForm((v) => ({ ...v, to_lat: "", to_lng: "" }))}
+                                            />
                                         </div>
                                     </div>
 
