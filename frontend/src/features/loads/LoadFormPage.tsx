@@ -112,6 +112,18 @@ const LOAD_BODY_CATEGORY_LABELS: Record<
     other: { az: "Digər", ru: "Другое", en: "Other", tr: "Diğer" },
 };
 
+function cityCoordinates(
+    locations: Location[] | undefined,
+    cityName: string,
+): { lat: number; lng: number } | null {
+    const city = locations?.find(
+        (item) => item.name.toLowerCase() === cityName.toLowerCase(),
+    );
+    return city?.lat != null && city.lng != null
+        ? { lat: Number(city.lat), lng: Number(city.lng) }
+        : null;
+}
+
 function loadBodyCategoryLabel(
     category: string,
     locale: CatalogLocale,
@@ -539,9 +551,7 @@ export default function LoadFormPage() {
                                             </button>
                                             <LocationMapPicker
                                                 label="Yükləmə nöqtəsi"
-                                                focus={(fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())?.lat != null
-                                                    ? { lat: Number((fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())!.lat), lng: Number((fromMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.from_location_name.toLowerCase())!.lng) }
-                                                    : null}
+                                                focus={cityCoordinates(fromMapCityQ.data, form.from_location_name)}
                                                 selected={form.from_lat !== "" && form.from_lng !== "" ? { lat: Number(form.from_lat), lng: Number(form.from_lng) } : null}
                                                 onSelect={(point) => setForm((v) => ({ ...v, from_lat: String(point.lat), from_lng: String(point.lng) }))}
                                                 onClear={() => setForm((v) => ({ ...v, from_lat: "", from_lng: "" }))}
@@ -566,9 +576,7 @@ export default function LoadFormPage() {
                                             </button>
                                             <LocationMapPicker
                                                 label="Çatdırılma nöqtəsi"
-                                                focus={(toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())?.lat != null
-                                                    ? { lat: Number((toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())!.lat), lng: Number((toMapCityQ.data ?? []).find((city) => city.name.toLowerCase() === form.to_location_name.toLowerCase())!.lng) }
-                                                    : null}
+                                                focus={cityCoordinates(toMapCityQ.data, form.to_location_name)}
                                                 selected={form.to_lat !== "" && form.to_lng !== "" ? { lat: Number(form.to_lat), lng: Number(form.to_lng) } : null}
                                                 onSelect={(point) => setForm((v) => ({ ...v, to_lat: String(point.lat), to_lng: String(point.lng) }))}
                                                 onClear={() => setForm((v) => ({ ...v, to_lat: "", to_lng: "" }))}
