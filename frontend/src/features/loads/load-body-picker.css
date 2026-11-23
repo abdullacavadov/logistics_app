@@ -87,3 +87,11 @@
         height: 58px;
     }
 }
+
+.load-vehicle-validation {
+    margin: 6px 0 0;
+    color: #dc2626;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+}
