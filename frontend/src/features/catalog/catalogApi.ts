@@ -54,6 +54,12 @@ export const catalogApi = {
     })
     return data.data
   },
+  async nearestLocation(countryId: number, lat: number, lng: number): Promise<Location & { distance_km: number }> {
+    const { data } = await api.get<{ data: Location & { distance_km: number } }>("/catalog/nearest-location", {
+      params: { country_id: countryId, lat, lng, locale: getCatalogLocale() },
+    })
+    return data.data
+  },
   async cargoTypes(): Promise<NamedCatalogItem[]> {
     const { data } = await api.get<{ data: NamedCatalogItem[] }>('/catalog/cargo-types')
     return data.data
