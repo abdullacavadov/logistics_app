@@ -82,6 +82,7 @@ export default function LocationMapPicker({ label, focus, selected, onSelect, on
         const map = mapRef.current;
         if (!map) return;
         if (selected && Number.isFinite(selected.lat) && Number.isFinite(selected.lng)) {
+            map.setView([selected.lat, selected.lng], 13);
             if (markerRef.current) markerRef.current.setLatLng([selected.lat, selected.lng]);
             else markerRef.current = window.L?.marker([selected.lat, selected.lng]).addTo(map) ?? null;
         } else if (markerRef.current) {
