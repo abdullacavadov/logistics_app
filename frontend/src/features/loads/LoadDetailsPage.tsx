@@ -22,13 +22,13 @@ function dateLabel(value?: string | null): string {
   const match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
   if (match) return `${match[3].padStart(2, '0')}.${match[2].padStart(2, '0')}.${match[1]}`
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('az-AZ').format(date)
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('ru-RU').format(date)
 }
 
 function dateTimeLabel(value?: string | null): string {
   if (!value) return ''
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? dateLabel(value) : new Intl.DateTimeFormat('az-AZ', {
+  return Number.isNaN(date.getTime()) ? dateLabel(value) : new Intl.DateTimeFormat('ru-RU', {
     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
   }).format(date)
 }
