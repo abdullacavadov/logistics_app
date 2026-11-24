@@ -12,6 +12,9 @@ import type { Load } from './types'
 import LoadOriginMap from './LoadOriginMap'
 import { MarketplaceTopbar } from '../marketplace/components/MarketplaceTopbar'
 import { useAuth, useLogout } from '../auth/hooks/useAuth'
+import { MarketplaceSidebar } from '../marketplace/components/MarketplaceSidebar'
+import { MarketplaceMobileNav } from '../marketplace/components/MarketplaceMobileNav'
+import { pagePaths, primaryNav, secondaryNav } from '../marketplace/config/navigation'
 
 function hasValue(value: unknown): boolean {
   return value !== null && value !== undefined && value !== ''
@@ -207,24 +210,39 @@ export default function LoadDetailsPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [showNotices, setShowNotices] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const page = 'Yük detalları'
+  const changePage = (label: string) => { navigate(pagePaths[label] ?? '/'); setShowMobileMenu(false) }
 
   return (
     <div className="app-shell load-details-shell" data-theme={theme}>
+      <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
       <div className="workspace">
         <MarketplaceTopbar
           page="Yük detalları"
           theme={theme}
           country="🇦🇿 Azərbaycan"
           onCountryChange={() => undefined}
-          onNavigate={(label) => navigate(label === 'Bütün elanlar' ? '/' : '/')}
+          onNavigate={changePage}
           onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
           showNotices={showNotices}
           onToggleNotices={() => setShowNotices(value => !value)}
           onLogin={() => navigate('/login')}
           userName={auth.data?.data.user.name ?? null}
           onLogout={() => logout.mutate()}
-          onToggleMobileMenu={() => undefined}
+          onToggleMobileMenu={() => setShowMobileMenu(value => !value)}
         />
+        {showMobileMenu && (
+          <div className="mobile-menu-panel">
+            {primaryNav.map(({ label, icon: Icon }) => (
+              <button key={label} onClick={() => changePage(label)}><Icon size={18} />{label}</button>
+            ))}
+            <div className="nav-divider" />
+            {secondaryNav.map(({ label, icon: Icon }) => (
+              <button key={label} onClick={() => changePage(label)}><Icon size={18} />{label}</button>
+            ))}
+          </div>
+        )}
       <main className="load-details-page">
         <header className="load-details-top">
           <button type="button" className="load-details-back" onClick={() => navigate(-1)}>
@@ -245,6 +263,7 @@ export default function LoadDetailsPage() {
         )}
       </main>
       </div>
+      <MarketplaceMobileNav page={page} onNavigate={changePage} onToggleMore={() => setShowMobileMenu(value => !value)} />
       <LoadOriginMap open={mapOpen} onClose={() => setMapOpen(false)} focusLoadId={loadId ?? undefined} />
     </div>
   )
