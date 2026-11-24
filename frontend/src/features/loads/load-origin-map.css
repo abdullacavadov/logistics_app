@@ -1,0 +1,44 @@
+.load-origin-map-overlay{position:fixed;inset:78px 0 0;z-index:1200;background:#f1f4f8;display:flex;flex-direction:column}
+.load-origin-map-header{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:var(--surface,#fff);border-bottom:1px solid var(--line,#e5e7eb);z-index:2}
+.load-origin-map-header>div{display:flex;align-items:center;gap:10px;color:var(--text,#172033)}
+.load-origin-map-header>div svg{color:var(--primary,#2868ed)}
+.load-origin-map-header strong{font-size:15px}
+.load-origin-map-header button,.load-origin-map-popup-close{width:36px;height:36px;border:0;border-radius:50%;display:grid;place-items:center;background:#f1f4f8;color:#172033;cursor:pointer}
+.load-origin-map-canvas{position:relative;flex:1;min-height:300px;z-index:0}
+.load-origin-map-canvas .leaflet-container{width:100%;height:100%;font:inherit}
+.load-map-marker-wrap{background:transparent;border:0}
+.load-map-marker{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:3px solid #fff;border-radius:50%;background:#2868ed;color:#fff;font-size:16px;font-weight:800;box-shadow:0 2px 10px #17203355}
+.load-origin-map-popup{position:absolute;z-index:500;right:18px;bottom:18px;width:min(475px,calc(100% - 36px));max-height:calc(100% - 36px);overflow:auto;padding:22px 18px 18px;border-radius:22px;background:#fff;box-shadow:0 12px 38px #17203330;color:#172033}
+.load-origin-map-popup-close{position:absolute;right:14px;top:14px}
+.load-origin-map-location{display:flex;align-items:center;gap:8px;padding-right:42px;min-height:28px}
+.load-map-flag{width:24px;height:18px;object-fit:cover;border-radius:2px;flex:none}
+.load-origin-map-location strong{font-size:19px}
+.load-origin-map-location>span{font-size:13px;color:#718096}
+.load-origin-map-total{display:flex;align-items:center;gap:10px;margin:18px 0 22px}
+.load-origin-map-total b{font-size:32px;line-height:1;color:#2868ed}
+.load-origin-map-total span{font-size:15px;color:#718096}
+.load-origin-map-popup h4{margin:16px 0 10px;color:#718096;font-size:11px;letter-spacing:.04em}
+.load-origin-map-destinations{display:grid;gap:9px;max-height:150px;overflow:auto}
+.load-origin-map-destination{display:flex;align-items:center;gap:11px;min-width:0}
+.load-origin-map-destination>div{display:grid;gap:3px;min-width:0;flex:1}
+.load-origin-map-destination strong{font-size:14px}
+.load-origin-map-destination small{font-size:12px;color:#718096}
+.load-origin-map-destination>b{display:grid;place-items:center;min-width:32px;height:28px;padding:0 8px;border-radius:20px;background:#eaf0ff;color:#2868ed;font-size:13px}
+.load-origin-map-vehicles{display:flex;flex-wrap:wrap;gap:7px}
+.load-origin-map-vehicles span{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #dce3ed;border-radius:18px;background:#f7f9fc;color:#45546b;font-size:12px}
+.load-origin-map-vehicles b{color:#172033}
+.load-origin-map-show{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;border:0;border-radius:13px;background:#2868ed;color:#fff;font-size:14px;font-weight:750;cursor:pointer}
+.load-origin-map-state{position:absolute;z-index:450;top:72px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;background:#fff;box-shadow:0 4px 18px #17203320;color:#45546b;font-size:13px}
+.load-origin-map-state.is-error{color:#b42318}
+.load-origin-map-state .spin{animation:load-origin-spin 1s linear infinite}
+@keyframes load-origin-spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){
+ .load-origin-map-overlay{inset:64px 0 0}
+ .load-origin-map-header{height:50px;padding:0 14px}
+ .load-origin-map-popup{right:0;bottom:0;width:100%;max-height:58%;border-radius:20px 20px 0 0;padding:19px 16px max(18px,env(safe-area-inset-bottom));box-shadow:0 -8px 28px #17203326}
+ .load-origin-map-location strong{font-size:17px}
+ .load-origin-map-total{margin:12px 0 15px}
+ .load-origin-map-popup h4{margin:12px 0 8px}
+ .load-origin-map-destinations{max-height:100px}
+ .load-origin-map-show{min-height:48px;margin-top:12px}
+}
