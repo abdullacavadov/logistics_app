@@ -42,3 +42,8 @@
  .load-origin-map-destinations{max-height:100px}
  .load-origin-map-show{min-height:48px;margin-top:12px}
 }
+
+.map-filter-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:11px 14px;border:1px solid #cbd9fb;border-radius:12px;background:#f2f6ff;color:#31569a;font-size:12px}
+.map-filter-notice span{display:flex;align-items:center;gap:8px;font-weight:650}
+.map-filter-notice button{border:0;background:transparent;color:#2868ed;font-size:12px;font-weight:750;cursor:pointer}
+@media(max-width:560px){.map-filter-notice{align-items:flex-start;flex-direction:column;gap:7px}}
