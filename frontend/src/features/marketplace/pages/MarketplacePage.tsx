@@ -526,6 +526,12 @@ export default function MarketplacePage() {
                                     />
                                 </div>
                             </section>
+                            {mapLoadIds && (
+                                <div className="map-filter-notice">
+                                    <span><MapPin size={16} /> Xəritədə seçilmiş nöqtənin yükləri göstərilir ({mapLoadIds.split(",").filter(Boolean).length})</span>
+                                    <button type="button" onClick={() => navigate("/")}>Bütün yükləri göstər</button>
+                                </div>
+                            )}
                             <div className="results-heading">
                                 <div>
                                     <h2>
