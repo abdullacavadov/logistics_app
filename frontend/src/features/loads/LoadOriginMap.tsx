@@ -8,6 +8,7 @@ import './load-origin-map.css'
 type LeafletMarker = {
   addTo: (map: LeafletMap) => LeafletMarker
   on: (event: string, callback: () => void) => LeafletMarker
+  remove: () => void
 }
 type LeafletMap = {
   setView: (point: [number, number], zoom: number) => LeafletMap
@@ -62,6 +63,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
   const navigate = useNavigate()
   const mapElement = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
+  const markersRef = useRef<LeafletMarker[]>([])
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [mapError, setMapError] = useState(false)
   const [mapReady, setMapReady] = useState(false)
@@ -96,6 +98,8 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
     const L = window.L
     if (!open || !map || !L || !points.length) return
     const valid = points.filter(point => point.lat !== null && point.lng !== null)
+    markersRef.current.forEach(marker => marker.remove())
+    markersRef.current = []
     const bounds: [number, number][] = []
     valid.forEach(point => {
       const marker = L.marker([point.lat as number, point.lng as number], {
@@ -107,6 +111,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
         }),
       }).addTo(map)
       marker.on('click', () => setSelectedKey(point.key))
+      markersRef.current.push(marker)
       bounds.push([point.lat as number, point.lng as number])
     })
     if (bounds.length > 1) map.fitBounds(bounds)
@@ -122,6 +127,8 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
 
   useEffect(() => {
     if (!open) {
+      markersRef.current.forEach(marker => marker.remove())
+      markersRef.current = []
       mapRef.current?.remove()
       mapRef.current = null
       setMapReady(false)
