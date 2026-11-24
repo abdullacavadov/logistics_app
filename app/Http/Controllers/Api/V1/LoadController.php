@@ -177,10 +177,20 @@ class LoadController extends Controller
             return $this->err('not_found', 'Elan tapılmadı', 404);
         }
 
-        // Reuse the existing load detail endpoint; expose only the shipper's display name,
-        // never phone/email or other private account fields.
+        // Contact fields are exposed only when the per-load source record has explicit visibility enabled.
+        // A single load may be found in multiple channels. Keep one primary source
+        // record for the detail panel, matching the legacy loads.applications channel.
+        $primarySource = DB::table('load_source_details')
+            ->selectRaw('load_id, platform, MIN(id) as id')
+            ->groupBy('load_id', 'platform');
+
         $detail = $this->publicQuery()
             ->leftJoin('users as u', 'u.id', '=', 'l.user_id')
+            ->leftJoinSub($primarySource, 'lsd_first', function ($join) {
+                $join->on('lsd_first.load_id', '=', 'l.id')
+                    ->on('lsd_first.platform', '=', 'l.applications');
+            })
+            ->leftJoin('load_source_details as lsd', 'lsd.id', '=', 'lsd_first.id')
             ->where('l.id', $id)
             ->addSelect(
                 'fl.name as from_location_name',
@@ -189,7 +199,13 @@ class LoadController extends Controller
                 'l.from_lng',
                 'l.to_lat',
                 'l.to_lng',
-                'u.name as shipper_name'
+                'u.name as shipper_name',
+                'lsd.source_name',
+                'lsd.source_url',
+                DB::raw('CASE WHEN lsd.contact_visible = 1 THEN lsd.contact_name ELSE NULL END as contact_name'),
+                DB::raw('CASE WHEN lsd.contact_visible = 1 THEN lsd.contact_phone ELSE NULL END as contact_phone'),
+                DB::raw('CASE WHEN lsd.contact_visible = 1 THEN lsd.source_profile_url ELSE NULL END as source_profile_url'),
+                DB::raw('COALESCE(lsd.contact_visible, 0) as contact_visible')
             )
             ->first();
 
