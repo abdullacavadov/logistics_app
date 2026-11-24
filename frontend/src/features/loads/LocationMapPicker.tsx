@@ -55,7 +55,7 @@ export default function LocationMapPicker({ label, focus, selected, onSelect, on
             if (cancelled || !mapElement.current || mapRef.current) return;
             const initial = selected ?? focus ?? { lat: 40.4093, lng: 49.8671 };
             const map = L.map(mapElement.current, { zoomControl: true, scrollWheelZoom: true }).setView([initial.lat, initial.lng], selected ? 13 : focus ? 11 : 5);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; YolDaş' }).addTo(map);
             map.on("click", (event) => {
                 onSelectRef.current({ lat: event.latlng.lat, lng: event.latlng.lng });
             });
