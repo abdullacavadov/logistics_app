@@ -229,11 +229,13 @@ class LoadController extends Controller
         $data = array_values(array_map(function ($group) {
             $group['count'] = count($group['load_ids']);
             $group['destinations'] = array_values($group['destinations']);
+            usort($group['destinations'], fn ($a, $b) => $b['count'] <=> $a['count']);
             $group['vehicles'] = array_map(
                 fn ($name, $count) => ['name' => $name, 'count' => $count],
                 array_keys($group['vehicles']),
                 array_values($group['vehicles'])
             );
+            usort($group['vehicles'], fn ($a, $b) => $b['count'] <=> $a['count']);
             return $group;
         }, $groups));
 
