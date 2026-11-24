@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, ExternalLink,
@@ -38,7 +39,7 @@ function weightLabel(value: number | string): string {
   return kg >= 1000 ? `${(kg / 1000).toLocaleString('az-AZ', { maximumFractionDigits: 2 })} ton` : `${kg.toLocaleString('az-AZ')} kq`
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <div className="load-detail-field"><small>{label}</small><strong>{children}</strong></div>
 }
 
