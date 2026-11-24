@@ -81,6 +81,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
 
   useEffect(() => {
     if (!open || !mapElement.current || mapRef.current) return
+    setMapError(false)
     let cancelled = false
     getLeaflet().then(L => {
       if (cancelled || !mapElement.current || mapRef.current) return
@@ -92,7 +93,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
       mapRef.current = map
       setMapReady(true)
       window.setTimeout(() => map.invalidateSize(), 150)
-    }).catch(() => setMapError(true))
+    }).catch(() => { leafletLoad = null; setMapError(true) })
     return () => { cancelled = true }
   }, [open])
 
