@@ -177,8 +177,7 @@ class LoadController extends Controller
             return $this->err('not_found', 'Elan tapılmadı', 404);
         }
 
-        // Reuse the existing load detail endpoint; expose only the shipper's display name,
-        // never phone/email or other private account fields.
+        // Contact fields are exposed only when the per-load source record has explicit visibility enabled.
         $detail = $this->publicQuery()
             ->leftJoin('users as u', 'u.id', '=', 'l.user_id')
             ->leftJoin('load_source_details as lsd', 'lsd.load_id', '=', 'l.id')
