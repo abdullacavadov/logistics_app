@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -189,6 +189,7 @@ export default function MarketplacePage() {
     const mapLoadIds = new URLSearchParams(location.search).get("load_ids") ?? "";
     const [mapOpen, setMapOpen] = useState(false);
     const [mapFocusLoadId, setMapFocusLoadId] = useState<number | undefined>(undefined);
+    useEffect(() => { if (mapLoadIds) setPageNumber(1); }, [mapLoadIds]);
 
     const loadFilters = {
         per_page: 12,
