@@ -28,11 +28,10 @@ import { faTelegram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { CountryFlag } from "../components/CountryFlag";
 import { Dropdown, type DropdownOption } from "../components/Dropdown";
 import { ListingCard } from "../components/ListingCard";
-import { DetailDialog } from "../components/DetailDialog";
 import { MarketplaceSidebar } from "../components/MarketplaceSidebar";
 import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
-import { useLoad, useLoads } from "../../loads/hooks/useLoads";
+import { useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
 function formatLoadDate(value: string): string {
     if (!value) return "";
@@ -206,8 +205,6 @@ export default function MarketplacePage() {
         sort: sort === "Əvvəlcə köhnələr" ? "oldest" as const : "newest" as const,
     };
     const loadsQuery = useLoads(loadFilters);
-    const [selectedLoadId, setSelectedLoadId] = useState<number | null>(null);
-    const selectedLoadQuery = useLoad(selectedLoadId);
     const auth = useAuth();
     const logout = useLogout();
     const apiListings: Listing[] = (loadsQuery.data?.data ?? []).map(
@@ -563,7 +560,7 @@ export default function MarketplacePage() {
                                         <ListingCard
                                             key={item.id}
                                             item={item}
-                                            onSelect={() => setSelectedLoadId(Number(item.id.replace(/^LA-/, "")))}
+                                            onSelect={() => navigate(`/loads/${Number(item.id.replace(/^LA-/, ""))}`)}
                                             saved={saved.includes(item.id)}
                                             onSave={() => toggleSaved(item.id)}
                                         />
@@ -669,7 +666,6 @@ export default function MarketplacePage() {
             <button className="mobile-create" aria-label="Elan yerləşdir">
                 <Plus size={21} />
             </button>
-            <DetailDialog load={selectedLoadQuery.data?.data ?? null} loading={selectedLoadQuery.isLoading} error={selectedLoadQuery.isError} open={selectedLoadId !== null} onClose={() => setSelectedLoadId(null)} />
         </div>
     );
 }
