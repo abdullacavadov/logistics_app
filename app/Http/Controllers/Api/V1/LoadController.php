@@ -37,6 +37,7 @@ class LoadController extends Controller
             'pickup_date' => 'nullable|date',
             'search' => 'nullable|string|max:200',
             'sort' => 'nullable|in:newest,oldest',
+            'ids' => 'nullable|string|max:2000',
         ]);
 
         foreach ([
@@ -61,6 +62,18 @@ class LoadController extends Controller
         }
 
         $q = $this->publicQuery()->whereIn('l.status', self::PUBLIC_STATUSES);
+
+        if ($r->filled('ids')) {
+            $ids = collect(explode(',', (string) $r->input('ids')))
+                ->map(fn ($id) => (int) trim($id))
+                ->filter(fn ($id) => $id > 0)
+                ->unique()
+                ->values();
+            if ($ids->isEmpty()) {
+                return response()->json(['data' => [], 'links' => ['first' => null, 'last' => null, 'prev' => null, 'next' => null], 'meta' => ['current_page' => 1, 'from' => null, 'last_page' => 1, 'path' => $r->url(), 'per_page' => 50, 'to' => null, 'total' => 0]]);
+            }
+            $q->whereIn('l.id', $ids);
+        }
         $dateFrom = $r->input('date_from', $r->input('pickup_date'));
         $dateTo = $r->input('date_to', $r->input('pickup_date'));
 
@@ -137,6 +150,91 @@ class LoadController extends Controller
                 'total' => $loads->total(),
             ],
         ]);
+    }
+
+
+    /**
+     * Public map aggregation: one pin per pickup point, with destinations,
+     * vehicle types and exact load IDs for the map popup's "show loads" action.
+     */
+    public function mapPoints()
+    {
+        $rows = DB::table('loads as l')
+            ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'l.to_location_id')
+            ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'l.load_vehicle_type_id')
+            ->whereIn('l.status', self::PUBLIC_STATUSES)
+            ->where(function ($query) {
+                $query->where('l.is_ready_for_loading', true)
+                    ->orWhere('l.pickup_from', '>=', now()->toDateString());
+            })
+            ->select(
+                'l.id', 'l.from_location_id', 'l.from_country_id', 'l.from_lat', 'l.from_lng',
+                'fc.name as from_country_name', 'fc.iso2 as from_country_iso2',
+                DB::raw('COALESCE(fl.name, fc.name) as from_name'),
+                'l.to_country_id', 'l.to_location_id', 'l.to_lat', 'l.to_lng',
+                'tc.name as to_country_name', 'tc.iso2 as to_country_iso2',
+                DB::raw('COALESCE(tl.name, tc.name) as to_name'),
+                'lvt.name as vehicle_name'
+            )
+            ->get();
+
+        $groups = [];
+        foreach ($rows as $row) {
+            if ($row->from_location_id) {
+                $key = 'location:' . $row->from_location_id;
+            } elseif ($row->from_lat !== null && $row->from_lng !== null) {
+                $key = 'coords:' . round((float) $row->from_lat, 4) . ':' . round((float) $row->from_lng, 4);
+            } else {
+                $key = 'country:' . $row->from_country_id;
+            }
+
+            if (!isset($groups[$key])) {
+                $groups[$key] = [
+                    'key' => $key,
+                    'from_location_id' => $row->from_location_id,
+                    'from_country_id' => $row->from_country_id,
+                    'from_name' => $row->from_name,
+                    'from_country_name' => $row->from_country_name,
+                    'from_country_iso2' => $row->from_country_iso2,
+                    'lat' => $row->from_lat !== null ? (float) $row->from_lat : null,
+                    'lng' => $row->from_lng !== null ? (float) $row->from_lng : null,
+                    'load_ids' => [],
+                    'destinations' => [],
+                    'vehicles' => [],
+                ];
+            }
+
+            $groups[$key]['load_ids'][] = (int) $row->id;
+            $destinationKey = ($row->to_location_id ? 'location:' . $row->to_location_id : 'country:' . $row->to_country_id);
+            if (!isset($groups[$key]['destinations'][$destinationKey])) {
+                $groups[$key]['destinations'][$destinationKey] = [
+                    'name' => $row->to_name,
+                    'country_name' => $row->to_country_name,
+                    'country_iso2' => $row->to_country_iso2,
+                    'count' => 0,
+                ];
+            }
+            $groups[$key]['destinations'][$destinationKey]['count']++;
+
+            $vehicle = $row->vehicle_name ?: 'Nəqliyyat növü göstərilməyib';
+            $groups[$key]['vehicles'][$vehicle] = ($groups[$key]['vehicles'][$vehicle] ?? 0) + 1;
+        }
+
+        $data = array_values(array_map(function ($group) {
+            $group['count'] = count($group['load_ids']);
+            $group['destinations'] = array_values($group['destinations']);
+            $group['vehicles'] = array_map(
+                fn ($name, $count) => ['name' => $name, 'count' => $count],
+                array_keys($group['vehicles']),
+                array_values($group['vehicles'])
+            );
+            return $group;
+        }, $groups));
+
+        return response()->json(['data' => $data]);
     }
 
     /** Public marketplace counters; definitions match the public loads/offers endpoints. */
