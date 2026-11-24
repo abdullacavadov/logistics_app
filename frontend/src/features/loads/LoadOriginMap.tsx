@@ -22,11 +22,14 @@ type Leaflet = {
   divIcon: (options: Record<string, unknown>) => unknown
   marker: (point: [number, number], options?: Record<string, unknown>) => LeafletMarker
 }
-declare global { interface Window { L?: Leaflet } }
+function currentLeaflet(): Leaflet | undefined {
+  return (window as unknown as { L?: Leaflet }).L
+}
 
 let leafletLoad: Promise<Leaflet> | null = null
 function getLeaflet(): Promise<Leaflet> {
-  if (window.L) return Promise.resolve(window.L)
+  const loadedLeaflet = currentLeaflet()
+  if (loadedLeaflet) return Promise.resolve(loadedLeaflet)
   if (!leafletLoad) {
     leafletLoad = new Promise((resolve, reject) => {
       if (!document.getElementById('leaflet-map-css')) {
@@ -43,7 +46,7 @@ function getLeaflet(): Promise<Leaflet> {
         script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
         document.body.appendChild(script)
       }
-      script.addEventListener('load', () => window.L ? resolve(window.L) : reject(new Error('Leaflet yüklənmədi')), { once: true })
+      script.addEventListener('load', () => { const L = currentLeaflet(); L ? resolve(L) : reject(new Error('Leaflet yüklənmədi')) }, { once: true })
       script.addEventListener('error', () => reject(new Error('Leaflet yüklənmədi')), { once: true })
     })
   }
@@ -95,7 +98,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
 
   useEffect(() => {
     const map = mapRef.current
-    const L = window.L
+    const L = currentLeaflet()
     if (!open || !map || !L || !points.length) return
     const valid = points.filter(point => point.lat !== null && point.lng !== null)
     markersRef.current.forEach(marker => marker.remove())
