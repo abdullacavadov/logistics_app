@@ -171,7 +171,9 @@ class LoadController extends Controller
                     ->orWhere('l.pickup_from', '>=', now()->toDateString());
             })
             ->select(
-                'l.id', 'l.from_location_id', 'l.from_country_id', 'l.from_lat', 'l.from_lng',
+                'l.id', 'l.from_location_id', 'l.from_country_id',
+                DB::raw('COALESCE(l.from_lat, fl.lat) as from_lat'),
+                DB::raw('COALESCE(l.from_lng, fl.lng) as from_lng'),
                 'fc.name as from_country_name', 'fc.iso2 as from_country_iso2',
                 DB::raw('COALESCE(fl.name, fc.name) as from_name'),
                 'l.to_country_id', 'l.to_location_id', 'l.to_lat', 'l.to_lng',
