@@ -178,9 +178,19 @@ class LoadController extends Controller
         }
 
         // Contact fields are exposed only when the per-load source record has explicit visibility enabled.
+        // A single load may be found in multiple channels. Keep one primary source
+        // record for the detail panel, matching the legacy loads.applications channel.
+        $primarySource = DB::table('load_source_details')
+            ->selectRaw('load_id, platform, MIN(id) as id')
+            ->groupBy('load_id', 'platform');
+
         $detail = $this->publicQuery()
             ->leftJoin('users as u', 'u.id', '=', 'l.user_id')
-            ->leftJoin('load_source_details as lsd', 'lsd.load_id', '=', 'l.id')
+            ->leftJoinSub($primarySource, 'lsd_first', function ($join) {
+                $join->on('lsd_first.load_id', '=', 'l.id')
+                    ->on('lsd_first.platform', '=', 'l.applications');
+            })
+            ->leftJoin('load_source_details as lsd', 'lsd.id', '=', 'lsd_first.id')
             ->where('l.id', $id)
             ->addSelect(
                 'fl.name as from_location_name',
