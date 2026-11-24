@@ -46,6 +46,7 @@ function formatDate(date: string) {
 export function ListingCard({
     item,
     onSelect,
+    onMap,
     saved,
     onSave,
     status,
@@ -55,6 +56,7 @@ export function ListingCard({
 }: {
     item: Listing;
     onSelect: () => void;
+    onMap?: () => void;
     saved: boolean;
     onSave: () => void;
     status?: { label: string; tone: "pending" | "published" | "rejected" | "archived" };
@@ -177,7 +179,7 @@ export function ListingCard({
                     <strong className="price">{item.price}</strong>
                 </div>
                 {footerAction ?? (
-                    <button className="outline-action" onClick={onSelect}>
+                    <button className="outline-action" onClick={onMap ?? onSelect}>
                         <Map size={15} /> Xəritədə bax
                     </button>
                 )}
