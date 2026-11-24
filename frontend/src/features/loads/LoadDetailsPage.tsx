@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, ExternalLink,
@@ -8,6 +9,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTelegram, faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { useLoad } from './hooks/useLoads'
 import type { Load } from './types'
+import LoadOriginMap from './LoadOriginMap'
+import { MarketplaceTopbar } from '../marketplace/components/MarketplaceTopbar'
+import { useAuth, useLogout } from '../auth/hooks/useAuth'
+import { MarketplaceSidebar } from '../marketplace/components/MarketplaceSidebar'
+import { MarketplaceMobileNav } from '../marketplace/components/MarketplaceMobileNav'
+import { pagePaths, primaryNav, secondaryNav } from '../marketplace/config/navigation'
 
 function hasValue(value: unknown): boolean {
   return value !== null && value !== undefined && value !== ''
@@ -119,13 +126,9 @@ function ContactPanel({ load }: { load: Load }) {
   )
 }
 
-function LoadContent({ load }: { load: Load }) {
+function LoadContent({ load, onOpenMap }: { load: Load; onOpenMap: () => void }) {
   const from = [load.from_location_name, load.from_country_name].filter(Boolean).join(', ')
   const to = [load.to_location_name, load.to_country_name].filter(Boolean).join(', ')
-  const hasCoordinates = load.from_lat != null && load.from_lng != null && load.to_lat != null && load.to_lng != null
-  const mapUrl = hasCoordinates
-    ? `https://www.google.com/maps/dir/${load.from_lat},${load.from_lng}/${load.to_lat},${load.to_lng}`
-    : `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`
   const price = load.price == null
     ? (load.price_negotiable ? 'Razılaşma ilə' : '')
     : `${Number(load.price).toLocaleString('az-AZ')} ${load.currency ?? ''}`.trim()
@@ -148,9 +151,9 @@ function LoadContent({ load }: { load: Load }) {
             <ArrowRight aria-hidden="true" />
             <div><span>Çatdırılma yeri</span><strong>{to || load.to_name || '—'}</strong></div>
           </div>
-          <a className="load-map-button" href={mapUrl} target="_blank" rel="noopener noreferrer">
-            <MapPin size={18} /> Marşrutu xəritədə göstər <ExternalLink size={15} />
-          </a>
+          <button type="button" className="load-map-button" onClick={onOpenMap}>
+            <MapPin size={18} /> Xəritədə bax
+          </button>
           {hasValue(load.description) && (
             <div className="load-detail-section">
               <h2>Yük haqqında məlumat</h2>
@@ -202,9 +205,44 @@ export default function LoadDetailsPage() {
   const navigate = useNavigate()
   const loadId = id && /^\d+$/.test(id) ? Number(id) : null
   const query = useLoad(loadId)
+  const auth = useAuth()
+  const logout = useLogout()
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [showNotices, setShowNotices] = useState(false)
+  const [mapOpen, setMapOpen] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const page = 'Yük detalları'
+  const changePage = (label: string) => { navigate(pagePaths[label] ?? '/'); setShowMobileMenu(false) }
 
   return (
-    <div className="app-shell load-details-shell">
+    <div className="app-shell load-details-shell" data-theme={theme}>
+      <MarketplaceSidebar theme={theme} page={page} onNavigate={changePage} />
+      <div className="workspace">
+        <MarketplaceTopbar
+          page="Yük detalları"
+          theme={theme}
+          country="🇦🇿 Azərbaycan"
+          onCountryChange={() => undefined}
+          onNavigate={changePage}
+          onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          showNotices={showNotices}
+          onToggleNotices={() => setShowNotices(value => !value)}
+          onLogin={() => navigate('/login')}
+          userName={auth.data?.data.user.name ?? null}
+          onLogout={() => logout.mutate()}
+          onToggleMobileMenu={() => setShowMobileMenu(value => !value)}
+        />
+        {showMobileMenu && (
+          <div className="mobile-menu-panel">
+            {primaryNav.map(({ label, icon: Icon }) => (
+              <button key={label} onClick={() => changePage(label)}><Icon size={18} />{label}</button>
+            ))}
+            <div className="nav-divider" />
+            {secondaryNav.map(({ label, icon: Icon }) => (
+              <button key={label} onClick={() => changePage(label)}><Icon size={18} />{label}</button>
+            ))}
+          </div>
+        )}
       <main className="load-details-page">
         <header className="load-details-top">
           <button type="button" className="load-details-back" onClick={() => navigate(-1)}>
@@ -221,9 +259,12 @@ export default function LoadDetailsPage() {
             <button type="button" className="load-map-button" onClick={() => navigate('/')}>Bütün elanlara qayıt</button>
           </div>
         ) : (
-          <LoadContent load={query.data.data} />
+          <LoadContent load={query.data.data} onOpenMap={() => setMapOpen(true)} />
         )}
       </main>
+      </div>
+      <MarketplaceMobileNav page={page} onNavigate={changePage} onToggleMore={() => setShowMobileMenu(value => !value)} />
+      <LoadOriginMap open={mapOpen} onClose={() => setMapOpen(false)} focusLoadId={loadId ?? undefined} />
     </div>
   )
 }

@@ -3375,7 +3375,7 @@ select:focus-visible {
 
 /* Standalone public load details page */
 .load-details-shell {
-    display: block;
+    display: flex;
     min-height: 100vh;
     padding: 0;
 }

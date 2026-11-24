@@ -24,6 +24,7 @@ Route::prefix('v1')->group(function () {
     Route::get('marketplace/stats', [LoadController::class, 'stats'])->middleware('throttle:60,1');
 
     // Ictimai (qonaq) — yalnız dərc olunmuş elanlar
+    Route::get('loads/map-points', [LoadController::class, 'mapPoints'])->middleware('throttle:60,1');
     Route::get('loads', [LoadController::class, 'index'])->middleware('throttle:60,1');
     Route::get('loads/{id}', [LoadController::class, 'show'])->whereNumber('id');
 

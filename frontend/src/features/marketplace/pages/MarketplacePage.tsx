@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -33,6 +33,7 @@ import { MarketplaceTopbar } from "../components/MarketplaceTopbar";
 import { MarketplaceMobileNav } from "../components/MarketplaceMobileNav";
 import { useLoads } from "../../loads/hooks/useLoads";
 import { useAuth, useLogout } from "../../auth/hooks/useAuth";
+import LoadOriginMap from "../../loads/LoadOriginMap";
 function formatLoadDate(value: string): string {
     if (!value) return "";
     const datePart = value.includes("T") ? value.split("T")[0] : value;
@@ -183,8 +184,16 @@ export default function MarketplacePage() {
         { value: "Əvvəlcə köhnələr", label: "Əvvəlcə köhnələr", leading: <span className="dropdown-sort-mark">↑</span> },
     ];
 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const mapLoadIds = new URLSearchParams(location.search).get("load_ids") ?? "";
+    const [mapOpen, setMapOpen] = useState(false);
+    const [mapFocusLoadId, setMapFocusLoadId] = useState<number | undefined>(undefined);
+    useEffect(() => { if (mapLoadIds) setPageNumber(1); }, [mapLoadIds]);
+
     const loadFilters = {
         per_page: 12,
+        ids: mapLoadIds || undefined,
         page: pageNumber,
         search: query || undefined,
         from_country_id: fromCountry ? Number(fromCountry) : undefined,
@@ -242,8 +251,6 @@ export default function MarketplacePage() {
             kind: "load",
         }),
     );
-    const location = useLocation();
-    const navigate = useNavigate();
     const currentPath = location.pathname.replace(/\/+$/, "") || "/";
     const page =
         Object.entries(pagePaths).find(
@@ -520,6 +527,12 @@ export default function MarketplacePage() {
                                     />
                                 </div>
                             </section>
+                            {mapLoadIds && (
+                                <div className="map-filter-notice">
+                                    <span><MapPin size={16} /> Xəritədə seçilmiş nöqtənin yükləri göstərilir ({mapLoadIds.split(",").filter(Boolean).length})</span>
+                                    <button type="button" onClick={() => navigate("/")}>Bütün yükləri göstər</button>
+                                </div>
+                            )}
                             <div className="results-heading">
                                 <div>
                                     <h2>
@@ -561,6 +574,7 @@ export default function MarketplacePage() {
                                             key={item.id}
                                             item={item}
                                             onSelect={() => navigate(`/loads/${Number(item.id.replace(/^LA-/, ""))}`)}
+                                            onMap={() => { setMapFocusLoadId(Number(item.id.replace(/^LA-/, ""))); setMapOpen(true); }}
                                             saved={saved.includes(item.id)}
                                             onSave={() => toggleSaved(item.id)}
                                         />
@@ -658,6 +672,7 @@ export default function MarketplacePage() {
                     )}
                 </main>
             </div>
+            <LoadOriginMap open={mapOpen} onClose={() => setMapOpen(false)} focusLoadId={mapFocusLoadId} />
             <MarketplaceMobileNav
                 page={page}
                 onNavigate={changePage}

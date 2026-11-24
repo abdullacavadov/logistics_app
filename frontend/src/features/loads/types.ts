@@ -98,6 +98,7 @@ export interface LoadFilters {
   max_price?: number
   currency?: string
   status?: LoadStatus
+  ids?: string
 }
 
 export interface CreateLoadPayload {
