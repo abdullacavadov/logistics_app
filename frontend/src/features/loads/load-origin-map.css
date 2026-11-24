@@ -1,4 +1,4 @@
-.load-origin-map-overlay{position:fixed;inset:78px 0 0;z-index:1200;background:#f1f4f8;display:flex;flex-direction:column}
+.load-origin-map-overlay{position:fixed;inset:82px 0 0;z-index:1200;background:#f1f4f8;display:flex;flex-direction:column}
 .load-origin-map-header{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:var(--surface,#fff);border-bottom:1px solid var(--line,#e5e7eb);z-index:2}
 .load-origin-map-header>div{display:flex;align-items:center;gap:10px;color:var(--text,#172033)}
 .load-origin-map-header>div svg{color:var(--primary,#2868ed)}
@@ -33,7 +33,7 @@
 .load-origin-map-state .spin{animation:load-origin-spin 1s linear infinite}
 @keyframes load-origin-spin{to{transform:rotate(360deg)}}
 @media(max-width:700px){
- .load-origin-map-overlay{inset:64px 0 0}
+ .load-origin-map-overlay{inset:66px 0 0}
  .load-origin-map-header{height:50px;padding:0 14px}
  .load-origin-map-popup{right:0;bottom:0;width:100%;max-height:58%;border-radius:20px 20px 0 0;padding:19px 16px max(18px,env(safe-area-inset-bottom));box-shadow:0 -8px 28px #17203326}
  .load-origin-map-location strong{font-size:17px}
