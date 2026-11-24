@@ -47,3 +47,5 @@
 .map-filter-notice span{display:flex;align-items:center;gap:8px;font-weight:650}
 .map-filter-notice button{border:0;background:transparent;color:#2868ed;font-size:12px;font-weight:750;cursor:pointer}
 @media(max-width:560px){.map-filter-notice{align-items:flex-start;flex-direction:column;gap:7px}}
+
+.load-origin-map-address{margin:6px 0 0 32px;color:#718096;font-size:12px;line-height:1.45}
