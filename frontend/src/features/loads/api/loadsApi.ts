@@ -6,6 +6,7 @@ export interface LoadMapPoint {
   from_location_id: number | null
   from_country_id: number
   from_name: string
+  from_address: string | null
   from_country_name: string
   from_country_iso2: string | null
   lat: number | null
