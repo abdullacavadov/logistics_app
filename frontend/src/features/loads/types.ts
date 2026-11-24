@@ -50,6 +50,12 @@ export interface Load {
   cargo_type_name?: string | null
   load_vehicle_type_name?: string | null
   shipper_name?: string | null
+  source_name?: string | null
+  source_url?: string | null
+  source_profile_url?: string | null
+  contact_name?: string | null
+  contact_phone?: string | null
+  contact_visible?: boolean | number
 }
 
 export interface PaginatedResponse<T> {
