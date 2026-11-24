@@ -64,6 +64,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
   const mapRef = useRef<LeafletMap | null>(null)
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [mapError, setMapError] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
   const pointsQuery = useQuery({
     queryKey: ['loads', 'map-points'],
     queryFn: loadsApi.mapPoints,
@@ -84,6 +85,7 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map)
       mapRef.current = map
+      setMapReady(true)
       window.setTimeout(() => map.invalidateSize(), 150)
     }).catch(() => setMapError(true))
     return () => { cancelled = true }
@@ -116,12 +118,13 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
         map.setView([focused.lat as number, focused.lng as number], 8)
       }
     }
-  }, [open, points, focusLoadId])
+  }, [open, points, focusLoadId, mapReady])
 
   useEffect(() => {
     if (!open) {
       mapRef.current?.remove()
       mapRef.current = null
+      setMapReady(false)
       setSelectedKey(null)
     }
   }, [open])
