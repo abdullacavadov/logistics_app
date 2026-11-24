@@ -171,6 +171,9 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
             <strong>{selected.from_name}</strong>
             <span>{selected.from_country_name}</span>
           </div>
+          {selected.from_address && <p className="load-origin-map-address">{selected.from_address}</p>}
+          <div className="load-origin-map-content">
+          </div>
           <div className="load-origin-map-total"><b>{selected.count}</b><span>Buradan yüklər</span></div>
           <h4>HARA GEDİR</h4>
           <div className="load-origin-map-destinations">
