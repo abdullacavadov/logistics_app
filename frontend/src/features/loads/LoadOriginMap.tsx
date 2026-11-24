@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, MapPin, ArrowRight, Truck, List, LoaderCircle } from 'lucide-react'
-import { loadsApi, type LoadMapPoint } from './api/loadsApi'
+import { loadsApi } from './api/loadsApi'
 import { useQuery } from '@tanstack/react-query'
 import './load-origin-map.css'
 
