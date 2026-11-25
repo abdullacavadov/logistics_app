@@ -96,7 +96,7 @@ export default function LoadsMapPage() {
   const apiFilters = useMemo(() => {
     const result: Record<string, string | number> = {}
     Object.entries(filters).forEach(([key, value]) => { if (value !== '') result[key] = ['min_weight', 'max_weight'].includes(key) ? Number(value) * 1000 : value })
-    return result as LoadFilters
+    return result as unknown as LoadFilters
   }, [filters])
   const pointsQuery = useQuery({
     queryKey: ['loads', 'map-points', apiFilters],
