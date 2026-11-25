@@ -15,7 +15,7 @@ import './loads-map.css'
 
 type CatalogItem = { id: number; name: string; iso2?: string | null }
 type LeafletMarker = { addTo: (map: LeafletMap) => LeafletMarker; on: (event: string, callback: () => void) => LeafletMarker; remove: () => void }
-type LeafletMap = { setView: (point: [number, number], zoom: number) => LeafletMap; fitBounds: (bounds: [number, number][]) => LeafletMap; remove: () => void; invalidateSize: () => void }
+type LeafletMap = { setView: (point: [number, number], zoom: number) => LeafletMap; fitBounds: (bounds: [number, number][], options?: Record<string, unknown>) => LeafletMap; remove: () => void; invalidateSize: () => void }
 type Leaflet = { map: (element: HTMLElement, options?: Record<string, unknown>) => LeafletMap; tileLayer: (url: string, options: Record<string, unknown>) => { addTo: (map: LeafletMap) => void }; divIcon: (options: Record<string, unknown>) => unknown; marker: (point: [number, number], options?: Record<string, unknown>) => LeafletMarker }
 function currentLeaflet(): Leaflet | undefined { return (window as unknown as { L?: Leaflet }).L }
 let leafletLoad: Promise<Leaflet> | null = null
