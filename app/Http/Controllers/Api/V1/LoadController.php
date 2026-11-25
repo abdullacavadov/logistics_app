@@ -49,6 +49,7 @@ class LoadController extends Controller
 
         foreach ([
             ['min_weight', 'max_weight', 'Çəkinin maksimumu minimumdan az ola bilməz'],
+            ['min_volume', 'max_volume', 'Həcmin maksimumu minimumdan az ola bilməz'],
             ['min_price', 'max_price', 'Qiymətin maksimumu minimumdan az ola bilməz'],
             ['date_from', 'date_to', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'],
         ] as [$minimum, $maximum, $message]) {
@@ -201,6 +202,16 @@ class LoadController extends Controller
             'created_to' => 'nullable|date',
         ]);
 
+        if ($r->filled('min_weight') && $r->filled('max_weight') && (float) $r->max_weight < (float) $r->min_weight) {
+            return response()->json(['message' => 'Çəkinin maksimumu minimumdan az ola bilməz'], 422);
+        }
+        if ($r->filled('min_volume') && $r->filled('max_volume') && (float) $r->max_volume < (float) $r->min_volume) {
+            return response()->json(['message' => 'Həcmin maksimumu minimumdan az ola bilməz'], 422);
+        }
+        if ($r->filled('created_from') && $r->filled('created_to') && $r->created_to < $r->created_from) {
+            return response()->json(['message' => 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'], 422);
+        }
+
         $query = DB::table('loads as l')
             ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
             ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
@@ -216,8 +227,8 @@ class LoadController extends Controller
         $this->applyMapFilters($query, $r);
 
         $rows = $query
-            ->whereNotNull(DB::raw('COALESCE(l.from_lat, fl.lat)'))
-            ->whereNotNull(DB::raw('COALESCE(l.from_lng, fl.lng)'))
+            ->whereRaw('COALESCE(l.from_lat, fl.lat) IS NOT NULL')
+            ->whereRaw('COALESCE(l.from_lng, fl.lng) IS NOT NULL')
             ->select(
                 'l.id', 'l.from_location_id', 'l.from_country_id',
                 DB::raw('COALESCE(l.from_lat, fl.lat) as from_lat'),
@@ -237,8 +248,6 @@ class LoadController extends Controller
 
             if ($row->from_location_id) {
                 $key = 'location:' . $row->from_location_id;
-            } elseif ($row->from_lat !== null && $row->from_lng !== null) {
-                $key = 'coords:' . round((float) $row->from_lat, 4) . ':' . round((float) $row->from_lng, 4);
             } else {
                 $key = 'coords:' . round((float) $row->from_lat, 4) . ':' . round((float) $row->from_lng, 4);
             }
