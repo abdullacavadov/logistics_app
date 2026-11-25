@@ -21,7 +21,7 @@ export const secondaryNav = [
 export const pagePaths: Record<string, string> = {
     "Bütün elanlar": "/",
     "Mənim elanlarım": "/my/loads",
-    "Yük xəritəsi": "/map",
+    "Yük xəritəsi": "/loads/map",
     "Marşrutlarım": "/my/offers",
     "Xidmətlərimiz": "/services",
     "Tariflər və Analitika": "/pricing-analytics",
