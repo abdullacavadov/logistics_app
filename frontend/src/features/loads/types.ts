@@ -87,6 +87,13 @@ export interface LoadFilters {
   cargo_type_id?: number
   min_weight?: number
   max_weight?: number
+  min_volume?: number
+  max_volume?: number
+  is_hazardous?: boolean | 0 | 1
+  needs_refrigeration?: boolean | 0 | 1
+  created_from?: string
+  created_to?: string
+  map_point_key?: string
   pickup_date?: string
   date_from?: string
   date_to?: string

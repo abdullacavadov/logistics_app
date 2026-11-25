@@ -6,7 +6,6 @@ export interface LoadMapPoint {
   from_location_id: number | null
   from_country_id: number
   from_name: string
-  from_address: string | null
   from_country_name: string
   from_country_iso2: string | null
   lat: number | null
@@ -28,8 +27,8 @@ function toQuery(filters: LoadFilters): URLSearchParams {
 }
 
 export const loadsApi = {
-  async mapPoints(): Promise<LoadMapPoint[]> {
-    const { data } = await api.get<{ data: LoadMapPoint[] }>('/loads/map-points')
+  async mapPoints(filters: LoadFilters = {}): Promise<LoadMapPoint[]> {
+    const { data } = await api.get<{ data: LoadMapPoint[] }>('/loads/map-points', { params: toQuery(filters) })
     return data.data
   },
 
