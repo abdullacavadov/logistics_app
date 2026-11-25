@@ -128,7 +128,9 @@ class LoadController extends Controller
         if ($r->filled('map_point_key')) {
             $pointKey = (string) $r->input('map_point_key');
             if (preg_match('/^location:(\\d+)$/', $pointKey, $match)) {
-                $q->where('l.from_location_id', (int) $match[1]);
+                $q->where('l.from_location_id', (int) $match[1])
+                    ->whereRaw('COALESCE(l.from_lat, fl.lat) IS NOT NULL')
+                    ->whereRaw('COALESCE(l.from_lng, fl.lng) IS NOT NULL');
             } elseif (preg_match('/^coords:(-?\\d+(?:\\.\\d+)?):(-?\\d+(?:\\.\\d+)?)$/', $pointKey, $match)) {
                 $q->whereRaw('ROUND(COALESCE(l.from_lat, fl.lat), 4) = ?', [(float) $match[1]])
                     ->whereRaw('ROUND(COALESCE(l.from_lng, fl.lng), 4) = ?', [(float) $match[2]]);
