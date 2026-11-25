@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, MapPin, X, Search, ChevronLeft, ChevronRight, LoaderCircle, Truck, Package, CalendarDays, RefreshCw, List, Map as MapIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Filter, MapPin, X, ChevronLeft, ChevronRight, LoaderCircle, Truck, CalendarDays, RefreshCw, List, Map as MapIcon } from 'lucide-react'
 import { api } from '../../../lib/api'
-import { loadsApi, type LoadMapPoint } from '../api/loadsApi'
+import { loadsApi } from '../api/loadsApi'
 import type { Load, LoadFilters } from '../types'
 import { ListingCard } from '../../marketplace/components/ListingCard'
 import { MarketplaceSidebar } from '../../marketplace/components/MarketplaceSidebar'
@@ -68,7 +68,6 @@ function toListing(load: Load) {
 
 export default function LoadsMapPage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [country, setCountry] = useState('AZ Azərbaycanca')
   const [showNotices, setShowNotices] = useState(false)
@@ -80,6 +79,7 @@ export default function LoadsMapPage() {
   const [showResults, setShowResults] = useState(false)
   const [page, setPage] = useState(1)
   const [mapError, setMapError] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
   const mapElement = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const markersRef = useRef<LeafletMarker[]>([])
@@ -127,9 +127,10 @@ export default function LoadsMapPage() {
       const map = L.map(mapElement.current, { zoomControl: true, scrollWheelZoom: true }).setView([40.4093, 49.8671], 4)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(map)
       mapRef.current = map
+      setMapReady(true)
       window.setTimeout(() => map.invalidateSize(), 120)
     }).catch(() => { leafletLoad = null; setMapError(true) })
-    return () => { cancelled = true; markersRef.current.forEach(marker => marker.remove()); mapRef.current?.remove(); mapRef.current = null }
+    return () => { cancelled = true; markersRef.current.forEach(marker => marker.remove()); mapRef.current?.remove(); mapRef.current = null; setMapReady(false) }
   }, [])
 
   useEffect(() => {
@@ -148,14 +149,14 @@ export default function LoadsMapPage() {
       markersRef.current.push(marker)
       bounds.push([point.lat as number, point.lng as number])
     })
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [35, 35] } as never)
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [35, 35] })
     else if (bounds.length === 1) map.setView(bounds[0], 7)
     else map.setView([40.4093, 49.8671], 4)
     if (selectedKey && valid.some(point => point.key === selectedKey)) {
       const point = valid.find(item => item.key === selectedKey)!
       map.setView([point.lat as number, point.lng as number], 8)
     } else if (selectedKey) setSelectedKey(null)
-  }, [pointsQuery.data, selectedKey])
+  }, [pointsQuery.data, selectedKey, mapReady])
 
   useEffect(() => { setPage(1) }, [selectedKey, filters])
   useEffect(() => { if (mobileView === 'map') window.setTimeout(() => mapRef.current?.invalidateSize(), 120) }, [mobileView])
