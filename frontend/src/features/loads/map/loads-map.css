@@ -91,6 +91,8 @@
 .loads-map-app[data-theme="dark"] .loads-map-field select, .loads-map-app[data-theme="dark"] .loads-map-range input,
 .loads-map-app[data-theme="dark"] .loads-map-date-fields input, .loads-map-app[data-theme="dark"] .loads-map-filter-toggle,
 .loads-map-app[data-theme="dark"] .loads-map-reset { background: #1d3044; color: #e5edf6; border-color: #304256; }
+.loads-map-app[data-theme="dark"] .loads-map-mobile-sheet, .loads-map-app[data-theme="dark"] .loads-map-mobile-switch { background: #172536; color: #e5edf6; border-color: #304256; }
+.loads-map-app[data-theme="dark"] .loads-map-sheet-actions button + button { background: #304256; color: #e5edf6; }
 @media (max-width: 1280px) {
   .loads-map-layout { grid-template-columns: 230px minmax(280px, 1fr) 320px; gap: 10px; }
   .loads-map-filters, .loads-map-results { padding: 12px; }
