@@ -28,7 +28,7 @@ export function AppRouter() {
       <Route path="/my/offers" element={<RequireAuth><OffersPage /></RequireAuth>} />
       <Route path="/pricing-analytics" element={<SubscriptionPage />} />
       <Route path="/admin/subscription-plans" element={<RequireAuth><AdminSubscriptionPlansPage /></RequireAuth>} />
-      {Object.values(pagePaths).filter((path) => path !== '/my/loads' && path !== '/my/offers' && path !== '/pricing-analytics').map((path) => (
+      {Object.values(pagePaths).filter((path) => path !== '/loads/map' && path !== '/my/loads' && path !== '/my/offers' && path !== '/pricing-analytics').map((path) => (
         <Route key={path} path={path} element={<MarketplacePage />} />
       ))}
       <Route path="*" element={<Navigate to="/" replace />} />
