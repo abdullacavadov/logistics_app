@@ -21,6 +21,13 @@ class LoadController extends Controller
             'per_page' => 'nullable|integer|min:1|max:50',
             'min_weight' => 'nullable|numeric|min:0',
             'max_weight' => 'nullable|numeric|min:0',
+            'min_volume' => 'nullable|numeric|min:0',
+            'max_volume' => 'nullable|numeric|min:0',
+            'is_hazardous' => 'nullable|boolean',
+            'needs_refrigeration' => 'nullable|boolean',
+            'created_from' => 'nullable|date',
+            'created_to' => 'nullable|date',
+            'map_point_key' => 'nullable|string|max:100',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
             'from_country_id' => 'nullable|integer|exists:countries,id',
@@ -110,6 +117,23 @@ class LoadController extends Controller
 
         if ($r->filled('min_weight')) $q->where('l.weight_kg', '>=', $r->min_weight);
         if ($r->filled('max_weight')) $q->where('l.weight_kg', '<=', $r->max_weight);
+        if ($r->filled('min_volume')) $q->where('l.volume_m3', '>=', $r->min_volume);
+        if ($r->filled('max_volume')) $q->where('l.volume_m3', '<=', $r->max_volume);
+        if ($r->has('is_hazardous') && $r->input('is_hazardous') !== '') $q->where('l.is_hazardous', $r->boolean('is_hazardous'));
+        if ($r->has('needs_refrigeration') && $r->input('needs_refrigeration') !== '') $q->where('l.needs_refrigeration', $r->boolean('needs_refrigeration'));
+        if ($r->filled('created_from')) $q->whereDate('l.created_at', '>=', $r->input('created_from'));
+        if ($r->filled('created_to')) $q->whereDate('l.created_at', '<=', $r->input('created_to'));
+        if ($r->filled('map_point_key')) {
+            $pointKey = (string) $r->input('map_point_key');
+            if (preg_match('/^location:(\\d+)$/', $pointKey, $match)) {
+                $q->where('l.from_location_id', (int) $match[1]);
+            } elseif (preg_match('/^coords:(-?\\d+(?:\\.\\d+)?):(-?\\d+(?:\\.\\d+)?)$/', $pointKey, $match)) {
+                $q->whereRaw('ROUND(COALESCE(l.from_lat, fl.lat), 4) = ?', [(float) $match[1]])
+                    ->whereRaw('ROUND(COALESCE(l.from_lng, fl.lng), 4) = ?', [(float) $match[2]]);
+            } else {
+                return response()->json(['message' => 'Xəritə məntəqəsi yanlışdır'], 422);
+            }
+        }
         if ($r->filled('min_price')) $q->where('l.price', '>=', $r->min_price);
         if ($r->filled('max_price')) $q->where('l.price', '<=', $r->max_price);
 
@@ -157,9 +181,27 @@ class LoadController extends Controller
      * Public map aggregation: one pin per pickup point, with destinations,
      * vehicle types and exact load IDs for the map popup's "show loads" action.
      */
-    public function mapPoints()
+    public function mapPoints(Request $r)
     {
-        $rows = DB::table('loads as l')
+        $r->validate([
+            'from_country_id' => 'nullable|integer|exists:countries,id',
+            'from_location_id' => 'nullable|integer|exists:locations,id',
+            'to_country_id' => 'nullable|integer|exists:countries,id',
+            'to_location_id' => 'nullable|integer|exists:locations,id',
+            'cargo_type_id' => 'nullable|integer|exists:cargo_types,id',
+            'load_vehicle_type_id' => 'nullable|integer|exists:load_vehicle_types,id',
+            'applications' => 'nullable|in:web,whatsapp,telegram',
+            'min_weight' => 'nullable|numeric|min:0',
+            'max_weight' => 'nullable|numeric|min:0',
+            'min_volume' => 'nullable|numeric|min:0',
+            'max_volume' => 'nullable|numeric|min:0',
+            'is_hazardous' => 'nullable|boolean',
+            'needs_refrigeration' => 'nullable|boolean',
+            'created_from' => 'nullable|date',
+            'created_to' => 'nullable|date',
+        ]);
+
+        $query = DB::table('loads as l')
             ->leftJoin('countries as fc', 'fc.id', '=', 'l.from_country_id')
             ->leftJoin('locations as fl', 'fl.id', '=', 'l.from_location_id')
             ->leftJoin('countries as tc', 'tc.id', '=', 'l.to_country_id')
@@ -169,7 +211,13 @@ class LoadController extends Controller
             ->where(function ($query) {
                 $query->where('l.is_ready_for_loading', true)
                     ->orWhere('l.pickup_from', '>=', now()->toDateString());
-            })
+            });
+
+        $this->applyMapFilters($query, $r);
+
+        $rows = $query
+            ->whereNotNull(DB::raw('COALESCE(l.from_lat, fl.lat)'))
+            ->whereNotNull(DB::raw('COALESCE(l.from_lng, fl.lng)'))
             ->select(
                 'l.id', 'l.from_location_id', 'l.from_country_id',
                 DB::raw('COALESCE(l.from_lat, fl.lat) as from_lat'),
@@ -185,12 +233,14 @@ class LoadController extends Controller
 
         $groups = [];
         foreach ($rows as $row) {
+            if ($row->from_lat === null || $row->from_lng === null) continue;
+
             if ($row->from_location_id) {
                 $key = 'location:' . $row->from_location_id;
             } elseif ($row->from_lat !== null && $row->from_lng !== null) {
                 $key = 'coords:' . round((float) $row->from_lat, 4) . ':' . round((float) $row->from_lng, 4);
             } else {
-                $key = 'country:' . $row->from_country_id;
+                $key = 'coords:' . round((float) $row->from_lat, 4) . ':' . round((float) $row->from_lng, 4);
             }
 
             if (!isset($groups[$key])) {
@@ -239,6 +289,21 @@ class LoadController extends Controller
         }, $groups));
 
         return response()->json(['data' => $data]);
+    }
+
+    /** Apply shared public map filters to the marker aggregate. */
+    private function applyMapFilters($query, Request $r): void
+    {
+        foreach (['from_country_id', 'from_location_id', 'to_country_id', 'to_location_id', 'cargo_type_id', 'load_vehicle_type_id', 'applications'] as $field) {
+            if ($r->filled($field)) $query->where("l.$field", $r->input($field));
+        }
+        foreach (['min_weight' => ['l.weight_kg', '>='], 'max_weight' => ['l.weight_kg', '<='], 'min_volume' => ['l.volume_m3', '>='], 'max_volume' => ['l.volume_m3', '<=']] as $field => [$column, $operator]) {
+            if ($r->filled($field)) $query->where($column, $operator, $r->input($field));
+        }
+        if ($r->has('is_hazardous') && $r->input('is_hazardous') !== '') $query->where('l.is_hazardous', $r->boolean('is_hazardous'));
+        if ($r->has('needs_refrigeration') && $r->input('needs_refrigeration') !== '') $query->where('l.needs_refrigeration', $r->boolean('needs_refrigeration'));
+        if ($r->filled('created_from')) $query->whereDate('l.created_at', '>=', $r->input('created_from'));
+        if ($r->filled('created_to')) $query->whereDate('l.created_at', '<=', $r->input('created_to'));
     }
 
     /** Public marketplace counters; definitions match the public loads/offers endpoints. */
