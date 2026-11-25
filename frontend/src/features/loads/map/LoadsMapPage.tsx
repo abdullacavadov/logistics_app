@@ -110,7 +110,6 @@ export default function LoadsMapPage() {
     queryKey: ['loads', 'map-results', listFilters],
     queryFn: () => loadsApi.list(listFilters),
     enabled: showResults && Boolean(selectedKey),
-    placeholderData: previous => previous,
   })
   const updateFilter = (key: keyof FilterState, value: string) => {
     setFilters(current => ({ ...current, [key]: value, ...(key === 'from_country_id' ? { from_location_id: '' } : {}), ...(key === 'to_country_id' ? { to_location_id: '' } : {}) }))
@@ -211,6 +210,8 @@ export default function LoadsMapPage() {
                 <div className="loads-map-point-title"><MapPin size={18} /><div><strong>{selected.from_name}</strong><small>{selected.from_country_name}</small></div><b>{selected.count}</b></div>
                 <h4>ÇATDIRILMA İSTİQAMƏTLƏRİ</h4>
                 {selected.destinations.slice(0, 4).map(item => <div className="loads-map-destination" key={item.name + item.country_name}><span>{item.name}, {item.country_name}</span><b>{item.count}</b></div>)}
+                <h4>NƏQLİYYAT NÖVLƏRİ</h4>
+                {selected.vehicles.slice(0, 4).map(item => <div className="loads-map-destination" key={item.name}><span>{item.name}</span><b>{item.count}</b></div>)}
                 <div className="loads-map-sheet-actions"><button onClick={() => { setShowResults(true); setMobileView('list') }}><List size={16} /> Yükləri göstər ({selected.count})</button><button onClick={() => setSelectedKey(null)}><X size={16} /> Bağla</button></div>
               </div>}
             </section>
