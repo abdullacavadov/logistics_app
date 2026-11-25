@@ -51,7 +51,8 @@ class LoadController extends Controller
             ['min_weight', 'max_weight', 'Çəkinin maksimumu minimumdan az ola bilməz'],
             ['min_volume', 'max_volume', 'Həcmin maksimumu minimumdan az ola bilməz'],
             ['min_price', 'max_price', 'Qiymətin maksimumu minimumdan az ola bilməz'],
-            ['date_from', 'date_to', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'],
+            ['date_from', 'date_to', 'Yükləmə tarixinin sonu başlanğıcdan əvvəl ola bilməz'],
+            ['created_from', 'created_to', 'Elan tarixinin sonu başlanğıcdan əvvəl ola bilməz'],
         ] as [$minimum, $maximum, $message]) {
             $rangeIsInvalid = false;
             if ($r->filled($minimum) && $r->filled($maximum)) {
@@ -209,7 +210,7 @@ class LoadController extends Controller
             return response()->json(['message' => 'Həcmin maksimumu minimumdan az ola bilməz'], 422);
         }
         if ($r->filled('created_from') && $r->filled('created_to') && $r->created_to < $r->created_from) {
-            return response()->json(['message' => 'Son tarix başlanğıc tarixindən əvvəl ola bilməz'], 422);
+            return response()->json(['message' => 'Elan tarixinin sonu başlanğıcdan əvvəl ola bilməz'], 422);
         }
 
         $query = DB::table('loads as l')
