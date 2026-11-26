@@ -125,7 +125,7 @@ export default function LoadsMapPage() {
     getLeaflet().then(L => {
       if (cancelled || !mapElement.current || mapRef.current) return
       const map = L.map(mapElement.current, { zoomControl: true, scrollWheelZoom: true }).setView([40.4093, 49.8671], 4)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(map)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; YolDaş' }).addTo(map)
       mapRef.current = map
       setMapReady(true)
       window.setTimeout(() => map.invalidateSize(), 120)
