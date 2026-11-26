@@ -83,6 +83,7 @@ export default function LoadsMapPage() {
   const mapElement = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const markersRef = useRef<LeafletMarker[]>([])
+  const lastAutoFitFiltersRef = useRef<string | null>(null)
   const auth = useAuth()
   const logout = useLogout()
   const changePage = (label: string) => { navigate(pagePaths[label] ?? '/'); setShowMobileMenu(false) }
@@ -136,22 +137,47 @@ export default function LoadsMapPage() {
     const map = mapRef.current
     const L = currentLeaflet()
     if (!map || !L || !pointsQuery.data) return
+
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
-    const valid = pointsQuery.data.filter(point => typeof point.lat === 'number' && typeof point.lng === 'number' && Number.isFinite(point.lat) && Number.isFinite(point.lng))
-    const bounds: [number, number][] = []
+
+    const valid = pointsQuery.data.filter(point =>
+      typeof point.lat === 'number' &&
+      typeof point.lng === 'number' &&
+      Number.isFinite(point.lat) &&
+      Number.isFinite(point.lng)
+    )
+
     valid.forEach(point => {
       const marker = L.marker([point.lat as number, point.lng as number], {
-        icon: L.divIcon({ className: 'loads-map-marker-wrap', html: `<span class="loads-map-marker">${point.count}</span>`, iconSize: [42, 42], iconAnchor: [21, 21] }),
+        icon: L.divIcon({
+          className: 'loads-map-marker-wrap',
+          html: `<span class="loads-map-marker">${point.count}</span>`,
+          iconSize: [42, 42],
+          iconAnchor: [21, 21],
+        }),
       }).addTo(map)
-      marker.on('click', () => { setSelectedKey(point.key); setShowResults(false); setPage(1) })
+
+      marker.on('click', () => {
+        setSelectedKey(point.key)
+        setShowResults(false)
+        setPage(1)
+      })
       markersRef.current.push(marker)
-      bounds.push([point.lat as number, point.lng as number])
     })
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [35, 35] })
-    else if (bounds.length === 1) map.setView(bounds[0], 7)
-    else map.setView([40.4093, 49.8671], 4)
-  }, [pointsQuery.data, mapReady])
+
+    // Auto-fit only on first load or when filters change.
+    // Background refetches must not reset the user's current map position.
+    const filtersKey = JSON.stringify(apiFilters)
+    if (lastAutoFitFiltersRef.current !== filtersKey) {
+      lastAutoFitFiltersRef.current = filtersKey
+      const bounds: [number, number][] = valid.map(point => [point.lat as number, point.lng as number])
+
+      if (bounds.length > 1) map.fitBounds(bounds, { padding: [35, 35] })
+      else if (bounds.length === 1) map.setView(bounds[0], 7)
+      else map.setView([40.4093, 49.8671], 4)
+    }
+  }, [pointsQuery.data, mapReady, apiFilters])
 
   useEffect(() => { setPage(1) }, [selectedKey, filters])
   useEffect(() => { if (mobileView === 'map') window.setTimeout(() => mapRef.current?.invalidateSize(), 120) }, [mobileView])
