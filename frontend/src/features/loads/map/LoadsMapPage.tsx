@@ -151,11 +151,7 @@ export default function LoadsMapPage() {
     if (bounds.length > 1) map.fitBounds(bounds, { padding: [35, 35] })
     else if (bounds.length === 1) map.setView(bounds[0], 7)
     else map.setView([40.4093, 49.8671], 4)
-    if (selectedKey && valid.some(point => point.key === selectedKey)) {
-      const point = valid.find(item => item.key === selectedKey)!
-      map.setView([point.lat as number, point.lng as number], 8)
-    } else if (selectedKey) setSelectedKey(null)
-  }, [pointsQuery.data, selectedKey, mapReady])
+  }, [pointsQuery.data, mapReady])
 
   useEffect(() => { setPage(1) }, [selectedKey, filters])
   useEffect(() => { if (mobileView === 'map') window.setTimeout(() => mapRef.current?.invalidateSize(), 120) }, [mobileView])
@@ -229,7 +225,7 @@ export default function LoadsMapPage() {
               </>}
             </aside>
           </div>
-          <div className="loads-map-mobile-switch"><button className={mobileView === 'map' ? 'active' : ''} onClick={() => setMobileView('map')}><MapIcon size={16} /> Xəritə</button><button className={mobileView === 'list' ? 'active' : ''} onClick={() => { setShowResults(true); setMobileView('list') }} disabled={!selected}><List size={16} /> Elanlar</button></div>
+          <div className={`loads-map-mobile-switch ${selected ? "has-selection" : ""}`}><button className={mobileView === 'map' ? 'active' : ''} onClick={() => setMobileView('map')}><MapIcon size={16} /> Xəritə</button><button className={mobileView === 'list' ? 'active' : ''} onClick={() => { setShowResults(true); setMobileView('list') }} disabled={!selected}><List size={16} /> Elanlar</button></div>
         </main>
         <MarketplaceMobileNav page="Yük xəritəsi" onNavigate={changePage} onToggleMore={() => setShowMobileMenu(value => !value)} />
       </div>
