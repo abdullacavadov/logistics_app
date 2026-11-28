@@ -20,7 +20,7 @@ class VehicleOfferController extends Controller
         if ($r->filled('vehicle_type_id')) $q->where('v.vehicle_type_id', $r->vehicle_type_id);
         if ($r->filled('date')) $q->where('o.available_from', '<=', $r->date)->where('o.available_to', '>=', $r->date);
         return response()->json($q->orderByDesc('o.id')->select('o.id', 'o.from_country_id', 'o.from_location_id', 'o.to_country_id', 'o.to_location_id',
-            'o.available_from', 'o.available_to', 'o.price', 'o.currency', 'v.vehicle_type_id', 'v.capacity_kg', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
+            'o.available_from', 'o.available_to', 'o.price', 'o.currency', 'o.price_negotiable', 'v.vehicle_type_id', 'v.capacity_kg', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
     }
 
     public function mine(Request $r)
@@ -35,7 +35,7 @@ class VehicleOfferController extends Controller
             'vehicle_id' => 'required|integer', 'from_country_id' => 'required|exists:countries,id', 'from_location_id' => 'nullable|exists:locations,id',
             'to_country_id' => 'required|exists:countries,id', 'to_location_id' => 'nullable|exists:locations,id',
             'available_from' => 'required|date|after_or_equal:today', 'available_to' => 'required|date|after_or_equal:available_from',
-            'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'terms' => 'nullable|string|max:3000', 'activate' => 'boolean',
+            'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'price_negotiable' => 'sometimes|boolean', 'terms' => 'nullable|string|max:3000', 'activate' => 'boolean',
         ]);
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         if (!DB::table('vehicles')->where(['id' => $d['vehicle_id'], 'user_id' => $r->user()->id, 'is_active' => 1])->exists()) return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil', 403);
@@ -66,6 +66,7 @@ class VehicleOfferController extends Controller
             'available_to' => 'sometimes|required|date',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
+            'price_negotiable' => 'sometimes|boolean',
             'terms' => 'nullable|string|max:3000',
         ]);
 
