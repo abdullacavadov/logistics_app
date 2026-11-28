@@ -51,7 +51,7 @@ export default function VehiclesPage() {
   return (
     <div className="app-shell" data-theme="light">
       <div className="workspace">
-        <header className="topbar"><div className="page-title"><h1>Nəqliyyat vasitələrim</h1></div><Link className="outline-action" to="/my/offers">Marşrut təkliflərim</Link></header>
+        <header className="topbar"><div className="page-title"><h1>Nəqliyyat vasitələrim</h1></div><div className="my-load-actions"><Link className="outline-action" to="/my/offers">Marşrut təkliflərim</Link><Link className="outline-action" to="/my/assignments">Sifarişlərim</Link></div></header>
         <main className="content-area">
           <section className="form-page">
             <div className="form-page-heading"><div><span className="overline">CARRIER WORKSPACE</span><h2>{editing ? 'Nəqliyyat vasitəsini redaktə et' : 'Nəqliyyat vasitəsi əlavə et'}</h2><p>Qeydiyyat ölkəsi tarif və abunəlik hesablamasında istifadə olunur.</p></div></div>
