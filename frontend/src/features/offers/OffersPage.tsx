@@ -37,13 +37,13 @@ export default function OffersPage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const payload: OfferPayload = {
-      vehicle_id: Number(form.vehicle_id), from_country_id: Number(form.from_country_id),
+      vehicle_id: Number(form.vehicle_id || vehicles.data?.[0]?.id), from_country_id: Number(form.from_country_id),
       from_location_id: form.from_location_id ? Number(form.from_location_id) : null,
       to_country_id: Number(form.to_country_id), to_location_id: form.to_location_id ? Number(form.to_location_id) : null,
       available_from: form.is_ready_for_loading ? new Date().toISOString().slice(0, 10) : form.available_from, available_to: form.is_ready_for_loading ? new Date().toISOString().slice(0, 10) : form.available_from,
       is_ready_for_loading: form.is_ready_for_loading, capacity_kg: Number(form.capacity_ton) * 1000, capacity_m3: form.capacity_m3 ? Number(form.capacity_m3) : null, quantity: Number(form.quantity), load_vehicle_type_id: Number(form.load_vehicle_type_id),
       price: form.price_negotiable || !form.price ? null : Number(form.price), price_negotiable: form.price_negotiable, currency: form.price_negotiable || !form.price ? null : form.currency,
-      terms: form.terms.trim() || null, activate: form.activate,
+      activate: form.activate,
     }
     save.mutate(payload)
   }
@@ -56,10 +56,10 @@ export default function OffersPage() {
       <div className="workspace">
         <header className="topbar"><div className="page-title"><h1>Marşrutlarım</h1></div><div className="my-load-actions"><Link className="outline-action" to="/my/vehicles">Nəqliyyat vasitələrim</Link><Link className="outline-action" to="/my/assignments">Sifarişlərim</Link></div></header>
         <main className="content-area"><section className="form-page">
-          <div className="form-page-heading"><div><span className="overline">CARRIER WORKSPACE</span><h2>{editing ? 'Təklifi redaktə et' : 'Yeni daşıma təklifi'}</h2><p>Boş nəqliyyat vasitənizin marşrutunu və mövcud tarixlərini paylaşın.</p></div></div>
+          <div className="form-page-heading"><div><span className="overline">CARRIER WORKSPACE</span><h2>{editing ? 'Təklifi redaktə et' : 'Yeni daşıma təklifi'}</h2><p>Marşrut, yükləmə tarixi, tutum və təklif etdiyiniz nəqliyyat vasitələrinin sayını daxil edin.</p></div></div>
           {vehicles.isLoading || countries.isLoading || bodyTypes.isLoading ? <div className="my-loads-state">Məlumatlar yüklənir…</div> : !vehicles.data?.length ? <div className="my-loads-state"><Truck size={30} /><strong>Əvvəlcə nəqliyyat vasitəsi əlavə edin</strong><p>Daşıma təklifi yaratmaq üçün aktiv vasitəniz olmalıdır.</p><Link className="primary-button" to="/my/vehicles">Nəqliyyat vasitəsi əlavə et</Link></div> : (
             <form className="data-form" onSubmit={submit}><section className="data-form-section"><div className="data-form-grid">
-              <label className="data-field"><span>Nəqliyyat vasitəsi *</span><select required value={form.vehicle_id} onChange={e => setForm(s => ({ ...s, vehicle_id: e.target.value }))}><option value="">Vasitə seçin</option>{(vehicles.data ?? []).map(v => <option key={v.id} value={v.id}>{v.name} · {(Number(v.capacity_kg) / 1000).toLocaleString('az-AZ')} ton</option>)}</select></label>
+              
               <label className="data-field"><span>Başlanğıc ölkə *</span><select required value={form.from_country_id} onChange={e => { const selected = countries.data?.find(country => country.id === Number(e.target.value)); setForm(s => ({ ...s, from_country_id: e.target.value, from_location_id: '', currency: selected?.default_currency ?? s.currency })) }}><option value="">Ölkə seçin</option>{(countries.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
               <label className="data-field"><span>Yükləmə şəhəri *</span><select required value={form.from_location_id} disabled={!form.from_country_id} onChange={e => setForm(s => ({ ...s, from_location_id: e.target.value }))}><option value="">Şəhər seçin</option>{(fromLocations.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
               <label className="data-field"><span>Təyinat ölkəsi *</span><select required value={form.to_country_id} onChange={e => setForm(s => ({ ...s, to_country_id: e.target.value, to_location_id: '' }))}><option value="">Ölkə seçin</option>{(countries.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
@@ -71,7 +71,7 @@ export default function OffersPage() {
               <label className="data-field"><span>Yük yeri növü *</span><select required value={form.load_vehicle_type_id} onChange={e => setForm(s => ({ ...s, load_vehicle_type_id: e.target.value }))}><option value="">Növ seçin</option>{(bodyTypes.data ?? []).map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
               <label className="data-field"><span>Qiymət təyin etmə üsulu</span><select value={form.price_negotiable ? "negotiable" : "fixed"} onChange={e => setForm(s => ({ ...s, price_negotiable: e.target.value === "negotiable", price: e.target.value === "negotiable" ? "" : s.price }))}><option value="negotiable">Razılaşma yolu ilə</option><option value="fixed">Sabit qiymət</option></select></label>{!form.price_negotiable && <label className="data-field"><span>Sabit qiymət *</span><input required type="number" min="0.01" step="0.01" value={form.price} onChange={e => setForm(s => ({ ...s, price: e.target.value }))} /></label>}
               <label className="data-field"><span>Valyuta</span><select value={form.currency} onChange={e => setForm(s => ({ ...s, currency: e.target.value }))}>{Array.from(new Set([form.currency, ...(countries.data ?? []).flatMap(country => country.default_currency ? [country.default_currency] : [])])).map(currency => <option key={currency} value={currency}>{currency}</option>)}</select></label>
-              <label className="data-field data-field-wide"><span>Əlavə şərtlər</span><textarea rows={3} maxLength={3000} value={form.terms} onChange={e => setForm(s => ({ ...s, terms: e.target.value }))} /></label>
+              
             </div>{!editing && <div className="data-checkbox-row"><label><input type="checkbox" checked={form.activate} onChange={e => setForm(s => ({ ...s, activate: e.target.checked }))} /> Yadda saxladıqdan sonra aktiv et</label></div>}
             {errorText && <p className="auth-error" role="alert">{errorText}</p>}
             <div className="data-form-actions">{editing && <button type="button" className="outline-action" onClick={() => { setForm(blank); setEditing(null) }}>Ləğv et</button>}<button type="submit" className="primary-button" disabled={save.isPending}>{save.isPending ? 'Saxlanılır…' : <><Plus size={16} /> {editing ? 'Dəyişiklikləri saxla' : 'Təklif yarat'}</>}</button></div>
