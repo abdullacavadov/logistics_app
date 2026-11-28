@@ -181,6 +181,7 @@ class AssignmentController extends Controller
             if (!$isDriver && !$isShipper) return $this->error('forbidden', 'Bu sifarişə giriş icazəsi yoxdur', 403);
             $next = $data['status'];
             $allowed = [
+                'pending' => ['cancelled'],
                 'accepted' => ['assigned', 'cancelled'],
                 'assigned' => ['loading', 'cancelled'],
                 'loading' => ['in_transit', 'cancelled'],
@@ -188,6 +189,7 @@ class AssignmentController extends Controller
                 'delivered' => ['completed'],
             ];
             if (!in_array($next, $allowed[$a->status] ?? [])) return $this->error('invalid_transition', 'Status keçidi mümkün deyil', 409);
+            if ($a->status === 'pending' && $next === 'cancelled' && !$isShipper) return $this->error('shipper_action_required', 'Gözləyən sifarişi yalnız yük sahibi geri götürə bilər', 403);
             if ($next === 'completed' && !$isShipper) return $this->error('shipper_confirmation_required', 'Tamamlama yük sahibi tərəfindən təsdiqlənməlidir', 403);
             if ($next !== 'completed' && !$isDriver && $next !== 'cancelled') return $this->error('driver_action_required', 'Bu statusu sürücü yeniləməlidir', 403);
             DB::table('load_assignments')->where('id', $id)->update([
