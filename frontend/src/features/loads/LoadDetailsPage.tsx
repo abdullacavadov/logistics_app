@@ -248,6 +248,7 @@ export default function LoadDetailsPage() {
           <button type="button" className="load-details-back" onClick={() => navigate(-1)}>
             <ArrowLeft size={17} /> Geri
           </button>
+          {query.data?.data && Number(query.data.data.user_id) === Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" onClick={() => navigate(`/drivers/offers?load_id=${loadId}`)}>Sürücü axtar və sifariş göndər</button>}
           <button type="button" className="load-details-market" onClick={() => navigate('/')}>Bütün elanlar</button>
         </header>
         {query.isLoading ? (
