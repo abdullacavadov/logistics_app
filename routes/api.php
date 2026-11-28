@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Api\V1\ApplicationController;
+use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\LoadController;
