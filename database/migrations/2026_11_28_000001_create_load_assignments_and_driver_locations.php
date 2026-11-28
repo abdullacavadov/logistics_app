@@ -8,8 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('vehicle_offers', function (Blueprint $table) {
-            $table->boolean('price_negotiable')->default(true)->after('currency');
+            $table->boolean('price_negotiable')->default(false)->after('currency');
         });
+
+        DB::table('vehicle_offers')->whereNull('price')->update(['price_negotiable' => true]);
 
         Schema::create('load_assignments', function (Blueprint $table) {
             $table->id();
