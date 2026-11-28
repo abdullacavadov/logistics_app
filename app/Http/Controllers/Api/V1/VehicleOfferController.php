@@ -41,6 +41,7 @@ class VehicleOfferController extends Controller
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
         if (!DB::table('vehicles')->where(['id' => $d['vehicle_id'], 'user_id' => $r->user()->id, 'is_active' => 1])->exists()) return $this->err('forbidden_vehicle', 'Vasitə sizə məxsus deyil', 403);
         $status = !empty($d['activate']) ? 'active' : 'draft'; unset($d['activate']);
+        if ($status === 'active' && $this->vehicleHasActiveAssignment((int) $d['vehicle_id'])) return $this->err('vehicle_in_assignment', 'Aktiv sifarişdə olan vasitə üçün yeni təklif aktivləşdirilə bilməz', 409);
         if ($status === 'active' && $this->conflicts($d['vehicle_id'], $d['available_from'], $d['available_to'], null))
             return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
         $id = DB::table('vehicle_offers')->insertGetId($d + ['user_id' => $r->user()->id, 'status' => $status, 'created_at' => now(), 'updated_at' => now()]);
@@ -84,6 +85,7 @@ class VehicleOfferController extends Controller
         $from = $data['available_from'] ?? $o->available_from;
         $to = $data['available_to'] ?? $o->available_to;
         if ($to < $from) return $this->err('invalid_dates', 'Son tarix başlanğıc tarixindən əvvəl ola bilməz', 422);
+        if ($o->status === 'active' && $this->vehicleHasActiveAssignment($vehicleId)) return $this->err('vehicle_in_assignment', 'Aktiv sifarişdə olan vasitə dəyişdirilə bilməz', 409);
         if ($o->status === 'active' && $this->conflicts($vehicleId, $from, $to, $id)) {
             return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
         }
@@ -108,6 +110,7 @@ class VehicleOfferController extends Controller
             'is_active' => 1,
         ])->exists()) return $this->err('inactive_vehicle', 'Aktiv nəqliyyat vasitəsi seçilməlidir', 422);
         if ($o->available_to < date('Y-m-d')) return $this->err('expired', 'Təklifin müddəti bitib', 422);
+        if ($this->vehicleHasActiveAssignment((int) $o->vehicle_id)) return $this->err('vehicle_in_assignment', 'Aktiv sifarişdə olan vasitə üçün təklif aktivləşdirilə bilməz', 409);
         if ($this->conflicts($o->vehicle_id, $o->available_from, $o->available_to, $id)) return $this->err('vehicle_conflict', 'Bu vasitə həmin tarixlərdə başqa təklifə ayrılıb', 409);
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'active', 'updated_at' => now()]);
         $n = $this->matcher->forOffer($id);
@@ -165,6 +168,12 @@ class VehicleOfferController extends Controller
         ])->exists()
             ? null
             : $this->err('not_carrier', 'Daşıyıcı hüququ lazımdır', 403);
+    }
+
+    private function vehicleHasActiveAssignment(int $vehicleId): bool
+    {
+        return DB::table('load_assignments')->where('vehicle_id', $vehicleId)
+            ->whereIn('status', ['pending', 'accepted', 'assigned', 'loading', 'in_transit', 'delivered'])->exists();
     }
 
     private function conflicts(int $vehicleId, string $from, string $to, ?int $exceptId): bool
