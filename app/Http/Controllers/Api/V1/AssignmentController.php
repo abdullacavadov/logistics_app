@@ -77,7 +77,8 @@ class AssignmentController extends Controller
             if ($offer->available_from > $load->pickup_from || $offer->available_to < $load->pickup_from) {
                 return $this->error('availability_mismatch', 'Sürücünün mövcudluq tarixi yükləmə tarixinə uyğun deyil', 422);
             }
-            if (DB::table('load_assignments')->where('load_id', $loadId)->whereIn('status', self::ACTIVE)->exists()) {
+            if (DB::table('load_assignments')->where('load_id', $loadId)->whereIn('status', self::ACTIVE)->exists()
+                || DB::table('load_assignments')->where('driver_user_id', $offer->user_id)->whereIn('status', self::ACTIVE)->exists()) {
                 return $this->error('load_already_assigned', 'Bu yük üzrə aktiv sifariş mövcuddur', 409);
             }
 
@@ -150,6 +151,9 @@ class AssignmentController extends Controller
                 || ($load->volume_m3 !== null && $vehicle->capacity_m3 !== null && (float) $vehicle->capacity_m3 < (float) $load->volume_m3)
                 || ((bool) $load->needs_refrigeration && !(bool) $vehicle->is_refrigerated)) {
                 return $this->error('vehicle_incompatible', 'Sürücünün nəqliyyat vasitəsi yükün tələblərinə uyğun deyil', 422);
+            }
+            if ($application->vehicle_offer_id && ($vehicleOffer->available_from > $load->pickup_from || $vehicleOffer->available_to < $load->pickup_from)) {
+                return $this->error('availability_mismatch', 'Sürücünün mövcudluq tarixi yükləmə tarixinə uyğun deyil', 422);
             }
             $id = DB::table('load_assignments')->insertGetId([
                 'load_id' => $load->id, 'driver_user_id' => $application->carrier_id, 'vehicle_id' => $vehicleId,
