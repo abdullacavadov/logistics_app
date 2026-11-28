@@ -33,6 +33,7 @@ export default function AssignmentsPage() {
   const applications = useQuery({
     queryKey: ['my-applications'],
     queryFn: async () => (await api.get<{ data: Application[] }>('/my/applications')).data.data,
+    refetchInterval: 15000,
   })
   const refresh = async () => {
     await client.invalidateQueries({ queryKey: ['my-assignments'] })
@@ -130,6 +131,7 @@ export default function AssignmentsPage() {
               {app.viewer_role === 'shipper' && app.status === 'pending' && <div className="my-load-actions"><button className="primary-button" onClick={() => decide.mutate({ id: app.id, decision: 'accept' })}>Təsdiqlə</button><button className="outline-action is-danger" onClick={() => decide.mutate({ id: app.id, decision: 'reject' })}>Rədd et</button></div>}
             </article>)}</div>}
           </section>
+          {(respond.isError || decide.isError || changeStatus.isError) && <p className="auth-error" role="alert">Əməliyyat tamamlanmadı. Sifariş statusunu və icazələri yoxlayın.</p>}
           <p className="form-hint">GPS paylaşımı üçün HTTPS bağlantısı və brauzer icazəsi tələb olunur. Brauzer arxa planda olduqda daimi izləmə zəmanətli deyil.</p>
         </section></main>
       </div>
