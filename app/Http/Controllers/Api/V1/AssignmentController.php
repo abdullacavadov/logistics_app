@@ -24,6 +24,10 @@ class AssignmentController extends Controller
                 'd.name as driver_name', 's.name as shipper_name', 'v.name as vehicle_name')
             ->paginate(20);
 
+        $rows->getCollection()->transform(function ($row) use ($userId) {
+            $row->viewer_role = $row->driver_user_id === $userId ? 'driver' : 'shipper';
+            return $row;
+        });
         return response()->json($rows);
     }
 
