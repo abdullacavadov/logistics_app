@@ -31,6 +31,23 @@ class AssignmentController extends Controller
         return response()->json($rows);
     }
 
+    public function applications(Request $request)
+    {
+        $userId = $request->user()->id;
+        $rows = DB::table('applications as ap')
+            ->join('loads as l', 'l.id', '=', 'ap.load_id')
+            ->join('users as c', 'c.id', '=', 'ap.carrier_id')
+            ->where(fn ($q) => $q->where('ap.carrier_id', $userId)->orWhere('l.user_id', $userId))
+            ->orderByDesc('ap.id')
+            ->select('ap.*', 'l.title as load_title', 'l.user_id as shipper_user_id', 'c.name as carrier_name')
+            ->get()
+            ->map(function ($row) use ($userId) {
+                $row->viewer_role = $row->carrier_id === $userId ? 'driver' : 'shipper';
+                return $row;
+            });
+        return response()->json(['data' => $rows]);
+    }
+
     /** Shipper creates a direct order for a carrier's active vehicle offer. */
     public function sendDriverOffer(Request $request, int $loadId)
     {
