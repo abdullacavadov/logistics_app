@@ -114,7 +114,7 @@ class AssignmentController extends Controller
             $application = DB::table('applications')->where('id', $applicationId)->lockForUpdate()->first();
             if (!$application) return $this->error('not_found', 'Müraciət tapılmadı', 404);
             $load = DB::table('loads')->where('id', $application->load_id)->lockForUpdate()->first();
-            if (!$load || $load->user_id !== $request->user()->id) return $this->error('forbidden', 'Bu müraciətə qərar vermək hüququ yoxdur', 403);
+            if (!$load || (int) $load->user_id !== (int) $request->user()->id) return $this->error('forbidden', 'Bu müraciətə qərar vermək hüququ yoxdur', 403);
             if ($application->status !== 'pending') return $this->error('invalid_status', 'Müraciət artıq emal edilib', 409);
 
             if ($data['decision'] === 'reject') {
@@ -183,7 +183,7 @@ class AssignmentController extends Controller
             'recorded_at' => 'nullable|date',
         ]);
         $a = DB::table('load_assignments')->where('id', $id)->first();
-        if (!$a || $a->driver_user_id !== $request->user()->id) return $this->error('not_found', 'Aktiv sifariş tapılmadı', 404);
+        if (!$a || (int) $a->driver_user_id !== (int) $request->user()->id) return $this->error('not_found', 'Aktiv sifariş tapılmadı', 404);
         if (!in_array($a->status, ['assigned', 'loading', 'in_transit', 'delivered'])) return $this->error('tracking_not_started', 'GPS yalnız sifariş təyin edildikdən sonra aktivdir', 409);
         DB::table('driver_locations')->updateOrInsert(['assignment_id' => $id], [
             'latitude' => $data['latitude'], 'longitude' => $data['longitude'],
