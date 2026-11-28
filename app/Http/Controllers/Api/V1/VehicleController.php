@@ -31,12 +31,19 @@ class VehicleController extends Controller
             return $this->err('forbidden_company', 'Şirkət sizə məxsus deyil', 403);
         }
 
-        $id = DB::table('vehicles')->insertGetId($d + [
-            'user_id' => $r->user()->id,
-            'is_active' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $id = DB::transaction(function () use ($r, $d) {
+            DB::table('users')->where('id', $r->user()->id)->lockForUpdate()->first();
+            if (DB::table('vehicles')->where('user_id', $r->user()->id)->where('is_active', 1)->exists()) {
+                return null;
+            }
+            return DB::table('vehicles')->insertGetId($d + [
+                'user_id' => $r->user()->id,
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+        if (!$id) return $this->err('vehicle_limit', 'Bir sürücü üçün yalnız bir aktiv nəqliyyat vasitəsi qeydiyyatdan keçirilə bilər', 409);
 
         return response()->json(['data' => DB::table('vehicles')->find($id)], 201);
     }
@@ -50,6 +57,10 @@ class VehicleController extends Controller
             'is_active' => 1,
         ])->exists()) {
             return $this->err('not_found', 'Tapılmadı', 404);
+        }
+
+        if (DB::table('load_assignments')->where('vehicle_id', $id)->whereIn('status', ['pending', 'accepted', 'assigned', 'loading', 'in_transit', 'delivered'])->exists()) {
+            return $this->err('vehicle_in_assignment', 'Aktiv sifarişə bağlı nəqliyyat vasitəsi dəyişdirilə bilməz', 409);
         }
 
         $data = $r->validate($this->rules(true));
@@ -77,7 +88,8 @@ class VehicleController extends Controller
             return $this->err('not_found', 'Tapılmadı', 404);
         }
 
-        if (DB::table('vehicle_offers')->where('vehicle_id', $id)
+        if (DB::table('load_assignments')->where('vehicle_id', $id)->whereIn('status', ['pending', 'accepted', 'assigned', 'loading', 'in_transit', 'delivered'])->exists()
+            || DB::table('vehicle_offers')->where('vehicle_id', $id)
             ->whereIn('status', ['active', 'applied', 'agreed', 'busy'])->exists()) {
             return $this->err('in_use', 'Aktiv təklifi olan vasitə silinə bilməz', 409);
         }
