@@ -117,6 +117,7 @@ export default function AssignmentsPage() {
               </div>
               <div className="my-load-actions">
                 {item.viewer_role === 'driver' && item.initiated_by === 'shipper' && item.status === 'pending' && <><button className="primary-button" onClick={() => respond.mutate({ id: item.id, decision: 'accept' })}>Qəbul et</button><button className="outline-action is-danger" onClick={() => respond.mutate({ id: item.id, decision: 'reject' })}>Rədd et</button></>}
+                {item.viewer_role === 'shipper' && item.initiated_by === 'shipper' && item.status === 'pending' && <button className="outline-action is-danger" onClick={() => changeStatus.mutate({ id: item.id, status: 'cancelled' })}>Sifarişi geri götür</button>}
                 {item.viewer_role === 'driver' && item.status === 'accepted' && <button className="primary-button" onClick={() => changeStatus.mutate({ id: item.id, status: 'assigned' })}>Sifarişi təyin et</button>}
                 {item.viewer_role === 'driver' && item.status === 'assigned' && <button className="primary-button" onClick={() => changeStatus.mutate({ id: item.id, status: 'loading' })}>Yükləməyə başla</button>}
                 {item.viewer_role === 'driver' && ['assigned', 'loading', 'in_transit'].includes(item.status) && <button className="outline-action" onClick={() => toggleGps(item.id)}>{gpsAssignment === item.id ? 'GPS-i dayandır' : 'GPS paylaş'}</button>}
