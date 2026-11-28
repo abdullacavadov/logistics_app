@@ -119,6 +119,9 @@ class VehicleOfferController extends Controller
         if ($e = $this->carrierOnly($r)) return $e;
         $o = $this->owned($r, $id); if ($o instanceof \Illuminate\Http\JsonResponse) return $o;
         if (!in_array($o->status, ['draft', 'active', 'applied'])) return $this->err('bad_status', 'Bu statusdan ləğv mümkün deyil', 409);
+        if (DB::table('load_assignments')->where('vehicle_offer_id', $id)->whereIn('status', ['pending', 'accepted', 'assigned', 'loading', 'in_transit', 'delivered'])->exists()) {
+            return $this->err('offer_in_assignment', 'Aktiv sifarişə bağlı təklif ləğv edilə bilməz', 409);
+        }
         DB::table('vehicle_offers')->where('id', $id)->update(['status' => 'cancelled', 'updated_at' => now()]);
         $this->matcher->forOffer($id); // aktiv olmadığı üçün uyğunluqları təmizləyir
         return response()->json(['data' => ['id' => $id, 'status' => 'cancelled']]);
