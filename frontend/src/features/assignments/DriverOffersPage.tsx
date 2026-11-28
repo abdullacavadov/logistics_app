@@ -9,7 +9,7 @@ type DriverOffer = {
   id: number; user_id: number; driver_name: string; vehicle_name: string; vehicle_id: number
   from_country_id: number; to_country_id: number; from_location_id: number | null; to_location_id: number | null
   available_from: string; available_to: string; price: number | null; currency: string | null
-  price_negotiable: boolean; capacity_kg: number; capacity_m3: number | null; quantity: number; load_vehicle_type_name: string | null; is_refrigerated: boolean
+  price_negotiable: boolean; capacity_kg: number; capacity_m3: number | null; quantity: number; load_vehicle_type_id: number | null; load_vehicle_type_name: string | null; is_refrigerated: boolean
 }
 
 export default function DriverOffersPage() {
@@ -44,6 +44,7 @@ export default function DriverOffersPage() {
     Number(offer.capacity_kg) >= Number(load.data?.weight_kg)
     && (load.data?.volume_m3 == null || offer.capacity_m3 == null || Number(offer.capacity_m3) >= Number(load.data.volume_m3))
     && (!load.data?.needs_refrigeration || offer.is_refrigerated)
+    && (!load.data?.load_vehicle_type_id || Number(offer.load_vehicle_type_id) === Number(load.data.load_vehicle_type_id))
   ), [offers.data, load.data])
 
   if (!Number.isInteger(loadId) || loadId < 1) return <div className="app-shell"><div className="workspace"><main className="content-area"><div className="my-loads-state">Yük ID-si göstərilməyib.</div></main></div></div>
