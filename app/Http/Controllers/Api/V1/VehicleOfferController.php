@@ -34,7 +34,7 @@ class VehicleOfferController extends Controller
         if ($r->filled('search')) $q->where(function ($s) use ($r) { $s->where('v.name', 'like', '%' . $r->search . '%')->orWhere('fl.name', 'like', '%' . $r->search . '%')->orWhere('fc.name', 'like', '%' . $r->search . '%')->orWhere('tl.name', 'like', '%' . $r->search . '%')->orWhere('tc.name', 'like', '%' . $r->search . '%'); });
         return response()->json($q->orderByDesc('o.id')->join('users as u', 'u.id', '=', 'o.user_id')
             ->select('o.id', 'o.user_id', 'u.name as driver_name', 'v.name as vehicle_name', 'o.vehicle_id', 'o.from_country_id', 'o.from_location_id', 'o.to_country_id', 'o.to_location_id',
-            'fc.name as from_country_name', 'fl.name as from_location_name', 'tc.name as to_country_name', 'tl.name as to_location_name',
+            'fc.name as from_country_name', 'fc.iso2 as from_country_iso2', 'fl.name as from_location_name', 'tc.name as to_country_name', 'tc.iso2 as to_country_iso2', 'tl.name as to_location_name',
             'o.available_from', 'o.available_to', 'o.is_ready_for_loading', 'o.price', 'o.currency', 'o.price_negotiable',
             'o.capacity_kg', 'o.capacity_m3', 'o.quantity', 'o.load_vehicle_type_id', 'lvt.name as load_vehicle_type_name',
             'v.vehicle_type_id', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
@@ -42,7 +42,7 @@ class VehicleOfferController extends Controller
 
     public function mine(Request $r)
     {
-        return response()->json(DB::table('vehicle_offers')->where('user_id', $r->user()->id)->orderByDesc('id')->paginate(15));
+        return response()->json(DB::table('vehicle_offers as o')->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'o.load_vehicle_type_id')->where('o.user_id', $r->user()->id)->orderByDesc('o.id')->select('o.*', 'lvt.name as load_vehicle_type_name')->paginate(50));
     }
 
     public function store(Request $r)

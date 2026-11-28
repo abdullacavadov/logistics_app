@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { MarketplaceSidebar } from '../marketplace/components/MarketplaceSidebar'
-import { pagePaths } from '../marketplace/config/navigation'
+import { MarketplaceSidebar } from './MarketplaceSidebar'
+import { pagePaths } from '../config/navigation'
 
 export function MyWorkspaceSidebar() {
   const location = useLocation()

@@ -285,7 +285,7 @@ export default function MarketplacePage() {
         title: offer.vehicle_name ?? "Nəqliyyat vasitəsi",
         from: offer.from_location_name ?? offer.from_country_name ?? "—",
         to: offer.to_location_name ?? offer.to_country_name ?? "—",
-        fromFlag: "", toFlag: "",
+        fromFlag: offer.from_country_iso2 ?? "", toFlag: offer.to_country_iso2 ?? "",
         cargo: offer.load_vehicle_type_name ?? "Yük yeri növü göstərilməyib",
         weight: `${(Number(offer.capacity_kg) / 1000).toLocaleString("az-AZ", { maximumFractionDigits: 2 })} ton`,
         vehicle: offer.load_vehicle_type_name ?? "Nəqliyyat vasitəsi",
@@ -365,7 +365,7 @@ export default function MarketplacePage() {
                                     className={kind === "load" ? "active" : ""}
                                     onClick={() => setKind("load")}
                                 >
-                                    <Package size={18} /> Yüklər <b>{statsQuery.data?.loads.active.toLocaleString("az-AZ") ?? "—"}</b>
+                                    <b>{statsQuery.data?.loads.active.toLocaleString("az-AZ") ?? "—"}</b> <Package size={18} /> Yüklər
                                 </button>
                                 <button
                                     className={
@@ -373,14 +373,14 @@ export default function MarketplacePage() {
                                     }
                                     onClick={() => setKind("vehicle")}
                                 >
-                                    <Truck size={18} /> Nəqliyyat vasitələri <b>{statsQuery.data?.vehicles.active.toLocaleString("az-AZ") ?? "—"}</b>
+                                    <b>{statsQuery.data?.vehicles.active.toLocaleString("az-AZ") ?? "—"}</b> <Truck size={18} /> Nəqliyyat vasitələri
                                 </button>
                             </div>
                             <section className="search-tools">
                                 <label className="search-field">
                                     <Search size={18} />
                                     <input
-                                        placeholder="Açar söz, marşrut və ya yük adı"
+                                        placeholder={kind === "load" ? "Açar söz, marşrut və ya yük adı" : "Marşrut, şəhər və ya nəqliyyat vasitəsi"}
                                         value={query}
                                         onChange={(e) => { setQuery(e.target.value); setPageNumber(1); }}
                                     />
