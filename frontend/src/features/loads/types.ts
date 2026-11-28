@@ -12,6 +12,7 @@ export type LoadStatus =
 
 export interface Load {
   id: number
+  user_id?: number
   title: string
   description: string | null
   cargo_type_id: number | null
