@@ -606,6 +606,7 @@ export default function MarketplacePage() {
                                             item={item}
                                             onSelect={() => navigate(`/loads/${Number(item.id.replace(/^LA-/, ""))}`)}
                                             onMap={() => { setMapFocusLoadId(Number(item.id.replace(/^LA-/, ""))); setMapOpen(true); }}
+                                            showApplication={item.kind === "load"}
                                             saved={saved.includes(item.id)}
                                             onSave={() => toggleSaved(item.id)}
                                         />
