@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,12 +16,10 @@ import {
     ListFilter,
     LayoutGrid,
     ArrowRight,
-    Globe2,
     MessageCircle,
     BadgeCheck,
 } from "lucide-react";
 import { pagePaths, primaryNav, secondaryNav } from "../config/navigation";
-import { listings } from "../data/listings";
 import type { Listing } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTelegram, faWhatsapp } from "@fortawesome/free-brands-svg-icons";
