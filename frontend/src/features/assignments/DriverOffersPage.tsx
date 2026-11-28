@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { MyWorkspaceSidebar } from '../marketplace/components/MyWorkspaceSidebar'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../../lib/api'
 import type { Load } from '../loads/types'
@@ -48,7 +49,7 @@ export default function DriverOffersPage() {
   if (!Number.isInteger(loadId) || loadId < 1) return <div className="app-shell"><div className="workspace"><main className="content-area"><div className="my-loads-state">Yük ID-si göstərilməyib.</div></main></div></div>
 
   return (
-    <div className="app-shell" data-theme="light"><div className="workspace">
+    <div className="app-shell" data-theme="light"><MyWorkspaceSidebar /><div className="workspace">
       <header className="topbar"><div className="page-title"><h1>Sürücü seçimi</h1></div><Link className="outline-action" to={`/loads/${loadId}`}>Elana qayıt</Link></header>
       <main className="content-area"><section className="form-page">
         <div className="form-page-heading"><div><span className="overline">DRIVER MARKETPLACE</span><h2>{load.data?.title ?? 'Yük üzrə sürücülər'}</h2><p>Yükün marşrutu və yükləmə tarixinə uyğun aktiv sürücü təklifləri.</p></div></div>

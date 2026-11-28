@@ -340,10 +340,10 @@ class LoadController extends Controller
                     ->count(),
             ],
             'vehicles' => [
-                'active' => (clone $activeOffers)->count(),
+                'active' => (clone $activeOffers)->sum('quantity'),
                 'last_hour' => (clone $activeOffers)
                     ->where('created_at', '>=', now()->subHour())
-                    ->count(),
+                    ->sum('quantity'),
             ],
         ]);
     }
