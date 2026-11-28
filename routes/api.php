@@ -66,6 +66,7 @@ Route::prefix('v1')->group(function () {
 
         // Driver / shipper order lifecycle
         Route::get('my/assignments', [AssignmentController::class, 'mine']);
+        Route::get('my/applications', [AssignmentController::class, 'applications']);
         Route::post('loads/{load}/driver-offers', [AssignmentController::class, 'sendDriverOffer'])->whereNumber('load');
         Route::post('assignments/{id}/respond', [AssignmentController::class, 'respond'])->whereNumber('id');
         Route::post('applications/{id}/decision', [AssignmentController::class, 'decideApplication'])->whereNumber('id');
