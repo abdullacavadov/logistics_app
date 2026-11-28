@@ -63,5 +63,14 @@ Route::prefix('v1')->group(function () {
         Route::get('offers/{id}/matches', [VehicleOfferController::class, 'matches'])->whereNumber('id');
 
         Route::post('loads/{load}/applications', [ApplicationController::class, 'store'])->whereNumber('load');
+
+        // Driver / shipper order lifecycle
+        Route::get('my/assignments', [AssignmentController::class, 'mine']);
+        Route::post('loads/{load}/driver-offers', [AssignmentController::class, 'sendDriverOffer'])->whereNumber('load');
+        Route::post('assignments/{id}/respond', [AssignmentController::class, 'respond'])->whereNumber('id');
+        Route::post('applications/{id}/decision', [AssignmentController::class, 'decideApplication'])->whereNumber('id');
+        Route::post('assignments/{id}/status', [AssignmentController::class, 'updateStatus'])->whereNumber('id');
+        Route::post('assignments/{id}/location', [AssignmentController::class, 'updateLocation'])->whereNumber('id');
+        Route::get('assignments/{id}/location', [AssignmentController::class, 'location'])->whereNumber('id');
     });
 });
