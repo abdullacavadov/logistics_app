@@ -609,7 +609,7 @@ class LoadController extends Controller
         $weightTon = ((float) ($values['weight_kg'] ?? 0)) / 1000;
         $maxWeightTon = $body->category === 'low_loader' ? 60 : ($body->category === 'car_carrier' ? 20 : 24);
         if ($weightTon > $maxWeightTon) {
-            return 'Bu maşın üçün maksimum yük ' . $maxWeightTon . ' ton olmalıdır.';
+            return 'Bu nəqliyyat vasitəsi üçün maksimum yük ' . $maxWeightTon . ' ton olmalıdır.';
         }
 
         $volume = $values['volume_m3'] ?? null;

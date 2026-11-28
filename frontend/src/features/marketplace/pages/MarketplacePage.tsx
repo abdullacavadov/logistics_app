@@ -569,7 +569,7 @@ export default function MarketplacePage() {
                                     <h2>
                                         {kind === "load"
                                             ? "Bütün yük elanları"
-                                            : "Boş nəqliyyat vasitələri"}{" "}
+                                            : "Marşrut üzrə nəqliyyat təklifləri"}{" "}
                                         <span className="span-round">
                                             {kind === "load" ? (loadsQuery.data?.meta.total ?? 0) : (vehicleOffersQuery.data?.meta.total ?? 0)}
                                         </span>
