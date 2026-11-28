@@ -70,9 +70,9 @@ export default function LoadOriginMap({ open, onClose, focusLoadId }: {
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [mapError, setMapError] = useState(false)
   const [mapReady, setMapReady] = useState(false)
-  const pointsQuery = useQuery({
+  const pointsQuery = useQuery<LoadMapPoint[]>({
     queryKey: ['loads', 'map-points'],
-    queryFn: loadsApi.mapPoints,
+    queryFn: () => loadsApi.mapPoints(),
     enabled: open,
     staleTime: 30_000,
   })
