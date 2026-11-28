@@ -52,7 +52,7 @@ export default function OffersPage() {
   return (
     <div className="app-shell" data-theme="light">
       <div className="workspace">
-        <header className="topbar"><div className="page-title"><h1>Marşrutlarım</h1></div><Link className="outline-action" to="/my/vehicles">Nəqliyyat vasitələrim</Link></header>
+        <header className="topbar"><div className="page-title"><h1>Marşrutlarım</h1></div><div className="my-load-actions"><Link className="outline-action" to="/my/vehicles">Nəqliyyat vasitələrim</Link><Link className="outline-action" to="/my/assignments">Sifarişlərim</Link></div></header>
         <main className="content-area"><section className="form-page">
           <div className="form-page-heading"><div><span className="overline">CARRIER WORKSPACE</span><h2>{editing ? 'Təklifi redaktə et' : 'Yeni daşıma təklifi'}</h2><p>Boş nəqliyyat vasitənizin marşrutunu və mövcud tarixlərini paylaşın.</p></div></div>
           {vehicles.isLoading || countries.isLoading ? <div className="my-loads-state">Məlumatlar yüklənir…</div> : !vehicles.data?.length ? <div className="my-loads-state"><Truck size={30} /><strong>Əvvəlcə nəqliyyat vasitəsi əlavə edin</strong><p>Daşıma təklifi yaratmaq üçün aktiv vasitəniz olmalıdır.</p><Link className="primary-button" to="/my/vehicles">Nəqliyyat vasitəsi əlavə et</Link></div> : (
