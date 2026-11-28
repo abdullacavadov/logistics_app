@@ -252,7 +252,7 @@ export default function LoadDetailsPage() {
             <ArrowLeft size={17} /> Geri
           </button>
           {query.data?.data && Number(query.data.data.owner_user_id) === Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" onClick={() => navigate(`/drivers/offers?load_id=${loadId}`)}>Sürücü axtar və sifariş göndər</button>}
-          {query.data?.data && auth.data?.data.roles?.includes('carrier') && Number(query.data.data.user_id) !== Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" disabled={apply.isPending} onClick={() => apply.mutate()}>{apply.isPending ? 'Göndərilir…' : 'Bu yükə müraciət et'}</button>}
+          {query.data?.data && auth.data?.data.roles?.includes('carrier') && Number(query.data.data.owner_user_id) !== Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" disabled={apply.isPending} onClick={() => apply.mutate()}>{apply.isPending ? 'Göndərilir…' : 'Bu yükə müraciət et'}</button>}
           <button type="button" className="load-details-market" onClick={() => navigate('/')}>Bütün elanlar</button>
         </header>
         {apply.isError && <p className="auth-error" role="alert">Müraciət göndərilmədi. Daşıyıcı abunəliyinizi və aktiv nəqliyyat vasitənizi yoxlayın.</p>}
