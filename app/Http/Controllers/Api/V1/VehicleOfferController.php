@@ -21,7 +21,7 @@ class VehicleOfferController extends Controller
         if ($r->filled('date')) $q->where('o.available_from', '<=', $r->date)->where('o.available_to', '>=', $r->date);
         return response()->json($q->orderByDesc('o.id')->join('users as u', 'u.id', '=', 'o.user_id')
             ->select('o.id', 'o.user_id', 'u.name as driver_name', 'v.name as vehicle_name', 'o.vehicle_id', 'o.from_country_id', 'o.from_location_id', 'o.to_country_id', 'o.to_location_id',
-            'o.available_from', 'o.available_to', 'o.price', 'o.currency', 'o.price_negotiable', 'v.vehicle_type_id', 'v.capacity_kg', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
+            'o.available_from', 'o.available_to', 'o.price', 'o.currency', 'o.price_negotiable', 'v.vehicle_type_id', 'v.capacity_kg', 'v.capacity_m3', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
     }
 
     public function mine(Request $r)
