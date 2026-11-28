@@ -65,6 +65,10 @@ export default function AssignmentsPage() {
     }
   }
 
+
+  useEffect(() => {
+    assignments.data?.filter(item => item.viewer_role === 'shipper' && ['assigned', 'loading', 'in_transit', 'delivered'].includes(item.status)).forEach(item => { void loadLocation(item.id) })
+  }, [assignments.data])
   function toggleGps(id: number) {
     if (gpsAssignment === id) {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
