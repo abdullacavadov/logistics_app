@@ -67,6 +67,7 @@ class AssignmentController extends Controller
                 return $this->error('offer_inactive', 'Sürücü təklifi aktiv deyil', 422);
             }
             if ((int) $offer->user_id === (int) $request->user()->id) return $this->error('own_offer', 'Öz təklifinizə sifariş göndərə bilməzsiniz', 422);
+            DB::table('users')->where('id', $offer->user_id)->lockForUpdate()->first();
             $vehicle = DB::table('vehicles')->where('id', $offer->vehicle_id)->first();
             if (!$vehicle || !(int) $vehicle->is_active) return $this->error('vehicle_inactive', 'Sürücünün nəqliyyat vasitəsi aktiv deyil', 422);
             if ((float) $vehicle->capacity_kg < (float) $load->weight_kg
@@ -135,6 +136,7 @@ class AssignmentController extends Controller
                 DB::table('applications')->where('id', $applicationId)->update(['status' => 'rejected', 'updated_at' => now()]);
                 return response()->json(['data' => ['application_id' => $applicationId, 'status' => 'rejected']]);
             }
+            DB::table('users')->where('id', $application->carrier_id)->lockForUpdate()->first();
             if (DB::table('load_assignments')->where('load_id', $load->id)->whereIn('status', self::ACTIVE)->exists()
                 || DB::table('load_assignments')->where('driver_user_id', $application->carrier_id)->whereIn('status', self::ACTIVE)->exists()) {
                 return $this->error('load_already_assigned', 'Bu yük üzrə aktiv sifariş mövcuddur', 409);
