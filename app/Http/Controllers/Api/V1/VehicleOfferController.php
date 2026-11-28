@@ -15,13 +15,29 @@ class VehicleOfferController extends Controller
     public function index(Request $r)
     {
         $q = DB::table('vehicle_offers as o')->join('vehicles as v', 'v.id', '=', 'o.vehicle_id')
-            ->where('o.status', 'active')->where('o.available_to', '>=', date('Y-m-d'));
-        foreach (['from_country_id', 'to_country_id', 'from_location_id', 'to_location_id'] as $f) if ($r->filled($f)) $q->where("o.$f", $r->input($f));
+            ->leftJoin('countries as fc', 'fc.id', '=', 'o.from_country_id')
+            ->leftJoin('locations as fl', 'fl.id', '=', 'o.from_location_id')
+            ->leftJoin('countries as tc', 'tc.id', '=', 'o.to_country_id')
+            ->leftJoin('locations as tl', 'tl.id', '=', 'o.to_location_id')
+            ->leftJoin('load_vehicle_types as lvt', 'lvt.id', '=', 'o.load_vehicle_type_id')
+            ->where('o.status', 'active')->where('o.available_to', '>=', now()->toDateString());
+        foreach (['from_country_id', 'to_country_id', 'from_location_id', 'to_location_id', 'load_vehicle_type_id'] as $f) if ($r->filled($f)) $q->where("o.$f", $r->input($f));
         if ($r->filled('vehicle_type_id')) $q->where('v.vehicle_type_id', $r->vehicle_type_id);
         if ($r->filled('date')) $q->where('o.available_from', '<=', $r->date)->where('o.available_to', '>=', $r->date);
+        if ($r->filled('min_weight')) $q->where('o.capacity_kg', '>=', (float) $r->min_weight * 1000);
+        if ($r->filled('max_weight')) $q->where('o.capacity_kg', '<=', (float) $r->max_weight * 1000);
+        if ($r->filled('min_volume')) $q->where('o.capacity_m3', '>=', $r->min_volume);
+        if ($r->filled('max_volume')) $q->where('o.capacity_m3', '<=', $r->max_volume);
+        if ($r->filled('min_price')) $q->where('o.price', '>=', $r->min_price);
+        if ($r->filled('max_price')) $q->where('o.price', '<=', $r->max_price);
+        if ($r->filled('currency')) $q->where('o.currency', $r->currency);
+        if ($r->filled('search')) $q->where(function ($s) use ($r) { $s->where('v.name', 'like', '%' . $r->search . '%')->orWhere('fl.name', 'like', '%' . $r->search . '%')->orWhere('fc.name', 'like', '%' . $r->search . '%')->orWhere('tl.name', 'like', '%' . $r->search . '%')->orWhere('tc.name', 'like', '%' . $r->search . '%'); });
         return response()->json($q->orderByDesc('o.id')->join('users as u', 'u.id', '=', 'o.user_id')
             ->select('o.id', 'o.user_id', 'u.name as driver_name', 'v.name as vehicle_name', 'o.vehicle_id', 'o.from_country_id', 'o.from_location_id', 'o.to_country_id', 'o.to_location_id',
-            'o.available_from', 'o.available_to', 'o.price', 'o.currency', 'o.price_negotiable', 'v.vehicle_type_id', 'v.capacity_kg', 'v.capacity_m3', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
+            'fc.name as from_country_name', 'fl.name as from_location_name', 'tc.name as to_country_name', 'tl.name as to_location_name',
+            'o.available_from', 'o.available_to', 'o.is_ready_for_loading', 'o.price', 'o.currency', 'o.price_negotiable',
+            'o.capacity_kg', 'o.capacity_m3', 'o.quantity', 'o.load_vehicle_type_id', 'lvt.name as load_vehicle_type_name',
+            'v.vehicle_type_id', 'v.is_refrigerated')->paginate($r->integer('per_page', 15)));
     }
 
     public function mine(Request $r)
@@ -36,6 +52,11 @@ class VehicleOfferController extends Controller
             'vehicle_id' => 'required|integer', 'from_country_id' => 'required|exists:countries,id', 'from_location_id' => 'nullable|exists:locations,id',
             'to_country_id' => 'required|exists:countries,id', 'to_location_id' => 'nullable|exists:locations,id',
             'available_from' => 'required|date|after_or_equal:today', 'available_to' => 'required|date|after_or_equal:available_from',
+            'is_ready_for_loading' => 'sometimes|boolean',
+            'capacity_kg' => 'required|numeric|min:1|max:1000000',
+            'capacity_m3' => 'nullable|numeric|min:0.01|max:100000',
+            'quantity' => 'required|integer|min:1|max:1000',
+            'load_vehicle_type_id' => 'required|exists:load_vehicle_types,id',
             'price' => 'nullable|numeric|min:0', 'currency' => 'required_with:price|nullable|string|size:3', 'price_negotiable' => 'sometimes|boolean', 'terms' => 'nullable|string|max:3000', 'activate' => 'boolean',
         ]);
         if (!$this->validLocationSelection($d)) return $this->err('location_country_mismatch', 'Şəhər seçilmiş ölkəyə aid deyil', 422);
@@ -66,6 +87,11 @@ class VehicleOfferController extends Controller
             'to_location_id' => 'nullable|exists:locations,id',
             'available_from' => 'sometimes|required|date',
             'available_to' => 'sometimes|required|date',
+            'is_ready_for_loading' => 'sometimes|boolean',
+            'capacity_kg' => 'sometimes|required|numeric|min:1|max:1000000',
+            'capacity_m3' => 'nullable|numeric|min:0.01|max:100000',
+            'quantity' => 'sometimes|required|integer|min:1|max:1000',
+            'load_vehicle_type_id' => 'sometimes|required|exists:load_vehicle_types,id',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'required_with:price|nullable|string|size:3',
             'price_negotiable' => 'sometimes|boolean',
