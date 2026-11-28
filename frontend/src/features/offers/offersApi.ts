@@ -12,6 +12,7 @@ export interface VehicleOffer {
   available_to: string
   price: number | string | null
   currency: string | null
+  price_negotiable: boolean
   terms: string | null
   status: 'draft' | 'active' | 'applied' | 'agreed' | 'busy' | 'completed' | 'cancelled' | 'expired'
 }
