@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
@@ -57,19 +57,19 @@ export default function AssignmentsPage() {
     if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
   }, [])
 
-  async function loadLocation(id: number) {
+  const loadLocation = useCallback(async (id: number) => {
     try {
       const response = await api.get<{ data: Location }>(`/assignments/${id}/location`)
       setLocations(current => ({ ...current, [id]: response.data.data }))
     } catch {
       setLocations(current => ({ ...current, [id]: null }))
     }
-  }
+  }, [])
 
 
   useEffect(() => {
     assignments.data?.filter(item => item.viewer_role === 'shipper' && ['assigned', 'loading', 'in_transit', 'delivered'].includes(item.status)).forEach(item => { void loadLocation(item.id) })
-  }, [assignments.data])
+  }, [assignments.data, loadLocation])
   function toggleGps(id: number) {
     if (gpsAssignment === id) {
       if (watchId.current !== null) navigator.geolocation.clearWatch(watchId.current)
