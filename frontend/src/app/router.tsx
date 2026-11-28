@@ -13,6 +13,7 @@ import OffersPage from '../features/offers/OffersPage'
 import SubscriptionPage from '../features/subscriptions/SubscriptionPage'
 import AdminSubscriptionPlansPage from '../features/subscriptions/AdminSubscriptionPlansPage'
 import AssignmentsPage from '../features/assignments/AssignmentsPage'
+import DriverOffersPage from '../features/assignments/DriverOffersPage'
 
 export function AppRouter() {
   return (
@@ -28,6 +29,7 @@ export function AppRouter() {
       <Route path="/my/vehicles" element={<RequireAuth><VehiclesPage /></RequireAuth>} />
       <Route path="/my/offers" element={<RequireAuth><OffersPage /></RequireAuth>} />
       <Route path="/my/assignments" element={<RequireAuth><AssignmentsPage /></RequireAuth>} />
+      <Route path="/drivers/offers" element={<RequireAuth><DriverOffersPage /></RequireAuth>} />
       <Route path="/pricing-analytics" element={<SubscriptionPage />} />
       <Route path="/admin/subscription-plans" element={<RequireAuth><AdminSubscriptionPlansPage /></RequireAuth>} />
       {Object.values(pagePaths).filter((path) => path !== '/loads/map' && path !== '/my/loads' && path !== '/my/offers' && path !== '/pricing-analytics').map((path) => (
