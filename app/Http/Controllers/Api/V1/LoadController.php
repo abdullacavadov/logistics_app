@@ -372,6 +372,7 @@ class LoadController extends Controller
             ->leftJoin('load_source_details as lsd', 'lsd.id', '=', 'lsd_first.id')
             ->where('l.id', $id)
             ->addSelect(
+                'l.user_id as owner_user_id',
                 'fl.name as from_location_name',
                 'tl.name as to_location_name',
                 'l.from_lat',

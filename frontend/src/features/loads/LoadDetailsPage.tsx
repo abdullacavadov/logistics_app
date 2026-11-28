@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { api } from '../../lib/api'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, ExternalLink,
@@ -207,6 +209,7 @@ export default function LoadDetailsPage() {
   const query = useLoad(loadId)
   const auth = useAuth()
   const logout = useLogout()
+  const apply = useMutation({ mutationFn: () => api.post(`/loads/${loadId}/applications`, {}) })
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [showNotices, setShowNotices] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
@@ -248,8 +251,12 @@ export default function LoadDetailsPage() {
           <button type="button" className="load-details-back" onClick={() => navigate(-1)}>
             <ArrowLeft size={17} /> Geri
           </button>
+          {query.data?.data && Number(query.data.data.owner_user_id) === Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" onClick={() => navigate(`/drivers/offers?load_id=${loadId}`)}>Sürücü axtar və sifariş göndər</button>}
+          {query.data?.data && auth.data?.data.roles?.includes('carrier') && Number(query.data.data.owner_user_id) !== Number(auth.data?.data.user.id) && ['published', 'has_applications'].includes(query.data.data.status) && <button type="button" className="load-details-market" disabled={apply.isPending} onClick={() => apply.mutate()}>{apply.isPending ? 'Göndərilir…' : 'Bu yükə müraciət et'}</button>}
           <button type="button" className="load-details-market" onClick={() => navigate('/')}>Bütün elanlar</button>
         </header>
+        {apply.isError && <p className="auth-error" role="alert">Müraciət göndərilmədi. Daşıyıcı abunəliyinizi və aktiv nəqliyyat vasitənizi yoxlayın.</p>}
+        {apply.isSuccess && <p className="form-hint" role="status">Müraciətiniz yük sahibinə göndərildi.</p>}
         {query.isLoading ? (
           <div className="load-detail-card load-detail-state">Yük məlumatları yüklənir…</div>
         ) : query.isError || !query.data?.data ? (

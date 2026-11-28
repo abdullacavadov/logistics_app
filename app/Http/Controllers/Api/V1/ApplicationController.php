@@ -23,7 +23,12 @@ class ApplicationController extends Controller
             return $this->err('subscription_required', 'Aktiv abunəlik tələb olunur', 402, ['subscription_url' => '/account/subscription']);
         $load = DB::table('loads')->where('id', $loadId)->first();
         if (!$load || !in_array($load->status, ['published', 'has_applications'])) return $this->err('load_inactive', 'Elan aktiv deyil', 422); // 7
-        if ($load->user_id === $user->id) return $this->err('own_load', 'Öz elanınıza müraciət edə bilməzsiniz', 422);                          // 8
+        if ((int) $load->user_id === (int) $user->id) return $this->err('own_load', 'Öz elanınıza müraciət edə bilməzsiniz', 422);                          // 8
+        if (empty($data['vehicle_offer_id'])) {
+            $matchingOffer = DB::table('vehicle_offers')->where('user_id', $user->id)->where('status', 'active')
+                ->where('available_from', '<=', $load->pickup_from)->where('available_to', '>=', $load->pickup_from)->orderByDesc('id')->first();
+            if ($matchingOffer) $data['vehicle_offer_id'] = $matchingOffer->id;
+        }
         if (!empty($data['vehicle_offer_id'])) {
             $offer = DB::table('vehicle_offers')->where([
                 'id' => $data['vehicle_offer_id'],
@@ -31,7 +36,7 @@ class ApplicationController extends Controller
             ])->first();
 
             if (!$offer) return $this->err('forbidden_offer', 'Təklif sizə məxsus deyil', 403);
-            if ($offer->status !== 'active' || $offer->available_to < now()->toDateString()) {
+            if ($offer->status !== 'active' || $offer->available_from > $load->pickup_from || $offer->available_to < $load->pickup_from) {
                 return $this->err('offer_inactive', 'Müraciət üçün aktiv və vaxtı bitməmiş təklif seçilməlidir', 422);
             }
         }
