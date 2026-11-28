@@ -10,6 +10,12 @@ export interface VehicleOffer {
   to_location_id: number | null
   available_from: string
   available_to: string
+  is_ready_for_loading: boolean
+  capacity_kg: number | string
+  capacity_m3: number | string | null
+  quantity: number
+  load_vehicle_type_id: number
+  load_vehicle_type_name?: string | null
   price: number | string | null
   currency: string | null
   price_negotiable: boolean
@@ -25,6 +31,12 @@ export interface OfferPayload {
   to_location_id?: number | null
   available_from: string
   available_to: string
+  is_ready_for_loading: boolean
+  capacity_kg: number
+  capacity_m3?: number | null
+  quantity: number
+  load_vehicle_type_id: number
+  price_negotiable: boolean
   price?: number | null
   currency?: string | null
   terms?: string | null

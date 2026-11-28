@@ -213,7 +213,7 @@ export default function LoadsMapPage() {
               {field('Çatdırılma ölkəsi', 'to_country_id', (countries.data ?? []).map(item => ({ value: String(item.id), label: item.name })))}
               {field('Çatdırılma şəhəri', 'to_location_id', (toCities.data ?? []).map(item => ({ value: String(item.id), label: item.name })), !filters.to_country_id)}
               {field('Yükün növü', 'cargo_type_id', (cargoTypes.data ?? []).map(item => ({ value: String(item.id), label: item.name })))}
-              {field('Yük yeri / maşın növü', 'load_vehicle_type_id', (vehicleTypes.data ?? []).map(item => ({ value: String(item.id), label: item.name })))}
+              {field('Yük yeri növü', 'load_vehicle_type_id', (vehicleTypes.data ?? []).map(item => ({ value: String(item.id), label: item.name })))}
               {rangeField('Çəki (ton)', 'min_weight', 'max_weight', '0.1')}
               {rangeField('Həcm (m³)', 'min_volume', 'max_volume', '0.1')}
               {field('ADR', 'is_hazardous', [{ value: '1', label: 'Tələb olunur' }, { value: '0', label: 'Tələb olunmur' }])}

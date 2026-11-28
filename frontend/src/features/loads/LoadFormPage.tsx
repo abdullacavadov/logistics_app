@@ -275,11 +275,11 @@ export default function LoadFormPage() {
             : selectedLoadVehicle.category === "car_carrier"
               ? 20
               : 24;
-        if (weightTon > weightLimit) return `Bu maşın üçün maksimum yük ${weightLimit} ton olmalıdır.`;
+        if (weightTon > weightLimit) return `Bu nəqliyyat vasitəsi üçün maksimum yük ${weightLimit} ton olmalıdır.`;
         const volume = form.volume_m3.trim() === "" ? null : Number(form.volume_m3);
         if (volume !== null && (!Number.isFinite(volume) || volume <= 0)) return "Həcm müsbət rəqəm olmalıdır.";
         if (volume !== null && selectedLoadVehicle.capacity_m3 !== null && volume > selectedLoadVehicle.capacity_m3) {
-            return `Bu maşının tutumu ${selectedLoadVehicle.capacity_m3} m³-dür. Həcm daha böyük ola bilməz.`;
+            return `Bu nəqliyyat vasitəsinin tutumu ${selectedLoadVehicle.capacity_m3} m³-dür. Həcm daha böyük ola bilməz.`;
         }
         const cargoName = (cargo?.name ?? "").toLocaleLowerCase();
         if (!cargoName) return null;

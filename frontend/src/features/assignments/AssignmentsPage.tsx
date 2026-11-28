@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { MyWorkspaceSidebar } from '../marketplace/components/MyWorkspaceSidebar'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api'
 
@@ -104,7 +105,7 @@ export default function AssignmentsPage() {
   }
 
   return (
-    <div className="app-shell" data-theme="light">
+    <div className="app-shell" data-theme="light"><MyWorkspaceSidebar />
       <div className="workspace">
         <header className="topbar"><div className="page-title"><h1>Sifarişlər və müraciətlər</h1></div><div className="my-load-actions"><Link className="outline-action" to="/my/vehicles">Vasitəm</Link><Link className="outline-action" to="/my/offers">Marşrut təkliflərim</Link></div></header>
         <main className="content-area"><section className="form-page">

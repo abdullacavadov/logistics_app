@@ -1,10 +1,12 @@
-import { BookOpen, ChartNoAxesCombined, CircleHelp, FileText, House, Info, LayoutGrid, Map, Network, Route, Shield, UserRound } from 'lucide-react'
+import { BookOpen, ChartNoAxesCombined, CircleHelp, ClipboardList, FileText, House, Info, LayoutGrid, Map, Network, Route, Shield, Truck, UserRound } from 'lucide-react'
 
 export const primaryNav = [
     { label: "Bütün elanlar", icon: House },
     { label: "Mənim elanlarım", icon: LayoutGrid },
     { label: "Yük xəritəsi", icon: Map },
     { label: "Marşrutlarım", icon: Route },
+    { label: "Nəqliyyat vasitələrim", icon: Truck },
+    { label: "Sifarişlərim", icon: ClipboardList },
     { label: "Xidmətlərimiz", icon: Network },
     { label: "Tariflər və Analitika", icon: ChartNoAxesCombined },
     { label: "Sənədlər", icon: FileText },
@@ -23,6 +25,8 @@ export const pagePaths: Record<string, string> = {
     "Mənim elanlarım": "/my/loads",
     "Yük xəritəsi": "/loads/map",
     "Marşrutlarım": "/my/offers",
+    "Nəqliyyat vasitələrim": "/my/vehicles",
+    "Sifarişlərim": "/my/assignments",
     "Xidmətlərimiz": "/services",
     "Tariflər və Analitika": "/pricing-analytics",
     "Sənədlər": "/documents",

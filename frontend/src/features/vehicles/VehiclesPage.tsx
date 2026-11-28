@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { MyWorkspaceSidebar } from '../marketplace/components/MyWorkspaceSidebar'
 import { Link } from 'react-router-dom'
 import { Pencil, Plus, Trash2, Truck } from 'lucide-react'
 import { catalogApi } from '../catalog/catalogApi'
@@ -49,7 +50,7 @@ export default function VehiclesPage() {
   const errorText = error?.response?.data?.error?.message ?? error?.response?.data?.message ?? (save.isError ? 'Yadda saxlamaq mümkün olmadı.' : '')
 
   return (
-    <div className="app-shell" data-theme="light">
+    <div className="app-shell" data-theme="light"><MyWorkspaceSidebar />
       <div className="workspace">
         <header className="topbar"><div className="page-title"><h1>Nəqliyyat vasitələrim</h1></div><div className="my-load-actions"><Link className="outline-action" to="/my/offers">Marşrut təkliflərim</Link><Link className="outline-action" to="/my/assignments">Sifarişlərim</Link></div></header>
         <main className="content-area">
