@@ -25,7 +25,7 @@ class AssignmentController extends Controller
             ->paginate(20);
 
         $rows->getCollection()->transform(function ($row) use ($userId) {
-            $row->viewer_role = $row->driver_user_id === $userId ? 'driver' : 'shipper';
+            $row->viewer_role = (int) $row->driver_user_id === (int) $userId ? 'driver' : 'shipper';
             return $row;
         });
         return response()->json($rows);
@@ -42,7 +42,7 @@ class AssignmentController extends Controller
             ->select('ap.*', 'l.title as load_title', 'l.user_id as shipper_user_id', 'c.name as carrier_name')
             ->get()
             ->map(function ($row) use ($userId) {
-                $row->viewer_role = $row->carrier_id === $userId ? 'driver' : 'shipper';
+                $row->viewer_role = (int) $row->carrier_id === (int) $userId ? 'driver' : 'shipper';
                 return $row;
             });
         return response()->json(['data' => $rows]);
@@ -59,14 +59,24 @@ class AssignmentController extends Controller
 
         return DB::transaction(function () use ($request, $loadId, $data) {
             $load = DB::table('loads')->where('id', $loadId)->lockForUpdate()->first();
-            if (!$load || $load->user_id !== $request->user()->id) return $this->error('forbidden_load', 'Bu yük sizə məxsus deyil', 403);
+            if (!$load || (int) $load->user_id !== (int) $request->user()->id) return $this->error('forbidden_load', 'Bu yük sizə məxsus deyil', 403);
             if (!in_array($load->status, ['published', 'has_applications'])) return $this->error('load_inactive', 'Yük aktiv deyil', 409);
 
             $offer = DB::table('vehicle_offers')->where('id', $data['vehicle_offer_id'])->lockForUpdate()->first();
             if (!$offer || $offer->status !== 'active' || $offer->available_to < today()->toDateString()) {
                 return $this->error('offer_inactive', 'Sürücü təklifi aktiv deyil', 422);
             }
-            if ($offer->user_id === $request->user()->id) return $this->error('own_offer', 'Öz təklifinizə sifariş göndərə bilməzsiniz', 422);
+            if ((int) $offer->user_id === (int) $request->user()->id) return $this->error('own_offer', 'Öz təklifinizə sifariş göndərə bilməzsiniz', 422);
+            $vehicle = DB::table('vehicles')->where('id', $offer->vehicle_id)->first();
+            if (!$vehicle || !(int) $vehicle->is_active) return $this->error('vehicle_inactive', 'Sürücünün nəqliyyat vasitəsi aktiv deyil', 422);
+            if ((float) $vehicle->capacity_kg < (float) $load->weight_kg
+                || ($load->volume_m3 !== null && $vehicle->capacity_m3 !== null && (float) $vehicle->capacity_m3 < (float) $load->volume_m3)
+                || ((bool) $load->needs_refrigeration && !(bool) $vehicle->is_refrigerated)) {
+                return $this->error('vehicle_incompatible', 'Nəqliyyat vasitəsi yükün çəki, həcm və ya soyuducu tələbinə uyğun deyil', 422);
+            }
+            if ($offer->available_from > $load->pickup_from || $offer->available_to < $load->pickup_from) {
+                return $this->error('availability_mismatch', 'Sürücünün mövcudluq tarixi yükləmə tarixinə uyğun deyil', 422);
+            }
             if (DB::table('load_assignments')->where('load_id', $loadId)->whereIn('status', self::ACTIVE)->exists()) {
                 return $this->error('load_already_assigned', 'Bu yük üzrə aktiv sifariş mövcuddur', 409);
             }
@@ -87,10 +97,11 @@ class AssignmentController extends Controller
         $data = $request->validate(['decision' => 'required|in:accept,reject']);
         return DB::transaction(function () use ($request, $id, $data) {
             $assignment = DB::table('load_assignments')->where('id', $id)->lockForUpdate()->first();
-            if (!$assignment || $assignment->driver_user_id !== $request->user()->id) return $this->error('not_found', 'Sifariş tapılmadı', 404);
+            if (!$assignment || (int) $assignment->driver_user_id !== (int) $request->user()->id) return $this->error('not_found', 'Sifariş tapılmadı', 404);
             if ($assignment->initiated_by !== 'shipper' || $assignment->status !== 'pending') return $this->error('invalid_status', 'Bu sifarişə artıq cavab verilib', 409);
             $status = $data['decision'] === 'accept' ? 'accepted' : 'rejected';
             DB::table('load_assignments')->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
+            if ($status === 'accepted') DB::table('loads')->where('id', $assignment->load_id)->update(['status' => 'agreed', 'updated_at' => now()]);
             return response()->json(['data' => ['id' => $id, 'status' => $status]]);
         });
     }
@@ -138,8 +149,8 @@ class AssignmentController extends Controller
             $a = DB::table('load_assignments as a')->join('loads as l', 'l.id', '=', 'a.load_id')
                 ->where('a.id', $id)->select('a.*', 'l.user_id as shipper_id')->lockForUpdate()->first();
             if (!$a) return $this->error('not_found', 'Sifariş tapılmadı', 404);
-            $isDriver = $a->driver_user_id === $request->user()->id;
-            $isShipper = $a->shipper_id === $request->user()->id;
+            $isDriver = (int) $a->driver_user_id === (int) $request->user()->id;
+            $isShipper = (int) $a->shipper_id === (int) $request->user()->id;
             if (!$isDriver && !$isShipper) return $this->error('forbidden', 'Bu sifarişə giriş icazəsi yoxdur', 403);
             $next = $data['status'];
             $allowed = [
