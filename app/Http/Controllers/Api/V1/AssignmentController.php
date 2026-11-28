@@ -130,6 +130,7 @@ class AssignmentController extends Controller
             if (!$application) return $this->error('not_found', 'Müraciət tapılmadı', 404);
             $load = DB::table('loads')->where('id', $application->load_id)->lockForUpdate()->first();
             if (!$load || (int) $load->user_id !== (int) $request->user()->id) return $this->error('forbidden', 'Bu müraciətə qərar vermək hüququ yoxdur', 403);
+            if (!in_array($load->status, ['published', 'has_applications'])) return $this->error('load_inactive', 'Yük artıq aktiv deyil', 409);
             if ($application->status !== 'pending') return $this->error('invalid_status', 'Müraciət artıq emal edilib', 409);
 
             if ($data['decision'] === 'reject') {
